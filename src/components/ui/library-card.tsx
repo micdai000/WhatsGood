@@ -13,11 +13,11 @@ export function LibraryCard({ library, className }: LibraryCardProps) {
     <div
       className={cn(
         "shrink-0 overflow-hidden rounded-2xl bg-white hover:shadow-md transition-shadow duration-200",
-        !className?.includes("w-") && "w-[280px]",
+        !className?.includes("w-") && "card-row-item card-row-item--wide",
         className,
       )}
     >
-      <div className="relative h-[160px] overflow-hidden rounded-t-2xl">
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-t-2xl">
         <Image
           src={library.coverImage}
           alt={library.name}

@@ -21,8 +21,8 @@ export default function LibrariesPage() {
   ];
 
   return (
-    <div className="py-6">
-      <div className="px-5 pt-2">
+    <div className="w-full py-6">
+      <div className="page-x pt-2">
         <h1 className="text-2xl font-bold tracking-tight text-[#111]">
           Libraries
         </h1>
@@ -32,7 +32,7 @@ export default function LibrariesPage() {
       </div>
 
       {/* Tabs */}
-      <div className="mt-6 flex gap-8 border-b border-neutral-100 px-5">
+      <div className="mt-6 flex gap-8 border-b border-neutral-100 page-x">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -50,7 +50,7 @@ export default function LibrariesPage() {
       </div>
 
       {/* Tab content */}
-      <div className="mt-5 px-5">
+      <div className="mt-5 page-x">
         {activeTab === "yours" && (
           <div className="flex flex-col gap-4">
             <Link

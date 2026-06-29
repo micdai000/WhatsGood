@@ -28,8 +28,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className={inter.className}>
-        <div className="mx-auto min-h-dvh max-w-lg pb-[88px] lg:max-w-2xl">
+      <body className={`${inter.className} overflow-x-hidden`}>
+        <div className="app-shell min-h-dvh overflow-x-hidden pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]">
           {children}
         </div>
         <BottomNav />

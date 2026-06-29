@@ -10,6 +10,7 @@ import {
   users,
   libraries,
   categoryLabels,
+  entityMatchesQuery,
   type Category,
 } from "@/data/mock";
 import { EntityCard } from "@/components/ui/entity-card";
@@ -24,12 +25,19 @@ type FilterTab =
   | "users"
   | "libraries";
 
+const categoryFilters: Category[] = [
+  "food",
+  "places",
+  "entertainment",
+  "movies-shows",
+];
+
 const filterTabs: { key: FilterTab; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "food", label: "Food" },
-  { key: "places", label: "Places" },
-  { key: "entertainment", label: "Entertainment" },
-  { key: "movies-shows", label: "Movies / Shows" },
+  ...categoryFilters.map((key) => ({
+    key,
+    label: categoryLabels[key],
+  })),
   { key: "users", label: "Users" },
   { key: "libraries", label: "Libraries" },
 ];
@@ -38,50 +46,69 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
 
-  const q = query.toLowerCase().trim();
+  const q = query.trim();
+  const isBrowsing = !q;
 
-  const popularEntities = useMemo(
-    () => [...allEntities].sort((a, b) => b.followersCount - a.followersCount).slice(0, 6),
-    [],
-  );
+  const browseEntities = useMemo(() => {
+    if (activeFilter === "users" || activeFilter === "libraries") return [];
+
+    const pool =
+      activeFilter === "all"
+        ? allEntities
+        : allEntities.filter((e) => e.category === activeFilter);
+
+    return [...pool]
+      .sort((a, b) => b.followersCount - a.followersCount)
+      .slice(0, activeFilter === "all" ? 6 : 12);
+  }, [activeFilter]);
+
+  const browseUsers = useMemo(() => {
+    if (activeFilter !== "all" && activeFilter !== "users") return [];
+    return [...users].sort((a, b) => b.followers - a.followers);
+  }, [activeFilter]);
+
+  const browseLibraries = useMemo(() => {
+    if (activeFilter !== "all" && activeFilter !== "libraries") return [];
+    return [...libraries].sort((a, b) => b.followerCount - a.followerCount);
+  }, [activeFilter]);
 
   const filteredEntities = useMemo(() => {
     if (!q) return [];
-    const byQuery = allEntities.filter(
-      (e) =>
-        e.name.toLowerCase().includes(q) ||
-        e.description.toLowerCase().includes(q),
-    );
-    if (activeFilter === "all" || activeFilter === "users" || activeFilter === "libraries")
+
+    const byQuery = allEntities.filter((e) => entityMatchesQuery(e, q));
+
+    if (
+      activeFilter === "all" ||
+      activeFilter === "users" ||
+      activeFilter === "libraries"
+    ) {
       return byQuery;
+    }
+
     return byQuery.filter((e) => e.category === activeFilter);
   }, [q, activeFilter]);
 
   const filteredUsers = useMemo(() => {
     if (!q) return [];
-    if (
-      activeFilter !== "all" &&
-      activeFilter !== "users"
-    )
-      return [];
+    if (activeFilter !== "all" && activeFilter !== "users") return [];
+
+    const normalized = q.toLowerCase();
     return users.filter(
       (u) =>
-        u.displayName.toLowerCase().includes(q) ||
-        u.username.toLowerCase().includes(q),
+        u.displayName.toLowerCase().includes(normalized) ||
+        u.username.toLowerCase().includes(normalized),
     );
   }, [q, activeFilter]);
 
   const filteredLibraries = useMemo(() => {
     if (!q) return [];
-    if (
-      activeFilter !== "all" &&
-      activeFilter !== "libraries"
-    )
-      return [];
+    if (activeFilter !== "all" && activeFilter !== "libraries") return [];
+
+    const normalized = q.toLowerCase();
     return libraries.filter(
       (l) =>
-        l.name.toLowerCase().includes(q) ||
-        l.description.toLowerCase().includes(q),
+        l.name.toLowerCase().includes(normalized) ||
+        l.description.toLowerCase().includes(normalized),
     );
   }, [q, activeFilter]);
 
@@ -90,24 +117,29 @@ export default function SearchPage() {
     filteredUsers.length > 0 ||
     filteredLibraries.length > 0;
 
+  const hasBrowseContent =
+    browseEntities.length > 0 ||
+    browseUsers.length > 0 ||
+    browseLibraries.length > 0;
+
   return (
-    <div className="py-6">
+    <div className="w-full py-6">
       {/* Search bar */}
-      <div className="px-5">
+      <div className="page-x">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="What are you looking for?"
+            placeholder="Search names, addresses, cities…"
             className="h-12 w-full rounded-xl bg-neutral-100 border-0 pl-12 pr-4 text-[15px] text-[#111] placeholder:text-neutral-400 outline-none transition-all focus:ring-2 focus:ring-[#D4A017]/30 focus:bg-white"
           />
         </div>
       </div>
 
       {/* Filter pills */}
-      <div className="mt-3 flex gap-2 overflow-x-auto px-5 hide-scrollbar">
+      <div className="mt-3 flex gap-2 overflow-x-auto page-x hide-scrollbar">
         {filterTabs.map((tab) => (
           <button
             key={tab.key}
@@ -125,52 +157,99 @@ export default function SearchPage() {
         ))}
       </div>
 
-      {/* Empty state — no query */}
-      {!q && (
-        <>
-          <h2 className="mt-8 px-5 text-lg font-bold text-[#111]">
-            Popular Right Now
-          </h2>
-          <div className="mt-3 grid grid-cols-2 gap-3 px-5">
-            {popularEntities.map((entity) => (
-              <Link
-                key={entity.id}
-                href={`/entity/${entity.id}`}
-                className="overflow-hidden rounded-xl bg-white"
-              >
-                <div className="relative h-[140px]">
-                  <Image
-                    src={entity.image}
-                    alt={entity.name}
-                    fill
-                    className="object-cover"
-                    sizes="50vw"
-                  />
-                </div>
-                <div className="p-2.5">
-                  <p className="text-[13px] font-semibold text-[#111] truncate">
-                    {entity.name}
-                  </p>
-                  <div className="mt-1">
-                    <TierBadge tier={entity.tier} size="sm" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+      {/* Browse — no query, filter drives content */}
+      {isBrowsing && hasBrowseContent && (
+        <div className="mt-8 space-y-8 page-x">
+          {browseEntities.length > 0 && (
+            <div>
+              <SectionHeader
+                title={
+                  activeFilter === "all"
+                    ? "Popular Right Now"
+                    : categoryLabels[activeFilter]
+                }
+                subtitle={
+                  activeFilter === "all"
+                    ? undefined
+                    : `Top picks in ${categoryLabels[activeFilter].toLowerCase()}`
+                }
+              />
+              <div className="tile-grid">
+                {browseEntities.map((entity) => (
+                  <Link
+                    key={entity.id}
+                    href={`/entity/${entity.id}`}
+                    className="overflow-hidden rounded-xl bg-white"
+                  >
+                    <div className="tile-media">
+                      <Image
+                        src={entity.image}
+                        alt={entity.name}
+                        fill
+                        className="object-cover"
+                        sizes="50vw"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="p-2.5">
+                      <p className="text-[13px] font-semibold text-[#111] truncate">
+                        {entity.name}
+                      </p>
+                      <div className="mt-1">
+                        <TierBadge tier={entity.tier} size="sm" />
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <h2 className="mt-8 px-5 text-lg font-bold text-[#111]">Creators</h2>
-          <div className="mt-3 flex gap-3 overflow-x-auto px-5 hide-scrollbar">
-            {users.map((user) => (
-              <UserCard key={user.id} user={user} />
-            ))}
-          </div>
-        </>
+          {browseUsers.length > 0 && (
+            <div>
+              <SectionHeader
+                title="Creators"
+                subtitle={
+                  activeFilter === "users"
+                    ? "People on Meritt"
+                    : undefined
+                }
+              />
+              <div className="flex flex-col gap-2">
+                {browseUsers.map((user) => (
+                  <UserCard key={user.id} user={user} className="w-full" />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {browseLibraries.length > 0 && (
+            <div>
+              <SectionHeader
+                title="Libraries"
+                subtitle={
+                  activeFilter === "libraries"
+                    ? "Curated collections from the community"
+                    : undefined
+                }
+              />
+              <div className="flex flex-col gap-3">
+                {browseLibraries.map((library) => (
+                  <LibraryCard
+                    key={library.id}
+                    library={library}
+                    className="w-full"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Search results */}
       {q && hasResults && (
-        <div className="mt-6 space-y-8 px-5">
+        <div className="mt-6 space-y-8 page-x">
           {filteredEntities.length > 0 && (
             <div>
               <SectionHeader title="Entities" />
@@ -212,10 +291,10 @@ export default function SearchPage() {
 
       {/* No results */}
       {q && !hasResults && (
-        <div className="py-20 text-center">
+        <div className="py-20 text-center page-x">
           <p className="text-lg font-bold text-neutral-300">No results</p>
           <p className="mt-1 text-[14px] text-neutral-300">
-            Try searching for something else
+            Try a different name, address, or city
           </p>
         </div>
       )}

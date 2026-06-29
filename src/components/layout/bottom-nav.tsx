@@ -18,7 +18,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-neutral-100 bg-white">
-      <div className="mx-auto flex max-w-lg lg:max-w-2xl items-center justify-around px-4 pb-[env(safe-area-inset-bottom,8px)] pt-1.5">
+      <div className="app-shell flex items-center justify-around px-4 pb-[env(safe-area-inset-bottom,8px)] pt-1.5">
         {tabs.map(({ href, icon: Icon }) => {
           const isActive =
             href === "/" ? pathname === "/" : pathname.startsWith(href);

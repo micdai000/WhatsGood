@@ -41,17 +41,17 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="py-6">
+    <div className="w-full py-6">
       {/* Settings */}
-      <div className="flex justify-end px-5">
+      <div className="flex justify-end page-x">
         <button type="button" className="text-neutral-400 hover:text-neutral-600 transition-colors">
           <Settings className="h-5 w-5" />
         </button>
       </div>
 
       {/* Profile header */}
-      <div className="pt-2 px-5 flex flex-col items-center">
-        <div className="relative h-22 w-22 overflow-hidden rounded-full">
+      <div className="pt-2 page-x flex flex-col items-center">
+        <div className="relative size-[88px] overflow-hidden rounded-full">
           <Image
             src={currentUser.avatar}
             alt={currentUser.displayName}
@@ -66,7 +66,7 @@ export default function ProfilePage() {
         <p className="text-[14px] text-neutral-400 text-center">
           @{currentUser.username}
         </p>
-        <p className="mt-2 max-w-[280px] text-center text-[14px] leading-relaxed text-neutral-500">
+        <p className="mt-2 max-w-md text-center text-[14px] leading-relaxed text-neutral-500">
           {currentUser.bio}
         </p>
       </div>
@@ -90,7 +90,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Action buttons */}
-      <div className="mt-6 flex gap-3 px-5">
+      <div className="mt-6 flex gap-3 page-x">
         <button
           type="button"
           className="flex-1 rounded-xl bg-neutral-100 py-3 text-[14px] font-semibold text-[#111] hover:bg-neutral-200 transition-colors"
@@ -107,7 +107,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="mt-8 flex gap-8 border-b border-neutral-100 px-5">
+      <div className="mt-8 flex gap-8 border-b border-neutral-100 page-x">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -125,7 +125,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Tab content */}
-      <div className="mt-5 px-5">
+      <div className="mt-5 page-x">
         {activeTab === "activity" && (
           <ActivityFeed items={myActivity} />
         )}

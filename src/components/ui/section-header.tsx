@@ -16,7 +16,7 @@ export function SectionHeader({
   return (
     <div className="mb-4">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-xl font-bold text-[#111] tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-[#111] tracking-tight sm:text-xl">{title}</h2>
         {actionLabel && actionHref && (
           <Link
             href={actionHref}

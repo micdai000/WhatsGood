@@ -4,13 +4,23 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, Users, Bookmark, Heart, TrendingUp, TrendingDown, Share2 } from "lucide-react";
+import { ChevronLeft, Users, TrendingUp, TrendingDown, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { allEntities, libraries, categoryLabels, formatCount, userVotes, followedEntityIds } from "@/data/mock";
+import {
+  allEntities,
+  libraries,
+  categoryLabels,
+  formatCount,
+  userVotes,
+  followedEntityIds,
+  formatFoodLocationLabel,
+  type FoodLocation,
+} from "@/data/mock";
 import { TierBadge } from "@/components/ui/tier-badge";
 import { VoteButtons } from "@/components/ui/vote-buttons";
 import { LibraryCard } from "@/components/ui/library-card";
 import { SectionHeader } from "@/components/ui/section-header";
+import { FoodLocationPicker } from "@/components/ui/food-location-picker";
 
 export default function EntityDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +29,8 @@ export default function EntityDetailPage() {
   const [following, setFollowing] = useState(
     () => !!entity && followedEntityIds.includes(entity.id),
   );
+  const [selectedFoodLocation, setSelectedFoodLocation] =
+    useState<FoodLocation | null>(null);
 
   if (!entity) {
     return (
@@ -39,16 +51,34 @@ export default function EntityDetailPage() {
     );
   }
 
+  const isFood = entity.category === "food";
+  const foodLocations = entity.foodLocations ?? [];
+  const activeLocation = isFood ? selectedFoodLocation : null;
+
+  const displayScore = activeLocation?.score ?? entity.score;
+  const displayTier = activeLocation?.tier ?? entity.tier;
+  const displayVotes = activeLocation?.totalVotes ?? entity.totalVotes;
+  const displayTrending = activeLocation?.trending ?? entity.trending;
+
   const includedInLibraries = libraries.filter((lib) =>
     lib.entityIds.includes(entity.id),
   );
+
   const currentVote =
-    userVotes.find((v) => v.entityId === entity.id)?.voteType ?? null;
+    !isFood || activeLocation
+      ? userVotes.find(
+          (v) =>
+            v.entityId === entity.id &&
+            (!isFood ||
+              !v.foodLocationId ||
+              v.foodLocationId === activeLocation?.id),
+        )?.voteType ?? null
+      : null;
 
   return (
-    <div className="pb-28">
+    <div className="w-full pb-28">
       {/* Cinematic hero image */}
-      <div className="relative h-[340px] lg:h-[420px] overflow-hidden">
+      <div className="entity-hero">
         <Image
           src={entity.image}
           alt={entity.name}
@@ -69,56 +99,88 @@ export default function EntityDetailPage() {
       </div>
 
       {/* Content */}
-      <div className="px-5 pt-6">
+      <div className="page-x pt-6">
         {/* Category + Tier */}
         <div className="flex items-center gap-2.5">
           <span className="text-[11px] font-bold uppercase tracking-widest text-[#D4A017]">
             {categoryLabels[entity.category]}
           </span>
-          <TierBadge tier={entity.tier} size="md" />
+          {(!isFood || activeLocation) && (
+            <TierBadge tier={displayTier} size="md" />
+          )}
         </div>
 
         {/* Name */}
-        <h1 className="mt-2 text-[28px] lg:text-3xl font-bold leading-tight tracking-tight text-[#111]">
+        <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-[#111] sm:text-3xl">
           {entity.name}
         </h1>
 
-        {/* Stats row */}
-        <div className="mt-4 flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="text-xl font-bold tabular-nums text-[#111]">
-              {entity.score > 0 ? "+" : ""}
-              {entity.score}
-            </span>
-            {entity.trending === "up" && (
-              <TrendingUp className="h-5 w-5 text-emerald-500" />
-            )}
-            {entity.trending === "down" && (
-              <TrendingDown className="h-5 w-5 text-red-400" />
-            )}
+        {isFood && activeLocation && (
+          <p className="mt-2 text-[14px] text-neutral-500">
+            {formatFoodLocationLabel(activeLocation)}
+          </p>
+        )}
+
+        {/* Food location picker */}
+        {isFood && foodLocations.length > 0 && (
+          <div className="mt-5">
+            <FoodLocationPicker
+              locations={foodLocations}
+              selectedId={selectedFoodLocation?.id ?? null}
+              onSelect={setSelectedFoodLocation}
+            />
           </div>
-          <div className="h-5 w-px bg-neutral-200" />
-          <span className="text-[14px] text-neutral-400">
-            {formatCount(entity.totalVotes)} votes
-          </span>
-          <div className="h-5 w-px bg-neutral-200" />
-          <span className="flex items-center gap-1.5 text-[14px] text-neutral-400">
-            <Users className="h-4 w-4" />
-            {formatCount(entity.followersCount)} followers
-          </span>
+        )}
+
+        {/* Stats row */}
+        <div
+          className={cn(
+            "flex flex-wrap items-center gap-4",
+            isFood ? "mt-5" : "mt-4",
+          )}
+        >
+          {isFood && !activeLocation ? (
+            <p className="text-[14px] text-neutral-400">
+              Pick a location above to see local ratings
+            </p>
+          ) : (
+            <>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl font-bold tabular-nums text-[#111]">
+                  {displayScore > 0 ? "+" : ""}
+                  {displayScore}
+                </span>
+                {displayTrending === "up" && (
+                  <TrendingUp className="h-5 w-5 text-emerald-500" />
+                )}
+                {displayTrending === "down" && (
+                  <TrendingDown className="h-5 w-5 text-red-400" />
+                )}
+              </div>
+              <div className="h-5 w-px bg-neutral-200" />
+              <span className="text-[14px] text-neutral-400">
+                {formatCount(displayVotes)} votes
+                {isFood && activeLocation ? " at this spot" : ""}
+              </span>
+              {!isFood && (
+                <>
+                  <div className="h-5 w-px bg-neutral-200" />
+                  <span className="flex items-center gap-1.5 text-[14px] text-neutral-400">
+                    <Users className="h-4 w-4" />
+                    {formatCount(entity.followersCount)} followers
+                  </span>
+                </>
+              )}
+            </>
+          )}
         </div>
 
-        {/* Description */}
-        <p className="mt-5 text-[16px] lg:text-[17px] leading-relaxed text-neutral-600">
-          {entity.description}
-        </p>
-
         {/* Action buttons */}
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6">
           <button
             onClick={() => setFollowing((f) => !f)}
             className={cn(
-              "flex-1 rounded-xl py-3.5 text-[15px] font-semibold transition-colors",
+              "w-full rounded-xl py-3.5 text-[15px] font-semibold transition-colors",
               following
                 ? "bg-neutral-100 text-neutral-600"
                 : "bg-[#111] text-white hover:bg-neutral-800",
@@ -126,26 +188,34 @@ export default function EntityDetailPage() {
           >
             {following ? "Following" : "Follow"}
           </button>
-          <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-neutral-200 py-3.5 text-[15px] font-semibold text-[#111] hover:bg-neutral-50 transition-colors">
-            <Bookmark className="h-4 w-4" />
-            Save
-          </button>
         </div>
 
         {/* Vote section */}
         <div className="mt-10">
           <SectionHeader
             title="Cast Your Vote"
-            subtitle="Help the community decide where this belongs"
+            subtitle={
+              isFood
+                ? activeLocation
+                  ? `Rate it at ${activeLocation.address}, ${activeLocation.city}`
+                  : "Select the exact address to vote"
+                : "Help the community decide where this belongs"
+            }
           />
-          <VoteButtons entityId={entity.id} currentVote={currentVote} />
+          {isFood && !activeLocation ? (
+            <p className="rounded-xl bg-neutral-50 py-6 text-center text-[14px] text-neutral-400">
+              Choose where you tried this before voting.
+            </p>
+          ) : (
+            <VoteButtons entityId={entity.id} currentVote={currentVote} />
+          )}
         </div>
 
         {/* Included In Libraries */}
         <div className="mt-10 mb-8">
           <SectionHeader title="Included In" />
           {includedInLibraries.length > 0 ? (
-            <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2">
+            <div className="card-row card-row--wide hide-scrollbar">
               {includedInLibraries.map((lib) => (
                 <LibraryCard key={lib.id} library={lib} />
               ))}

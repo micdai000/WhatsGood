@@ -12,7 +12,7 @@ export function UserCard({ user, className }: UserCardProps) {
     <div
       className={cn(
         "flex items-center gap-4 rounded-2xl bg-white p-4 hover:bg-neutral-50 transition-colors",
-        !className?.includes("w-") && "w-[300px] shrink-0",
+        !className?.includes("w-") && "card-row-item card-row-item--wide shrink-0",
         className,
       )}
     >
