@@ -1,17 +1,22 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter",
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
-  title: "Meritt",
-  description: "Discover what people believe is worth choosing.",
+  title: "TrustLoop",
+  description:
+    "Build trust through verified reviews. Professional reputation for independent experts.",
 };
 
 export const viewport: Viewport = {
@@ -27,12 +32,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className={`${inter.className} overflow-x-hidden`}>
-        <div className="app-shell min-h-dvh overflow-x-hidden pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]">
+    <html lang="en" className={cn(inter.variable, "font-sans")}>
+      <body className="overflow-x-hidden font-sans antialiased">
+        <SiteHeader />
+        <main className="min-h-dvh pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
           {children}
-        </div>
+        </main>
+        <SiteFooter className="hidden md:block" />
         <BottomNav />
+        <Toaster />
       </body>
     </html>
   );

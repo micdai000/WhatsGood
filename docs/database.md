@@ -1,218 +1,239 @@
-# TrustLoop — Database Architecture
+# WhatsGood — Database Architecture
 
-> Last updated: June 2025
+> Last updated: June 2025  
 > Stack: PostgreSQL (via Supabase), Next.js 15, TypeScript
 
 ---
 
 ## Overview
 
-TrustLoop is a review platform where service professionals collect verified reviews from their clients. The database is designed around four tables that cover the MVP use case: professionals create profiles, request reviews from clients, and display those reviews publicly.
+WhatsGood (package name: `meritt`) is a reputation voting platform. Users vote to **promote**, **maintain**, or **demote** entities — food, places, entertainment, and movies/shows. They follow entities, curate **libraries**, and see an **activity feed** of community actions.
+
+This schema mirrors the types in `src/data/mock.ts`.
 
 ---
 
 ## Entity Relationship Diagram
 
 ```
-┌─────────────────┐
-│   professions   │
-│─────────────────│
-│ id (PK)         │
-│ name            │
-│ slug (UNIQUE)   │
-│ icon            │
-│ created_at      │
-└────────┬────────┘
-         │
-         │  1 : many
-         │
-┌────────▼────────┐       ┌──────────────────────┐
-│    profiles     │       │       reviews         │
-│─────────────────│       │──────────────────────│
-│ id (PK/FK)      │──────▶│ id (PK)              │
-│ slug (UNIQUE)   │ 1:many│ profile_id (FK)      │
-│ full_name       │       │ reviewer_name        │
-│ profession_id   │       │ reviewer_email       │
-│ bio             │       │ rating (1-5)         │
-│ city            │       │ review_text          │
-│ state           │       │ service_description  │
-│ profile_photo   │       │ verified             │
-│ average_rating  │       │ created_at           │
-│ total_reviews   │       └──────────────────────┘
-│ created_at      │
-│ updated_at      │       ┌──────────────────────┐
-│                 │       │   review_requests    │
-│                 │──────▶│──────────────────────│
-│                 │ 1:many│ id (PK)              │
-└─────────────────┘       │ profile_id (FK)      │
-         ▲                │ email                │
-         │                │ token (UNIQUE)       │
-    1 : 1                 │ status (ENUM)        │
-         │                │ created_at           │
-┌────────┴────────┐       └──────────────────────┘
-│  auth.users     │
-│  (Supabase)     │
-└─────────────────┘
+auth.users
+    │
+    │ 1:1
+    ▼
+profiles ─────────────────────────────────────────────┐
+    │                                                  │
+    ├── 1:many ──► entities ◄── created_by            │
+    │                  │                               │
+    │                  ├── 1:many ──► food_locations    │
+    │                  │                               │
+    │                  ├── 1:many ──► votes ◄── user_id
+    │                  │                               │
+    │                  └── 1:many ──► entity_follows    │
+    │                                                  │
+    ├── 1:many ──► libraries ◄── creator_id           │
+    │                  │                               │
+    │                  ├── 1:many ──► library_items    │
+    │                  └── 1:many ──► library_follows  │
+    │                                                  │
+    ├── 1:many ──► user_follows (follower/following)  │
+    │                                                  │
+    └── 1:many ──► activity (feed events)              │
 ```
 
 ---
 
 ## Tables
 
-### `professions`
-
-**Purpose:** Lookup table for professional categories. Normalized so we can add new professions, attach icons, and build SEO-friendly category pages without modifying the profiles table.
-
-| Column       | Type        | Constraints       | Description                            |
-|-------------|-------------|-------------------|----------------------------------------|
-| `id`        | UUID        | PK, auto-gen      | Unique identifier                       |
-| `name`      | TEXT        | NOT NULL, UNIQUE   | Human-readable name ("Electrician")     |
-| `slug`      | TEXT        | NOT NULL, UNIQUE   | URL-safe identifier ("electrician")     |
-| `icon`      | TEXT        | nullable           | Lucide icon name for UI rendering       |
-| `created_at`| TIMESTAMPTZ | NOT NULL, default  | Row creation timestamp                  |
-
-**RLS:** Publicly readable. No client-side writes (managed by admins or seed data).
-
----
-
 ### `profiles`
 
-**Purpose:** Extends `auth.users` with business-specific fields. The `id` column directly references `auth.users.id`, creating a 1:1 relationship. Supabase's `auth` schema is internal and cannot be queried from the client — this table is the public-facing representation of a user.
+Extends `auth.users` with app-specific fields. Same pattern as before — `auth.users` is internal; this is the public user record.
 
-| Column           | Type          | Constraints                 | Description                                      |
-|-----------------|---------------|----------------------------|--------------------------------------------------|
-| `id`            | UUID          | PK, FK → auth.users(id)    | Same UUID as the auth user                        |
-| `slug`          | TEXT          | NOT NULL, UNIQUE            | Vanity URL (/p/john-doe)                          |
-| `full_name`     | TEXT          | NOT NULL                    | Display name                                      |
-| `profession_id` | UUID          | FK → professions(id)        | What type of professional they are                |
-| `bio`           | TEXT          | nullable                    | Free-text bio                                     |
-| `city`          | TEXT          | nullable                    | City for location-based search                    |
-| `state`         | TEXT          | nullable                    | State for location-based search                   |
-| `profile_photo` | TEXT          | nullable                    | URL to image in Supabase Storage                  |
-| `average_rating`| NUMERIC(3,2)  | NOT NULL, default 0.00      | Denormalized average — updated by trigger          |
-| `total_reviews` | INTEGER       | NOT NULL, default 0         | Denormalized count — updated by trigger            |
-| `created_at`    | TIMESTAMPTZ   | NOT NULL, default now()     | Row creation timestamp                            |
-| `updated_at`    | TIMESTAMPTZ   | NOT NULL, default now()     | Auto-updated by trigger on every UPDATE            |
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID PK, FK → auth.users | Same UUID as auth user |
+| `username` | TEXT UNIQUE | Handle (@michaeld) |
+| `display_name` | TEXT | Display name |
+| `avatar` | TEXT | URL in `avatars` storage bucket |
+| `bio` | TEXT | User bio |
+| `followers_count` | INTEGER | Denormalized — updated by triggers |
+| `following_count` | INTEGER | Denormalized |
+| `total_votes_cast` | INTEGER | Denormalized |
+| `entities_followed_count` | INTEGER | Denormalized |
+| `libraries_created_count` | INTEGER | Denormalized |
+| `created_at` / `updated_at` | TIMESTAMPTZ | Timestamps |
 
-**Why denormalize `average_rating` / `total_reviews`?**
-Computing `AVG()` across all reviews on every profile page load is expensive. By storing the computed values directly on the profile, reads are a single row fetch. The trigger on the `reviews` table keeps them in sync automatically.
-
-**RLS:**
-- SELECT: Public (anyone can view profiles)
-- INSERT: Only the authenticated user can insert their own row (`auth.uid() = id`)
-- UPDATE: Only the profile owner (`auth.uid() = id`)
-
-**Triggers:**
-- `on_profile_updated`: Sets `updated_at = now()` before every UPDATE.
+**RLS:** Public read. Owner can insert/update.
 
 ---
 
-### `reviews`
+### `entities`
 
-**Purpose:** The core data — reviews left by clients. Reviewers do **not** need a TrustLoop account. Their name and email are stored directly on the review row. The `verified` flag distinguishes reviews that came through an authenticated review request link.
+Things users vote on. Maps to the `Entity` type in mock data.
 
-| Column               | Type        | Constraints                  | Description                                  |
-|----------------------|-------------|------------------------------|----------------------------------------------|
-| `id`                 | UUID        | PK, auto-gen                 | Unique identifier                            |
-| `profile_id`         | UUID        | NOT NULL, FK → profiles(id)  | The professional being reviewed              |
-| `reviewer_name`      | TEXT        | NOT NULL                     | Name of the person leaving the review        |
-| `reviewer_email`     | TEXT        | NOT NULL                     | Email of the reviewer (for verification)     |
-| `rating`             | INTEGER     | NOT NULL, CHECK 1-5          | Star rating                                  |
-| `review_text`        | TEXT        | nullable                     | Written review content                       |
-| `service_description`| TEXT        | nullable                     | What service was performed                   |
-| `verified`           | BOOLEAN     | NOT NULL, default false      | True if submitted via a review_request token |
-| `created_at`         | TIMESTAMPTZ | NOT NULL, default now()      | When the review was submitted                |
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID PK | |
+| `slug` | TEXT UNIQUE | URL path: `/food/costco-pizza` |
+| `name` | TEXT | Display name |
+| `category` | ENUM | `food`, `places`, `entertainment`, `movies_shows` |
+| `image` | TEXT | Cover image URL |
+| `score` | INTEGER | Reputation score (promote +1, demote -1) |
+| `total_votes` | INTEGER | Vote count |
+| `followers_count` | INTEGER | Denormalized |
+| `location` | TEXT | Country/region for search |
+| `created_by` | UUID FK → profiles | Who added it (nullable) |
+| `created_at` / `updated_at` | TIMESTAMPTZ | |
 
-**RLS:**
-- SELECT: Public (reviews are displayed on profile pages)
-- INSERT: **No client-side policy.** Reviews are inserted through a server-side API route using the `service_role` key. This prevents spam and ensures reviews can only be submitted through validated flows.
+**Tier is NOT stored.** The app computes it from `score` via `getTier()` in `src/data/mock.ts`.
 
-**Triggers:**
-- `on_review_inserted`: After each INSERT, recalculates `average_rating` and `total_reviews` on the parent `profiles` row.
-
----
-
-### `review_requests`
-
-**Purpose:** Professionals send review request emails to their clients. Each request generates a unique `token` (UUID) that is embedded in the review link (e.g., `/review?token=abc-123`). When a client clicks the link and submits a review, the API validates the token, marks the request as `completed`, and sets `verified = true` on the review.
-
-| Column       | Type                        | Constraints                  | Description                          |
-|-------------|----------------------------|------------------------------|--------------------------------------|
-| `id`        | UUID                        | PK, auto-gen                 | Unique identifier                    |
-| `profile_id`| UUID                        | NOT NULL, FK → profiles(id)  | The professional who sent it         |
-| `email`     | TEXT                        | NOT NULL                     | Client's email address               |
-| `token`     | UUID                        | NOT NULL, UNIQUE, auto-gen   | Unique link token                    |
-| `status`    | review_request_status ENUM  | NOT NULL, default 'pending'  | pending → completed \| expired       |
-| `created_at`| TIMESTAMPTZ                 | NOT NULL, default now()      | When the request was created         |
-
-**RLS:**
-- SELECT: Only the profile owner (`auth.uid() = profile_id`)
-- INSERT: Only the profile owner (`auth.uid() = profile_id`)
+**RLS:** Public read. Authenticated users can create. Creators can update their own.
 
 ---
 
-## Indexes
+### `food_locations`
 
-| Index                         | Table            | Column(s)         | Why                                                        |
-|------------------------------|------------------|-------------------|------------------------------------------------------------|
-| `idx_profiles_slug`          | profiles         | slug              | Profile pages load by slug — avoids full table scan         |
-| `idx_profiles_profession`    | profiles         | profession_id     | Filtering by profession category                            |
-| `idx_profiles_location`      | profiles         | (state, city)     | Location-based search ("plumbers in Denver, CO")            |
-| `idx_reviews_profile`        | reviews          | profile_id        | Loading all reviews for a profile — most frequent join       |
-| `idx_reviews_created`        | reviews          | created_at DESC   | Sorting reviews newest-first without expensive sort          |
-| `idx_review_requests_profile`| review_requests  | profile_id        | Dashboard view listing all sent requests                     |
-| `idx_review_requests_token`  | review_requests  | token             | Review submission page validates by token — must be fast     |
-| `idx_professions_slug`       | professions      | slug              | Profession category pages loaded by slug                     |
+Physical locations for food entities. Maps to `FoodLocation` in mock data.
 
-Note: `UNIQUE` constraints on `profiles.slug`, `professions.slug`, `professions.name`, and `review_requests.token` automatically create B-tree indexes. The explicit indexes above cover non-unique columns.
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID PK | |
+| `entity_id` | UUID FK → entities | Parent food entity |
+| `restaurant` | TEXT | Restaurant name |
+| `address` | TEXT | Street address |
+| `city` | TEXT | City, state |
+| `location` | TEXT | Country/region |
+| `score` | INTEGER | Location-specific score |
+| `total_votes` | INTEGER | Location-specific vote count |
+
+Users can vote on the entity overall OR on a specific location.
+
+---
+
+### `votes`
+
+Maps to the `Vote` type. One vote per user per entity (or per food location).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID PK | |
+| `user_id` | UUID FK → profiles | Voter |
+| `entity_id` | UUID FK → entities | What they voted on |
+| `food_location_id` | UUID FK → food_locations | Optional — set for location votes |
+| `vote_type` | ENUM | `promote`, `maintain`, `demote` |
+
+**Triggers:** `handle_vote_change()` updates scores on entities/food_locations and `total_votes_cast` on profiles.
+
+---
+
+### `libraries`
+
+Curated collections. Maps to the `Library` type.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID PK | |
+| `name` | TEXT | Library title |
+| `description` | TEXT | |
+| `cover_image` | TEXT | |
+| `creator_id` | UUID FK → profiles | Owner |
+| `is_public` | BOOLEAN | Public vs private |
+| `follower_count` | INTEGER | Denormalized |
+
+---
+
+### `library_items`
+
+Join table: which entities are in which library.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `library_id` | UUID FK | |
+| `entity_id` | UUID FK | |
+| `position` | INTEGER | Display order |
+| `added_at` | TIMESTAMPTZ | |
+
+Primary key: `(library_id, entity_id)`.
+
+---
+
+### Follow tables
+
+| Table | Purpose |
+|-------|---------|
+| `user_follows` | User follows another user |
+| `entity_follows` | User follows an entity |
+| `library_follows` | User follows a library |
+
+All have triggers that keep denormalized counts in sync.
+
+---
+
+### `activity`
+
+Feed events. Maps to `ActivityItem` in mock data.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `type` | ENUM | promote, demote, maintain, create_library, tier_up, tier_down, follow |
+| `user_id` | UUID | Who did it (nullable) |
+| `entity_id` | UUID | Related entity (nullable) |
+| `library_id` | UUID | Related library (nullable) |
+| `tier` / `previous_tier` | TEXT | For tier change events |
+
+Inserted by server-side API routes, not directly by clients.
 
 ---
 
 ## Storage Buckets
 
-| Bucket           | Public | Max Size | Allowed Types                          | Purpose                 |
-|-----------------|--------|----------|----------------------------------------|-------------------------|
-| `profile-images`| Yes    | 5 MB     | image/jpeg, image/png, image/webp, image/gif | Profile photos / avatars |
+| Bucket | Purpose | Folder convention |
+|--------|---------|---------------------|
+| `avatars` | Profile photos | `avatars/{user_id}/` |
+| `entity-images` | Entity cover images | `entity-images/{entity_id}/` |
+| `library-covers` | Library cover images | `library-covers/{library_id}/` |
 
-**Folder convention:** `profile-images/{user_id}/filename.ext`
+---
 
-RLS ensures users can only upload/update/delete files in their own folder. Reading is public.
+## Applying to Supabase
 
-**Future buckets** (not created yet — add when needed):
-- `review-attachments` — photos attached to reviews
-- `documents` — business licenses, certifications
+Because you previously uploaded the old TrustLoop schema, run migrations **in order**:
+
+1. `000_reset_legacy_schema.sql` — drops old tables
+2. `001` through `010` — creates the new schema
+3. `seed.sql` — optional sample data
+
+In the Supabase SQL Editor, run each file in order. Or use the Supabase CLI:
+
+```bash
+supabase db push
+```
 
 ---
 
 ## Design Decisions
 
-### Why `profiles` mirrors `auth.users` instead of adding columns
-Supabase's `auth.users` lives in the `auth` schema which is not directly queryable from the client SDK with RLS. A separate `profiles` table in the `public` schema gives us full control over columns, policies, and triggers.
+### Why no `tier` column on entities
+Tier is derived from score thresholds in the frontend. Storing it would require triggers on every score change and duplicate logic already in `getTier()`.
 
-### Why reviewers don't need accounts
-The core value proposition is frictionless review collection. Requiring clients to create an account would kill conversion rates. The `review_requests.token` system provides verification without authentication.
+### Why denormalized counts
+Profile pages, entity cards, and leaderboards need follower/vote counts on every render. Triggers keep counts accurate without expensive `COUNT(*)` on hot paths.
 
-### Why ratings are denormalized on profiles
-A professional with 500 reviews would require `SELECT AVG(rating) FROM reviews WHERE profile_id = ?` on every profile view. By maintaining `average_rating` and `total_reviews` directly on the profile — updated by a database trigger — profile page loads are a single-row fetch.
+### Why `movies_shows` not `movies-shows` in the DB
+PostgreSQL enum values can't contain hyphens. The app maps `movies_shows` ↔ `movies-shows` at the API layer.
 
-### Why reviews have no client-side INSERT policy
-This is intentional security. If we allowed `INSERT` via RLS, anyone could submit reviews directly through the Supabase client. Instead, reviews flow through a server-side API route that validates the review request token, checks for duplicates, and uses the `service_role` key to bypass RLS.
-
-### Why we use an ENUM for review_request status
-The status values are a finite, well-defined set (`pending`, `completed`, `expired`). An ENUM enforces this at the database level and is more storage-efficient than TEXT.
+### Why activity has no client INSERT policy
+Feed events should only be created by trusted server logic to prevent spam.
 
 ---
 
 ## Future Scalability
 
-| Feature                    | What changes                                                           |
-|---------------------------|------------------------------------------------------------------------|
-| Search                    | Add `tsvector` column to profiles for full-text search                 |
-| Review replies            | Add `replies` table with FK to reviews                                 |
-| Multiple locations        | Add `locations` table, change profiles → locations to many-to-many     |
-| Review photos             | Add `review-attachments` storage bucket + `review_images` table        |
-| Analytics dashboard       | Add `profile_analytics` table with daily aggregated views/clicks       |
-| Subscription tiers        | Add `subscriptions` table linked to profiles                           |
-| Badges / certifications   | Add `badges` table + `profile_badges` join table                       |
+| Feature | Change |
+|---------|--------|
+| Full-text search | Add `tsvector` columns on entities and food_locations |
+| Comments | New `comments` table on entities |
+| Notifications | New `notifications` table |
+| Moderation | Add `status` enum on entities (active, flagged, removed) |
+| Vote history | Append-only `vote_events` table for analytics |
 
-The current schema is designed so none of these additions require breaking changes to existing tables.
+The current schema supports all of these without breaking changes.

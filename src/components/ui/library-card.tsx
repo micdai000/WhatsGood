@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Avatar } from "./avatar";
+import { UserAvatar } from "./user-avatar";
 import { formatCount, type Library } from "@/data/mock";
 
 interface LibraryCardProps {
@@ -35,7 +35,7 @@ export function LibraryCard({ library, className }: LibraryCardProps) {
         </p>
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Avatar
+            <UserAvatar
               src={library.creator.avatar}
               alt={library.creator.displayName}
               size={20}
