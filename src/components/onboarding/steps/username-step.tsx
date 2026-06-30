@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
 import { UsernameField } from "@/components/onboarding/username-field";
 import { useOnboardingWizard } from "@/hooks/use-onboarding-wizard";
@@ -9,8 +8,7 @@ import { onboardingUsernameSchema } from "@/lib/validators";
 import { checkSlugAvailabilityAction } from "@/app/actions/onboarding.actions";
 
 export function UsernameStep() {
-  const pathname = usePathname();
-  const { state, updateState, isReady } = useOnboardingWizard(pathname);
+  const { state, updateState, isReady } = useOnboardingWizard();
   const [fieldError, setFieldError] = useState<string | null>(null);
 
   if (!isReady) return null;

@@ -37,7 +37,7 @@ export function OnboardingWizardShell({
 }: OnboardingWizardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isReady } = useOnboardingWizard(pathname);
+  const { isReady } = useOnboardingWizard();
   const stepMeta = getStepMetaForRoute(pathname);
   const previousRoute = getPreviousRoute(pathname);
   const nextRoute = getNextRoute(pathname);

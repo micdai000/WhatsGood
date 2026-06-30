@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
 import { CharacterCounter } from "@/components/onboarding/character-counter";
 import { Label } from "@/components/ui/label";
@@ -11,8 +10,7 @@ import { useOnboardingWizard } from "@/hooks/use-onboarding-wizard";
 import { onboardingBioSchema } from "@/lib/validators";
 
 export function BioStep() {
-  const pathname = usePathname();
-  const { state, updateState, isReady } = useOnboardingWizard(pathname);
+  const { state, updateState, isReady } = useOnboardingWizard();
   const [fieldError, setFieldError] = useState<string | null>(null);
 
   if (!isReady) return null;

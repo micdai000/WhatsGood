@@ -137,5 +137,17 @@ export async function createProfileAction(
 }
 
 export async function completeOnboardingAction(): Promise<never> {
+  const sessionResult = await authService.getSession();
+
+  if (!isSuccess(sessionResult) || !sessionResult.data) {
+    redirect("/login");
+  }
+
+  const onboarding = await getOnboardingStatus(sessionResult.data.user.id);
+
+  if (!onboarding.ok || onboarding.status !== "has_profile") {
+    redirect(ONBOARDING_ROUTES.welcome);
+  }
+
   redirect(ONBOARDING_ROUTES.dashboard);
 }

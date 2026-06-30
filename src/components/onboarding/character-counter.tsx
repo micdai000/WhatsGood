@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Muted } from "@/components/typography/typography";
 import { cn } from "@/lib/utils";
 

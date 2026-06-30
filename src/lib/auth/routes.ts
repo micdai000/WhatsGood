@@ -24,8 +24,8 @@ export function isPublicRoute(pathname: string): boolean {
     return true;
   }
 
-  // Future public profile pages: /@username
-  if (/^\/@[a-z0-9-]+$/.test(pathname)) {
+  // Public professional profiles: /@username (rewritten to /u/username)
+  if (/^\/@[a-z0-9-]+$/.test(pathname) || /^\/u\/[a-z0-9-]+$/.test(pathname)) {
     return true;
   }
 

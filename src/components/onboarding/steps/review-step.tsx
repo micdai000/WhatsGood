@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Loader2, Pencil } from "lucide-react";
 import {
   createProfileAction,
@@ -33,9 +33,8 @@ const EDIT_LINKS = [
 ] as const;
 
 export function ReviewStep() {
-  const pathname = usePathname();
   const router = useRouter();
-  const { state, isReady } = useOnboardingWizard(pathname);
+  const { state, isReady } = useOnboardingWizard();
   const [professionName, setProfessionName] = useState<string>("—");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

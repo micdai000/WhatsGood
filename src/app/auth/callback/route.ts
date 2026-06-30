@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sanitizeRedirectPath } from "@/lib/auth/safe-redirect";
 import { createClient } from "@/lib/supabase/server";
 import { authService } from "@/services/auth/auth.service";
 import { isFailure } from "@/types";
@@ -8,7 +9,7 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
-  const next = searchParams.get("next") ?? "/login";
+  const next = sanitizeRedirectPath(searchParams.get("next"), "/login");
 
   if (tokenHash && type === "email") {
     const result = await authService.verifyEmail(tokenHash);

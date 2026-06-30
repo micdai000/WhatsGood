@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { StatusAlert } from "@/components/ui/status-alert";
 import { authService } from "@/services/auth/auth.service";
 import { profileService } from "@/services/profiles/profile.service";
-import { getSiteUrl } from "@/lib/auth/routes";
+import { getPublicProfileUrl } from "@/lib/profile/public-url";
 import { cn } from "@/lib/utils";
 import { isFailure, isSuccess } from "@/types";
 
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   }
 
   const profile = profileResult.data;
-  const publicUrl = `${getSiteUrl()}/@${profile.username}`;
+  const publicUrl = getPublicProfileUrl(profile.username);
   const displayName = profile.displayName;
 
   return (

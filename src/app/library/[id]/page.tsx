@@ -8,7 +8,7 @@ import { ChevronLeft, Share2, Users, X, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { allEntities, formatCount } from "@/data/mock";
 import { useLibraries } from "@/lib/libraries-store";
-import { Avatar } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { EntityCard } from "@/components/ui/entity-card";
 import { SectionHeader } from "@/components/ui/section-header";
 import { LibraryAddItems } from "@/components/library/library-add-items";
@@ -103,7 +103,7 @@ export default function LibraryDetailPage() {
       <div className="page-x pt-6">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2.5">
-            <Avatar
+            <UserAvatar
               src={library.creator.avatar}
               alt={library.creator.displayName}
               size={36}

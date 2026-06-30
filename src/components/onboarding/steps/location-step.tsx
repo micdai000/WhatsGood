@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +8,7 @@ import { useOnboardingWizard } from "@/hooks/use-onboarding-wizard";
 import { onboardingLocationSchema } from "@/lib/validators";
 
 export function LocationStep() {
-  const pathname = usePathname();
-  const { state, updateState, isReady } = useOnboardingWizard(pathname);
+  const { state, updateState, isReady } = useOnboardingWizard();
   const [fieldErrors, setFieldErrors] = useState<{
     city?: string;
     state?: string;

@@ -2,6 +2,8 @@
 
 This document describes the TrustLoop professional profile onboarding wizard, state management, and profile creation flow.
 
+> **Prerequisite:** Apply migration `011_create_professions.sql` before testing onboarding. Run `npm run db:verify` — see [database-migrations.md](./database-migrations.md).
+
 ## Why onboarding is split into multiple steps
 
 A single long form overwhelms users and increases abandonment. Breaking setup into focused steps:

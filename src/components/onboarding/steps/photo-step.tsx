@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { uploadProfilePhotoAction } from "@/app/actions/onboarding.actions";
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
@@ -12,8 +11,7 @@ import { Muted } from "@/components/typography/typography";
 import { useOnboardingWizard } from "@/hooks/use-onboarding-wizard";
 
 export function PhotoStep() {
-  const pathname = usePathname();
-  const { state, updateState, isReady } = useOnboardingWizard(pathname);
+  const { state, updateState, isReady } = useOnboardingWizard();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,6 +104,7 @@ export function PhotoStep() {
 
           <input
             ref={inputRef}
+            id="profile-photo"
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
             className="sr-only"
@@ -120,7 +119,9 @@ export function PhotoStep() {
           </Muted>
         </div>
 
-        <Label className="sr-only">Profile photo</Label>
+        <Label htmlFor="profile-photo" className="sr-only">
+          Profile photo
+        </Label>
 
         {error ? (
           <p className="text-center text-sm text-destructive" role="alert">

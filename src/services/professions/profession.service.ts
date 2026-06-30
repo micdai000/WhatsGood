@@ -1,7 +1,5 @@
 import "server-only";
 
-import "server-only";
-
 import { createClient } from "@/lib/supabase/server";
 import { DatabaseError, NotFoundError } from "@/lib/errors";
 import { logger } from "@/lib/logger";

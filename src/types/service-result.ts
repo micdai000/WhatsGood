@@ -1,4 +1,4 @@
-import type { ApplicationError } from "@/lib/errors";
+import type { BaseError } from "@/lib/errors";
 
 export type SuccessResult<T> = {
   success: true;
@@ -7,7 +7,7 @@ export type SuccessResult<T> = {
 
 export type FailureResult = {
   success: false;
-  error: ApplicationError;
+  error: BaseError;
 };
 
 export type ServiceResult<T> = SuccessResult<T> | FailureResult;
@@ -16,7 +16,7 @@ export function success<T>(data: T): SuccessResult<T> {
   return { success: true, data };
 }
 
-export function failure<T = never>(error: ApplicationError): ServiceResult<T> {
+export function failure<T = never>(error: BaseError): ServiceResult<T> {
   return { success: false, error };
 }
 

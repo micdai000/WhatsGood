@@ -84,7 +84,11 @@ export function mapUnknownAuthError(error: unknown): ApplicationError {
   }
 
   if (error instanceof Error) {
-    return new ApplicationError(error.message, "INTERNAL_ERROR", 500);
+    return new ApplicationError(
+      "An unexpected error occurred",
+      "INTERNAL_ERROR",
+      500,
+    );
   }
 
   return new ApplicationError(

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { getProfessionsAction } from "@/app/actions/onboarding.actions";
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
 import { LoadingState } from "@/components/layout/loading-state";
@@ -14,8 +13,7 @@ import { isFailure } from "@/types";
 import type { Profession } from "@/types";
 
 export function ProfessionStep() {
-  const pathname = usePathname();
-  const { state, updateState, isReady } = useOnboardingWizard(pathname);
+  const { state, updateState, isReady } = useOnboardingWizard();
   const [professions, setProfessions] = useState<Profession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,10 +35,17 @@ export function ProfessionStep() {
   }
 
   if (error) {
+    const isMissingTable =
+      error.includes("public.professions") ||
+      error.includes("schema cache");
     return (
       <ErrorState
         title="Unable to load professions"
-        description={error}
+        description={
+          isMissingTable
+            ? `${error} Apply database migration 011: run npm run db:migrate (see docs/database-migrations.md).`
+            : error
+        }
         onRetry={() => window.location.reload()}
         className="mx-auto max-w-lg"
       />

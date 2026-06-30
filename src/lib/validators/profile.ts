@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LIMITS } from "@/lib/constants";
+import { isAllowedProfilePhotoUrl } from "./profile-photo";
 
 const slugSchema = z
   .string()
@@ -40,7 +41,15 @@ export const createProfileSchema = z.object({
   bio: bioSchema.nullable().optional(),
   city: locationFieldSchema,
   state: locationFieldSchema,
-  profilePhoto: z.string().url().nullable().optional(),
+  profilePhoto: z
+    .string()
+    .url()
+    .nullable()
+    .optional()
+    .refine(
+      (url) => url == null || isAllowedProfilePhotoUrl(url),
+      "Profile photo must be uploaded through TrustLoop",
+    ),
 });
 
 export const updateProfileSchema = createProfileSchema.partial();

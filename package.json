@@ -9,7 +9,10 @@
     "dev:clean": "node scripts/kill-ports.mjs && node scripts/clean.mjs && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:verify": "node scripts/db-verify.mjs",
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "db:push": "npx supabase@2.109.0 db push"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -38,6 +41,7 @@
     "@types/react-dom": "^19.1.5",
     "eslint": "^9.27.0",
     "postcss": "^8.5.4",
+    "postgres": "^3.4.7",
     "tailwindcss": "^4.1.8",
     "typescript": "^5.8.3"
   }

@@ -16,6 +16,21 @@ export interface Profile {
   updatedAt: string;
 }
 
+/** Public-facing profile data — no internal IDs or private metrics */
+export interface PublicProfile {
+  username: string;
+  displayName: string;
+  avatar: string | null;
+  bio: string | null;
+  professionName: string | null;
+  city: string | null;
+  state: string | null;
+  averageRating: number;
+  totalReviews: number;
+  memberSince: string;
+  isComplete: boolean;
+}
+
 export interface CreateProfileInput {
   slug: string;
   fullName: string;

@@ -23,11 +23,16 @@ import type {
   PaginatedResult,
   PaginationParams,
   Profile,
+  PublicProfile,
   ServiceResult,
   UpdateProfileInput,
 } from "@/types";
 import { isFailure, isSuccess } from "@/types";
 import { mapProfileRow, type ProfileRow } from "./profile.mapper";
+import {
+  mapPublicProfileRow,
+  type PublicProfileRow,
+} from "./public-profile.mapper";
 import { PAGINATION } from "@/lib/constants";
 
 const AVATARS_BUCKET = "avatars";
@@ -96,15 +101,55 @@ export class ProfileService {
     }
   }
 
+  async getPublicProfile(slug: string): Promise<ServiceResult<PublicProfile>> {
+    const method = "ProfileService.getPublicProfile";
+
+    try {
+      const { slug: username } = validate(profileSlugSchema, { slug });
+      const supabase = await createClient();
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(
+          `
+          username,
+          display_name,
+          avatar,
+          bio,
+          city,
+          state,
+          created_at,
+          profession_id,
+          professions ( name )
+        `,
+        )
+        .eq("username", username)
+        .maybeSingle();
+
+      if (error) {
+        logger.error(method, error, { slug: username });
+        return failure(new DatabaseError(error.message));
+      }
+
+      if (!data) {
+        return failure(new NotFoundError("Profile"));
+      }
+
+      return success(mapPublicProfileRow(data as PublicProfileRow));
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
   async listProfiles(
     params?: PaginationParams,
   ): Promise<ServiceResult<PaginatedResult<Profile>>> {
     const method = "ProfileService.listProfiles";
 
     try {
-      const page = params?.page ?? PAGINATION.DEFAULT_PAGE;
+      const page = Math.max(1, params?.page ?? PAGINATION.DEFAULT_PAGE);
       const limit = Math.min(
-        params?.limit ?? PAGINATION.DEFAULT_LIMIT,
+        Math.max(1, params?.limit ?? PAGINATION.DEFAULT_LIMIT),
         PAGINATION.MAX_LIMIT,
       );
       const from = (page - 1) * limit;
