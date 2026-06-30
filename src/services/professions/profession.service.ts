@@ -1,19 +1,93 @@
+import "server-only";
+
+import "server-only";
+
+import { createClient } from "@/lib/supabase/server";
+import { DatabaseError, NotFoundError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
+import { professionIdSchema, professionSlugSchema, validate } from "@/lib/validators";
+import { failure, handleServiceError, success } from "@/services/shared";
 import type { Profession, ServiceResult } from "@/types";
-import { notImplemented } from "../shared";
+import { mapProfessionRow, type ProfessionRow } from "./profession.mapper";
 
 export class ProfessionService {
   async getProfessions(): Promise<ServiceResult<Profession[]>> {
-    return notImplemented("ProfessionService.getProfessions");
+    const method = "ProfessionService.getProfessions";
+
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("professions")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        logger.error(method, error);
+        return failure(new DatabaseError(error.message));
+      }
+
+      const professions = (data ?? []).map((row) =>
+        mapProfessionRow(row as ProfessionRow),
+      );
+
+      return success(professions);
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
   }
 
-  async getProfession(_id: string): Promise<ServiceResult<Profession>> {
-    return notImplemented("ProfessionService.getProfession");
+  async getProfession(id: string): Promise<ServiceResult<Profession>> {
+    const method = "ProfessionService.getProfession";
+
+    try {
+      const { id: professionId } = validate(professionIdSchema, { id });
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("professions")
+        .select("*")
+        .eq("id", professionId)
+        .maybeSingle();
+
+      if (error) {
+        logger.error(method, error, { id: professionId });
+        return failure(new DatabaseError(error.message));
+      }
+
+      if (!data) {
+        return failure(new NotFoundError("Profession"));
+      }
+
+      return success(mapProfessionRow(data as ProfessionRow));
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
   }
 
-  async getProfessionBySlug(
-    _slug: string,
-  ): Promise<ServiceResult<Profession>> {
-    return notImplemented("ProfessionService.getProfessionBySlug");
+  async getProfessionBySlug(slug: string): Promise<ServiceResult<Profession>> {
+    const method = "ProfessionService.getProfessionBySlug";
+
+    try {
+      const { slug: professionSlug } = validate(professionSlugSchema, { slug });
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("professions")
+        .select("*")
+        .eq("slug", professionSlug)
+        .maybeSingle();
+
+      if (error) {
+        logger.error(method, error, { slug: professionSlug });
+        return failure(new DatabaseError(error.message));
+      }
+
+      if (!data) {
+        return failure(new NotFoundError("Profession"));
+      }
+
+      return success(mapProfessionRow(data as ProfessionRow));
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
   }
 }
 
