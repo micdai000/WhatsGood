@@ -27,7 +27,7 @@ export function BelowFoldSections({
 }: BelowFoldSectionsProps) {
   return (
     <>
-      <section className="section-gap">
+      <section className="section-gap mt-10">
         <div className="page-x">
           <SectionHeader
             title="Elite Right Now"

@@ -8,11 +8,12 @@ import { cn } from "@/lib/utils";
 import {
   allEntities,
   users,
-  libraries,
   categoryLabels,
   entityMatchesQuery,
+  libraryMatchesQuery,
   type Category,
 } from "@/data/mock";
+import { useLibraries } from "@/lib/libraries-store";
 import { EntityCard } from "@/components/ui/entity-card";
 import { UserCard } from "@/components/ui/user-card";
 import { LibraryCard } from "@/components/ui/library-card";
@@ -45,6 +46,7 @@ const filterTabs: { key: FilterTab; label: string }[] = [
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
+  const { libraries } = useLibraries();
 
   const q = query.trim();
   const isBrowsing = !q;
@@ -104,13 +106,8 @@ export default function SearchPage() {
     if (!q) return [];
     if (activeFilter !== "all" && activeFilter !== "libraries") return [];
 
-    const normalized = q.toLowerCase();
-    return libraries.filter(
-      (l) =>
-        l.name.toLowerCase().includes(normalized) ||
-        l.description.toLowerCase().includes(normalized),
-    );
-  }, [q, activeFilter]);
+    return libraries.filter((l) => libraryMatchesQuery(l, q));
+  }, [q, activeFilter, libraries]);
 
   const hasResults =
     filteredEntities.length > 0 ||

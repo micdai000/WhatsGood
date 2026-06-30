@@ -4,18 +4,18 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, Users, TrendingUp, TrendingDown, Share2 } from "lucide-react";
+import { ChevronLeft, Heart, TrendingUp, TrendingDown, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   allEntities,
-  libraries,
   categoryLabels,
   formatCount,
   userVotes,
-  followedEntityIds,
   formatFoodLocationLabel,
   type FoodLocation,
 } from "@/data/mock";
+import { useLibraries } from "@/lib/libraries-store";
+import { useLikes } from "@/lib/likes-store";
 import { TierBadge } from "@/components/ui/tier-badge";
 import { VoteButtons } from "@/components/ui/vote-buttons";
 import { LibraryCard } from "@/components/ui/library-card";
@@ -24,11 +24,11 @@ import { FoodLocationPicker } from "@/components/ui/food-location-picker";
 
 export default function EntityDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { libraries } = useLibraries();
+  const { isLiked, toggleLike } = useLikes();
   const entity = allEntities.find((e) => e.id === id);
 
-  const [following, setFollowing] = useState(
-    () => !!entity && followedEntityIds.includes(entity.id),
-  );
+  const liked = entity ? isLiked(entity.id) : false;
   const [selectedFoodLocation, setSelectedFoodLocation] =
     useState<FoodLocation | null>(null);
 
@@ -166,8 +166,8 @@ export default function EntityDetailPage() {
                 <>
                   <div className="h-5 w-px bg-neutral-200" />
                   <span className="flex items-center gap-1.5 text-[14px] text-neutral-400">
-                    <Users className="h-4 w-4" />
-                    {formatCount(entity.followersCount)} followers
+                    <Heart className="h-4 w-4" />
+                    {formatCount(entity.followersCount)} likes
                   </span>
                 </>
               )}
@@ -178,15 +178,20 @@ export default function EntityDetailPage() {
         {/* Action buttons */}
         <div className="mt-6">
           <button
-            onClick={() => setFollowing((f) => !f)}
+            type="button"
+            onClick={() => entity && toggleLike(entity.id)}
             className={cn(
-              "w-full rounded-xl py-3.5 text-[15px] font-semibold transition-colors",
-              following
-                ? "bg-neutral-100 text-neutral-600"
+              "flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[15px] font-semibold transition-colors",
+              liked
+                ? "bg-red-50 text-red-500 ring-1 ring-red-100"
                 : "bg-[#111] text-white hover:bg-neutral-800",
             )}
           >
-            {following ? "Following" : "Follow"}
+            <Heart
+              className={cn("h-[18px] w-[18px]", liked && "fill-current")}
+              strokeWidth={2}
+            />
+            {liked ? "Liked" : "Like"}
           </button>
         </div>
 
