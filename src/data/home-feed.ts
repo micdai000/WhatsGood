@@ -8,8 +8,6 @@ function byFollowersDesc(a: Entity, b: Entity) {
   return b.followersCount - a.followersCount;
 }
 
-export const featuredEntity = [...allEntities].sort(byScoreDesc)[0];
-
 export const eliteEntities = allEntities
   .filter((e) => e.tier === "elite")
   .sort(byScoreDesc)

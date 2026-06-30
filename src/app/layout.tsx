@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -34,13 +35,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn(inter.variable, "font-sans")}>
       <body className="overflow-x-hidden font-sans antialiased">
-        <SiteHeader />
-        <main className="min-h-dvh pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
-          {children}
-        </main>
-        <SiteFooter className="hidden md:block" />
-        <BottomNav />
-        <Toaster />
+        <Providers>
+          <SiteHeader />
+          <main className="min-h-dvh pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+            {children}
+          </main>
+          <SiteFooter className="hidden md:block" />
+          <BottomNav />
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

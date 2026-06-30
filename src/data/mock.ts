@@ -65,6 +65,8 @@ export interface Library {
   creator: User;
   entityIds: string[];
   isPublic: boolean;
+  isLocationBased?: boolean;
+  location?: string;
 }
 
 export interface ActivityItem {
@@ -476,6 +478,32 @@ export function entityMatchesQuery(entity: Entity, query: string): boolean {
   return tokens.every((token) => combined.includes(token));
 }
 
+export function libraryMatchesQuery(library: Library, query: string): boolean {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) return true;
+
+  const texts = [
+    library.name,
+    library.description,
+    library.creator.displayName,
+    library.creator.username,
+    library.location ?? "",
+  ].map(normalizeSearchText);
+
+  const combined = texts.join(" ");
+
+  if (texts.some((text) => text.includes(normalizedQuery))) {
+    return true;
+  }
+
+  if (combined.includes(normalizedQuery)) {
+    return true;
+  }
+
+  const tokens = normalizedQuery.split(" ").filter(Boolean);
+  return tokens.every((token) => combined.includes(token));
+}
+
 // ─── PLACES (20) ────────────────────────────────────
 
 export const places: Entity[] = [
@@ -853,12 +881,14 @@ export const libraries: Library[] = [
     coverImage: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=600&fit=crop",
     entityCount: 15, followerCount: 3310, creator: users[4],
     entityIds: ["p1", "p8", "e4"], isPublic: true,
+    isLocationBased: true, location: "Tokyo, Japan",
   },
   {
     id: "l5", name: "LA Food Scene", description: "The definitive guide to eating well in Los Angeles.",
     coverImage: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop",
     entityCount: 42, followerCount: 5670, creator: users[1],
     entityIds: ["f1", "f3", "f4", "f6", "f7", "f20"], isPublic: true,
+    isLocationBased: true, location: "Los Angeles, CA",
   },
   {
     id: "l6", name: "Weekend Experiences", description: "Immersive experiences worth your Saturday.",
@@ -960,8 +990,12 @@ export const userVotes: Vote[] = [
   { id: "v10", userId: "u1", entityId: "m7", voteType: "promote" },
 ];
 
-// ─── USER'S FOLLOWED ENTITIES ───────────────────────
+// ─── USER'S LIKED ENTITIES (seed) ───────────────────
 
-export const followedEntityIds: string[] = [
+export const seedLikedEntityIds: string[] = [
   "f1", "f2", "f3", "m1", "m2", "m4", "p1", "p8", "e1", "e4",
 ];
+
+// ─── USER'S FOLLOWED CREATORS (seed) ────────────────
+
+export const followedCreatorIds: string[] = ["u2", "u4", "u5"];
