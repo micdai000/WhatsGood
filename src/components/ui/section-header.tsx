@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { SectionTitle, Muted } from "@/components/typography/typography";
+import { cn } from "@/lib/utils";
 
 interface SectionHeaderProps {
   title: string;
   subtitle?: string;
   actionLabel?: string;
   actionHref?: string;
+  className?: string;
 }
 
 export function SectionHeader({
@@ -12,23 +15,22 @@ export function SectionHeader({
   subtitle,
   actionLabel,
   actionHref,
+  className,
 }: SectionHeaderProps) {
   return (
-    <div className="mb-4">
-      <div className="flex items-baseline justify-between">
-        <h2 className="text-lg font-bold text-[#111] tracking-tight sm:text-xl">{title}</h2>
-        {actionLabel && actionHref && (
+    <div className={cn("mb-4", className)}>
+      <div className="flex items-baseline justify-between gap-4">
+        <SectionTitle>{title}</SectionTitle>
+        {actionLabel && actionHref ? (
           <Link
             href={actionHref}
-            className="text-[13px] font-semibold text-neutral-400 hover:text-[#111] transition-colors"
+            className="shrink-0 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             {actionLabel}
           </Link>
-        )}
+        ) : null}
       </div>
-      {subtitle && (
-        <p className="text-[13px] text-neutral-400 mt-0.5">{subtitle}</p>
-      )}
+      {subtitle ? <Muted className="mt-0.5">{subtitle}</Muted> : null}
     </div>
   );
 }

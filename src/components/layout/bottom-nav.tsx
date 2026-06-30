@@ -3,23 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Search, Plus, BookOpen, User } from "lucide-react";
+import { isAuthRoute } from "@/lib/auth/routes";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { href: "/", icon: Home },
-  { href: "/search", icon: Search },
-  { href: "/create", icon: Plus },
-  { href: "/libraries", icon: BookOpen },
-  { href: "/profile", icon: User },
+  { href: "/", icon: Home, label: "Home" },
+  { href: "/search", icon: Search, label: "Search" },
+  { href: "/create", icon: Plus, label: "Create" },
+  { href: "/libraries", icon: BookOpen, label: "Libraries" },
+  { href: "/profile", icon: User, label: "Profile" },
 ] as const;
 
 export function BottomNav() {
   const pathname = usePathname();
 
+  if (pathname === "/style-guide" || isAuthRoute(pathname)) {
+    return null;
+  }
+
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-neutral-100 bg-white">
-      <div className="app-shell flex items-center justify-around px-4 pb-[env(safe-area-inset-bottom,8px)] pt-1.5">
-        {tabs.map(({ href, icon: Icon }) => {
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur-md md:hidden"
+      aria-label="Mobile navigation"
+    >
+      <div className="flex items-center justify-around px-4 pb-[env(safe-area-inset-bottom,8px)] pt-1.5">
+        {tabs.map(({ href, icon: Icon, label }) => {
           const isActive =
             href === "/" ? pathname === "/" : pathname.startsWith(href);
           const isCreate = href === "/create";
@@ -29,10 +37,11 @@ export function BottomNav() {
               <Link
                 key={href}
                 href={href}
+                aria-label={label}
                 className="flex items-center justify-center -mt-4"
               >
-                <span className="flex h-[44px] w-[44px] items-center justify-center rounded-full bg-[#111] text-white ring-4 ring-white">
-                  <Icon size={24} strokeWidth={2} />
+                <span className="flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-background">
+                  <Icon size={22} strokeWidth={2} />
                 </span>
               </Link>
             );
@@ -42,14 +51,16 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className="flex items-center justify-center py-2 px-3"
+              aria-label={label}
+              aria-current={isActive ? "page" : undefined}
+              className="flex items-center justify-center px-3 py-2"
             >
               <Icon
-                size={24}
+                size={22}
                 strokeWidth={isActive ? 2 : 1.5}
                 className={cn(
                   "transition-colors",
-                  isActive ? "text-[#111]" : "text-[#B0B0B0]",
+                  isActive ? "text-foreground" : "text-muted-foreground",
                 )}
               />
             </Link>

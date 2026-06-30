@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Avatar } from "./avatar";
+import { UserAvatar } from "./user-avatar";
 import { formatCount, type User } from "@/data/mock";
 
 interface UserCardProps {
@@ -16,7 +16,7 @@ export function UserCard({ user, className }: UserCardProps) {
         className,
       )}
     >
-      <Avatar src={user.avatar} alt={user.displayName} size={52} />
+      <UserAvatar src={user.avatar} alt={user.displayName} size={52} />
       <div className="min-w-0 flex-1">
         <h3 className="text-[15px] font-semibold text-[#111] truncate">
           {user.displayName}

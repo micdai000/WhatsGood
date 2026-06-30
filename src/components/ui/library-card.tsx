@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Avatar } from "./avatar";
+import { UserAvatar } from "./user-avatar";
 import { allEntities, formatCount, type Library } from "@/data/mock";
 
 interface LibraryCardProps {
@@ -78,7 +78,7 @@ export function LibraryCard({ library, className }: LibraryCardProps) {
 
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
-          <Avatar
+          <UserAvatar
             src={library.creator.avatar}
             alt={library.creator.displayName}
             size={24}
