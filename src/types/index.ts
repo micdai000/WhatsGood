@@ -1,7 +1,7 @@
 export type { ServiceResult, SuccessResult, FailureResult } from "./service-result";
 export { success, failure, isSuccess, isFailure } from "./service-result";
 
-export type { Profile, CreateProfileInput, UpdateProfileInput } from "./profile";
+export type { Profile, PublicProfile, CreateProfileInput, UpdateProfileInput } from "./profile";
 export type { Review, CreateReviewInput } from "./review";
 export type {
   ReviewRequest,

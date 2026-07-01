@@ -11,8 +11,8 @@ import {
   updatePasswordSchema,
   validate,
 } from "@/lib/validators";
-import { isFailure } from "@/types";
 import { resolvePostAuthRedirect } from "@/lib/onboarding/routing";
+import { isFailure } from "@/types";
 
 export type AuthActionState = {
   success: boolean;
@@ -115,8 +115,11 @@ export async function signInAction(
 }
 
 export async function signOutAction(): Promise<void> {
-  await authService.signOut();
+  const result = await authService.signOut();
   revalidatePath("/", "layout");
+  if (isFailure(result)) {
+    redirect("/login?error=SIGN_OUT_FAILED");
+  }
   redirect("/login");
 }
 

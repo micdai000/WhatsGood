@@ -1,4 +1,4 @@
-import { ApplicationError } from "@/lib/errors";
+import { ApplicationError, BaseError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { failure, success, type ServiceResult } from "@/types";
 
@@ -17,7 +17,7 @@ export function handleServiceError<T>(
   method: string,
   error: unknown,
 ): ServiceResult<T> {
-  if (error instanceof ApplicationError) {
+  if (error instanceof BaseError) {
     logger.error(method, error);
     return failure(error);
   }

@@ -1,12 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { OnboardingLayout } from "@/components/onboarding/onboarding-layout";
 import { ProgressFooter } from "@/components/onboarding/progress-footer";
 import { ProgressHeader } from "@/components/onboarding/progress-header";
 import { Paragraph } from "@/components/typography/typography";
-
-const TOTAL_ONBOARDING_STEPS = 6;
+import { ONBOARDING } from "@/lib/constants";
+import { ONBOARDING_ROUTES } from "@/lib/onboarding/constants";
 
 export function WelcomeContent() {
   return (
@@ -16,7 +18,7 @@ export function WelcomeContent() {
           title="Welcome to TrustLoop"
           description="Let's set up your professional presence."
           currentStep={1}
-          totalSteps={TOTAL_ONBOARDING_STEPS}
+          totalSteps={ONBOARDING.TOTAL_STEPS}
         />
 
         <Paragraph className="text-muted-foreground">
@@ -25,10 +27,13 @@ export function WelcomeContent() {
           your work.
         </Paragraph>
 
-        <ProgressFooter hint="Profile setup opens in the next phase.">
-          <Button type="button" className="w-full" size="lg">
+        <ProgressFooter>
+          <Link
+            href={ONBOARDING_ROUTES.profession}
+            className={cn(buttonVariants({ size: "lg" }), "w-full")}
+          >
             Create My Profile
-          </Button>
+          </Link>
         </ProgressFooter>
       </div>
     </OnboardingLayout>

@@ -3,6 +3,11 @@ export {
   updateProfileSchema,
   profileIdSchema,
   profileSlugSchema,
+  onboardingProfessionSchema,
+  onboardingDisplayNameSchema,
+  onboardingUsernameSchema,
+  onboardingBioSchema,
+  onboardingLocationSchema,
 } from "./profile";
 export type { CreateProfileSchema, UpdateProfileSchema } from "./profile";
 

@@ -236,28 +236,32 @@ export class AuthService {
     try {
       const supabase = await this.getClient();
       const {
-        data: { session },
+        data: { user },
         error,
-      } = await supabase.auth.getSession();
+      } = await supabase.auth.getUser();
 
       if (error) {
         logger.error(method, error);
         return failure(mapUnknownAuthError(error));
       }
 
-      if (!session?.user) {
+      if (!user) {
         return success(null);
       }
 
-      if (!session.user.email_confirmed_at) {
+      if (!user.email_confirmed_at) {
         await supabase.auth.signOut();
         return success(null);
       }
 
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       return success(
         this.mapSession(
-          mapSupabaseUser(session.user),
-          session.expires_at ?? null,
+          mapSupabaseUser(user),
+          session?.expires_at ?? null,
         ),
       );
     } catch (error) {
@@ -281,6 +285,11 @@ export class AuthService {
       }
 
       if (!session?.user) {
+        return success(null);
+      }
+
+      if (!session.user.email_confirmed_at) {
+        await supabase.auth.signOut();
         return success(null);
       }
 

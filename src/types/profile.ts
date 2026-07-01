@@ -4,6 +4,9 @@ export interface Profile {
   displayName: string;
   avatar: string | null;
   bio: string | null;
+  professionId: string | null;
+  city: string | null;
+  state: string | null;
   followersCount: number;
   followingCount: number;
   totalVotesCast: number;
@@ -13,18 +16,38 @@ export interface Profile {
   updatedAt: string;
 }
 
-/** @deprecated Profile creation is not implemented yet — reserved for Phase 5 */
-export interface CreateProfileInput {
+/** Public-facing profile data — no internal IDs or private metrics */
+export interface PublicProfile {
   username: string;
   displayName: string;
-  avatar?: string | null;
-  bio?: string | null;
+  avatar: string | null;
+  bio: string | null;
+  professionName: string | null;
+  city: string | null;
+  state: string | null;
+  averageRating: number;
+  totalReviews: number;
+  memberSince: string;
+  isComplete: boolean;
 }
 
-/** @deprecated Profile editing is not implemented yet */
-export interface UpdateProfileInput {
-  username?: string;
-  displayName?: string;
-  avatar?: string | null;
+export interface CreateProfileInput {
+  slug: string;
+  fullName: string;
+  professionId: string;
   bio?: string | null;
+  city: string;
+  state: string;
+  profilePhoto?: string | null;
+}
+
+/** Profile editing is not implemented yet */
+export interface UpdateProfileInput {
+  slug?: string;
+  fullName?: string;
+  professionId?: string | null;
+  bio?: string | null;
+  city?: string | null;
+  state?: string | null;
+  profilePhoto?: string | null;
 }

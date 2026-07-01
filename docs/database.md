@@ -55,6 +55,9 @@ Extends `auth.users` with app-specific fields. Same pattern as before — `auth.
 | `display_name` | TEXT | Display name |
 | `avatar` | TEXT | URL in `avatars` storage bucket |
 | `bio` | TEXT | User bio |
+| `profession_id` | UUID FK → professions | TrustLoop profession (migration `011`) |
+| `city` | TEXT | Professional location city |
+| `state` | TEXT | Professional location state |
 | `followers_count` | INTEGER | Denormalized — updated by triggers |
 | `following_count` | INTEGER | Denormalized |
 | `total_votes_cast` | INTEGER | Denormalized |
@@ -63,6 +66,22 @@ Extends `auth.users` with app-specific fields. Same pattern as before — `auth.
 | `created_at` / `updated_at` | TIMESTAMPTZ | Timestamps |
 
 **RLS:** Public read. Owner can insert/update.
+
+---
+
+### `professions`
+
+TrustLoop profession lookup for onboarding (migration `011`).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID PK | |
+| `name` | TEXT | Display name (e.g. Tutor) |
+| `slug` | TEXT UNIQUE | URL-safe identifier |
+| `icon` | TEXT | Lucide icon name (optional) |
+| `created_at` | TIMESTAMPTZ | |
+
+**RLS:** Public read. Seeded by migration `011`; not user-editable.
 
 ---
 

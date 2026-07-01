@@ -11,11 +11,14 @@ export const RATING = {
 
 export const LIMITS = {
   SLUG_MAX_LENGTH: 200,
+  FULL_NAME_MIN_LENGTH: 2,
   FULL_NAME_MAX_LENGTH: 100,
   BIO_MAX_LENGTH: 1000,
+  LOCATION_MAX_LENGTH: 100,
   REVIEW_TEXT_MAX_LENGTH: 2000,
   SERVICE_DESCRIPTION_MAX_LENGTH: 500,
   PASSWORD_MIN_LENGTH: 8,
+  PROFILE_PHOTO_MAX_BYTES: 5 * 1024 * 1024,
 } as const;
 
 export const DEFAULTS = {
@@ -27,4 +30,9 @@ export const DEFAULTS = {
 export const REVIEW_REQUEST = {
   TOKEN_EXPIRY_DAYS: 30,
   STATUSES: ["pending", "completed", "expired"] as const,
+} as const;
+
+export const ONBOARDING = {
+  STORAGE_KEY: "trustloop-onboarding-v1",
+  TOTAL_STEPS: 8,
 } as const;
