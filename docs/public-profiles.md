@@ -143,23 +143,23 @@ Reusable building blocks in `src/components/profile/`:
 | Component | Type | Role |
 |-----------|------|------|
 | `ProfileHeader` | Server | Photo, name, username, profession, location |
-| `ProfileStats` | Server | Rating, review count, member since (placeholders for reviews) |
+| `ProfileStats` | Server | Rating, review count, member since |
 | `ProfileBio` | Server | About section |
-| `ProfileActions` | Client | Share + disabled Request Review |
+| `ProfileActions` | Client | Share + Leave a Review link |
+| `ProfileReviewsSection` | Server | Summary, breakdown, recent reviews, empty state |
 | `ProfileCard` | Server | Compact link card for future listings |
 | `PublicProfileView` | Server | Composes the full page layout |
 
 ---
 
-## Future review integration
+## Reviews integration (Phase 8)
 
-When reviews are implemented:
+Reviews are live. See [reviews.md](./reviews.md) for architecture.
 
-1. Add `ReviewService.getReviewsByProfile(slug)` and average rating aggregation
-2. Extend `getPublicProfile()` to fetch real `averageRating` and `totalReviews`
-3. Enable **Request Review** in `ProfileActions` (links to review request flow)
-4. Add a reviews list section below `ProfileBio` as a Server Component
-5. Consider `revalidate` or ISR for public profiles with stable review data
+- `getPublicProfile()` reads `average_rating` and `total_reviews` from `profiles` (kept in sync by DB trigger)
+- `ProfileReviewsSection` loads recent reviews via `ReviewService.getReviews()`
+- **Leave a Review** links to `/review/[slug]`
+- Review requests, email sharing, and QR codes are **not** in scope
 
 No changes to the public URL structure or rewrite are required.
 

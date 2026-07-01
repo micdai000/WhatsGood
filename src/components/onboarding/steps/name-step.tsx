@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { DisplayNameField } from "@/components/profile-fields";
 import { useOnboardingWizard } from "@/hooks/use-onboarding-wizard";
 import { onboardingDisplayNameSchema } from "@/lib/validators";
 
@@ -33,26 +32,14 @@ export function NameStep() {
         return true;
       }}
     >
-      <div className="space-y-2">
-        <Label htmlFor="fullName">Display name</Label>
-        <Input
-          id="fullName"
-          name="fullName"
-          value={state.fullName}
-          onChange={(event) => {
-            updateState({ fullName: event.target.value });
-            setFieldError(null);
-          }}
-          autoComplete="name"
-          aria-invalid={Boolean(fieldError)}
-          aria-describedby={fieldError ? "fullName-error" : undefined}
-        />
-        {fieldError ? (
-          <p id="fullName-error" className="text-sm text-destructive" role="alert">
-            {fieldError}
-          </p>
-        ) : null}
-      </div>
+      <DisplayNameField
+        value={state.fullName}
+        onChange={(fullName) => {
+          updateState({ fullName });
+          setFieldError(null);
+        }}
+        error={fieldError ?? undefined}
+      />
     </OnboardingWizardShell>
   );
 }

@@ -2,17 +2,25 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
-import { PageHeader } from "@/components/layout/page-header";
-import { Paragraph, Muted } from "@/components/typography/typography";
-import { buttonVariants } from "@/components/ui/button";
-import { StatusAlert } from "@/components/ui/status-alert";
+import {
+  ActivityFeed,
+  DashboardHeader,
+  EmptyDashboard,
+  QuickActions,
+  RatingDistribution,
+  ReviewRequestCard,
+  StatisticsGrid,
+  TrendChart,
+} from "@/components/dashboard";
+import { ReviewCard } from "@/components/reviews/review-card";
+import { Muted } from "@/components/typography/typography";
 import { authService } from "@/services/auth/auth.service";
-import { profileService } from "@/services/profiles/profile.service";
-import { getPublicProfileUrl } from "@/lib/profile/public-url";
-import { cn } from "@/lib/utils";
+import { dashboardService } from "@/services/dashboard";
 import { isFailure, isSuccess } from "@/types";
 
 export const dynamic = "force-dynamic";
+
+const RECENT_LIMIT = 5;
 
 export default async function DashboardPage() {
   const sessionResult = await authService.getSession();
@@ -21,55 +29,98 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const profileResult = await profileService.getProfile(
-    sessionResult.data.user.id,
-  );
+  const userId = sessionResult.data.user.id;
+  const dashboardResult = await dashboardService.getDashboard(userId);
 
-  if (isFailure(profileResult)) {
+  if (isFailure(dashboardResult)) {
     redirect("/welcome");
   }
 
-  const profile = profileResult.data;
-  const publicUrl = getPublicProfileUrl(profile.username);
-  const displayName = profile.displayName;
+  const {
+    profile,
+    statistics,
+    recentReviews,
+    recentReviewRequests,
+    recentActivity,
+    reviewTrend,
+    ratingDistribution,
+  } = dashboardResult.data;
 
   return (
     <Section>
-      <Container className="space-y-6">
-        <PageHeader
-          title={`Welcome, ${displayName.split(" ")[0]}`}
-          description="Your professional profile is live."
-        />
+      <Container className="space-y-8">
+        <DashboardHeader profile={profile} />
 
-        <StatusAlert status="success" title="Profile created" description="Your TrustLoop profile has been published. Share your link with clients to start collecting verified reviews." />
+        <StatisticsGrid statistics={statistics} />
 
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          <Muted className="text-xs uppercase tracking-wide">
-            Public profile URL
-          </Muted>
-          <Paragraph className="mt-2 break-all font-medium">{publicUrl}</Paragraph>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <a
-              href={publicUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={buttonVariants()}
-            >
-              View public profile
-            </a>
+        <QuickActions profile={profile} />
+
+        <section
+          className="grid gap-4 lg:grid-cols-2"
+          aria-label="Analytics charts"
+        >
+          <TrendChart trend={reviewTrend} />
+          <RatingDistribution distribution={ratingDistribution} />
+        </section>
+
+        <section className="space-y-4" aria-labelledby="recent-reviews-heading">
+          <div className="flex items-center justify-between gap-4">
+            <h2 id="recent-reviews-heading" className="text-lg font-semibold">
+              Recent reviews
+            </h2>
+            {statistics.totalReviews > RECENT_LIMIT ? (
+              <Muted className="text-sm">Showing latest {RECENT_LIMIT}</Muted>
+            ) : null}
+          </div>
+
+          {recentReviews.length > 0 ? (
+            <ul className="space-y-4">
+              {recentReviews.map((review) => (
+                <li key={review.id}>
+                  <ReviewCard review={review} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyDashboard
+              title="No reviews yet"
+              description="Share your profile or send a review request to start collecting feedback."
+            />
+          )}
+        </section>
+
+        <section className="space-y-4" aria-labelledby="recent-requests-heading">
+          <div className="flex items-center justify-between gap-4">
+            <h2 id="recent-requests-heading" className="text-lg font-semibold">
+              Recent review requests
+            </h2>
             <Link
-              href="/dashboard"
-              className={buttonVariants({ variant: "outline" })}
+              href="/dashboard/review-requests"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
             >
-              Go to dashboard home
+              View all
             </Link>
           </div>
-        </div>
 
-        <Paragraph className="max-w-2xl text-muted-foreground">
-          Dashboard features like reviews, analytics, and profile editing are
-          coming in future phases.
-        </Paragraph>
+          {recentReviewRequests.length > 0 ? (
+            <ul className="grid gap-4 sm:grid-cols-2">
+              {recentReviewRequests.map((request) => (
+                <li key={request.id}>
+                  <ReviewRequestCard request={request} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyDashboard
+              title="No review requests yet"
+              description="Create a review request to get a shareable link for your client."
+            />
+          )}
+        </section>
+
+        {recentActivity.length > 0 ? (
+          <ActivityFeed items={recentActivity} />
+        ) : null}
       </Container>
     </Section>
   );

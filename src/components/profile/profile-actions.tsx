@@ -1,20 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Share2, MessageSquarePlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Share2, PenLine } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface ProfileActionsProps {
   profileUrl: string;
   displayName: string;
+  leaveReviewHref: string;
   className?: string;
 }
 
 export function ProfileActions({
   profileUrl,
   displayName,
+  leaveReviewHref,
   className,
 }: ProfileActionsProps) {
   const [sharing, setSharing] = useState(false);
@@ -57,17 +60,13 @@ export function ProfileActions({
         <Share2 className="size-4" aria-hidden />
         Share Profile
       </Button>
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full sm:w-auto"
-        disabled
-        aria-disabled
-        title="Review requests coming soon"
+      <Link
+        href={leaveReviewHref}
+        className={buttonVariants({ variant: "outline", className: "w-full sm:w-auto" })}
       >
-        <MessageSquarePlus className="size-4" aria-hidden />
-        Request Review
-      </Button>
+        <PenLine className="size-4" aria-hidden />
+        Leave a Review
+      </Link>
     </div>
   );
 }

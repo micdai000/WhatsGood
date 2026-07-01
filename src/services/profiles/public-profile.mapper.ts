@@ -1,5 +1,5 @@
+import type { Profile, PublicProfile } from "@/types";
 import { DEFAULTS } from "@/lib/constants";
-import type { PublicProfile } from "@/types";
 
 export type PublicProfileRow = {
   username: string;
@@ -10,6 +10,8 @@ export type PublicProfileRow = {
   state: string | null;
   created_at: string;
   profession_id: string | null;
+  average_rating: number | string | null;
+  total_reviews: number | null;
   professions: { name: string } | { name: string }[] | null;
 };
 
@@ -44,9 +46,39 @@ export function mapPublicProfileRow(row: PublicProfileRow): PublicProfile {
     professionName,
     city: row.city,
     state: row.state,
-    averageRating: DEFAULTS.AVERAGE_RATING,
-    totalReviews: DEFAULTS.TOTAL_REVIEWS,
+    averageRating: Number(row.average_rating ?? DEFAULTS.AVERAGE_RATING),
+    totalReviews: row.total_reviews ?? DEFAULTS.TOTAL_REVIEWS,
     memberSince: row.created_at,
     isComplete: isPublicProfileComplete(row),
+  };
+}
+
+export function mapProfileToPublicProfile(
+  profile: Profile,
+  options: {
+    professionName: string | null;
+    averageRating?: number;
+    totalReviews?: number;
+  },
+): PublicProfile {
+  const professionName = options.professionName;
+
+  return {
+    username: profile.username,
+    displayName: profile.displayName,
+    avatar: profile.avatar,
+    bio: profile.bio,
+    professionName,
+    city: profile.city,
+    state: profile.state,
+    averageRating: options.averageRating ?? DEFAULTS.AVERAGE_RATING,
+    totalReviews: options.totalReviews ?? DEFAULTS.TOTAL_REVIEWS,
+    memberSince: profile.createdAt,
+    isComplete: Boolean(
+      profile.displayName?.trim() &&
+        professionName &&
+        profile.city?.trim() &&
+        profile.state?.trim(),
+    ),
   };
 }

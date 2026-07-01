@@ -7,6 +7,13 @@ export interface ReviewRequest {
   token: string;
   status: ReviewRequestStatus;
   createdAt: string;
+  expiresAt: string;
+  completedAt: string | null;
+}
+
+export interface ReviewRequestWithProfile extends ReviewRequest {
+  profileUsername: string;
+  profileDisplayName: string;
 }
 
 export interface CreateReviewRequestInput {

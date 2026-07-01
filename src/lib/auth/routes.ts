@@ -2,6 +2,7 @@ export const PUBLIC_ROUTES = [
   "/",
   "/about",
   "/pricing",
+  "/search",
   "/login",
   "/signup",
   "/forgot-password",
@@ -26,6 +27,16 @@ export function isPublicRoute(pathname: string): boolean {
 
   // Public professional profiles: /@username (rewritten to /u/username)
   if (/^\/@[a-z0-9-]+$/.test(pathname) || /^\/u\/[a-z0-9-]+$/.test(pathname)) {
+    return true;
+  }
+
+  // Leave a review — open to guests and signed-in users
+  if (/^\/review\/[a-z0-9-]+$/.test(pathname)) {
+    return true;
+  }
+
+  // Token-based review request links
+  if (/^\/review\/request\/[0-9a-f-]{36}$/i.test(pathname)) {
     return true;
   }
 

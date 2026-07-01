@@ -41,7 +41,7 @@ export interface CreateProfileInput {
   profilePhoto?: string | null;
 }
 
-/** Profile editing is not implemented yet */
+/** Partial profile updates for editing */
 export interface UpdateProfileInput {
   slug?: string;
   fullName?: string;

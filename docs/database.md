@@ -58,6 +58,8 @@ Extends `auth.users` with app-specific fields. Same pattern as before — `auth.
 | `profession_id` | UUID FK → professions | TrustLoop profession (migration `011`) |
 | `city` | TEXT | Professional location city |
 | `state` | TEXT | Professional location state |
+| `average_rating` | NUMERIC(3,2) | Denormalized mean review rating (migration `012`) |
+| `total_reviews` | INTEGER | Denormalized review count (migration `012`) |
 | `followers_count` | INTEGER | Denormalized — updated by triggers |
 | `following_count` | INTEGER | Denormalized |
 | `total_votes_cast` | INTEGER | Denormalized |
@@ -82,6 +84,51 @@ TrustLoop profession lookup for onboarding (migration `011`).
 | `created_at` | TIMESTAMPTZ | |
 
 **RLS:** Public read. Seeded by migration `011`; not user-editable.
+
+---
+
+### `reviews`
+
+Client reviews for TrustLoop professionals (migration `012`). See [reviews.md](./reviews.md).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID PK | |
+| `profile_id` | UUID FK → profiles | Professional being reviewed |
+| `reviewer_name` | TEXT | Public display name |
+| `reviewer_email` | TEXT | Private — duplicate prevention |
+| `rating` | INTEGER | 1–5 stars |
+| `title` | TEXT | Review headline |
+| `body` | TEXT | Full review text |
+| `would_recommend` | BOOLEAN | Recommendation flag |
+| `relationship` | TEXT | Optional (Client, Student, etc.) |
+| `verified` | BOOLEAN | Reserved for future verified flows |
+| `created_at` | TIMESTAMPTZ | |
+
+**Unique:** `(profile_id, reviewer_email)` — one review per email per professional.
+
+**RLS:** Public read. Anyone can insert. Profile owner can delete.
+
+**Trigger:** `handle_review_change()` updates `profiles.average_rating` and `profiles.total_reviews`.
+
+---
+
+### `review_requests`
+
+Shareable client review invitations (migration `013`). See [review-requests.md](./review-requests.md).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID PK | |
+| `profile_id` | UUID FK → profiles | Professional who created the request |
+| `email` | TEXT | Intended client email |
+| `token` | UUID UNIQUE | Secret link token |
+| `status` | ENUM | `pending`, `completed`, `expired` |
+| `created_at` | TIMESTAMPTZ | |
+| `expires_at` | TIMESTAMPTZ | Default +30 days |
+| `completed_at` | TIMESTAMPTZ nullable | When client submitted review |
+
+**RLS:** Public read. Profile owner insert/update. Completion via `complete_review_request()` RPC.
 
 ---
 

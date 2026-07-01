@@ -40,12 +40,10 @@ export function ProfileStats({ profile, className }: ProfileStatsProps) {
         <StatItem
           label="Average rating"
           value={formatRating(profile.averageRating)}
-          hint="Coming soon"
         />
         <StatItem
           label="Reviews"
           value={String(profile.totalReviews)}
-          hint="Coming soon"
         />
         <StatItem label="Member since" value={memberSince} />
       </CardContent>

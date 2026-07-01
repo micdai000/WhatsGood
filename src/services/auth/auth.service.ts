@@ -16,6 +16,7 @@ import type {
   SignUpInput,
   UpdatePasswordInput,
 } from "@/types";
+import { isSuccess } from "@/types";
 
 export class AuthService {
   private async getClient(): Promise<SupabaseClient> {
@@ -264,6 +265,36 @@ export class AuthService {
           session?.expires_at ?? null,
         ),
       );
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async deleteAccount(): Promise<ServiceResult<void>> {
+    const method = "AuthService.deleteAccount";
+
+    try {
+      const sessionResult = await this.getSession();
+
+      if (!isSuccess(sessionResult) || !sessionResult.data) {
+        return failure(
+          mapUnknownAuthError(new Error("You must be signed in to delete your account")),
+        );
+      }
+
+      const userId = sessionResult.data.user.id;
+      const supabase = await this.getClient();
+
+      const { error } = await supabase.rpc("delete_own_account");
+
+      if (error) {
+        logger.error(method, error, { userId });
+        return failure(mapUnknownAuthError(error));
+      }
+
+      await supabase.auth.signOut();
+      logger.info(method, { userId });
+      return success(undefined);
     } catch (error) {
       return handleServiceError(method, error);
     }

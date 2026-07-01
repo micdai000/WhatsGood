@@ -13,10 +13,13 @@ export type { CreateProfileSchema, UpdateProfileSchema } from "./profile";
 
 export {
   createReviewSchema,
+  leaveReviewSchema,
   reviewIdSchema,
   reviewsByProfileSchema,
+  reviewsByProfileSlugSchema,
+  reviewsPaginationSchema,
 } from "./review";
-export type { CreateReviewSchema } from "./review";
+export type { CreateReviewSchema, LeaveReviewSchema } from "./review";
 
 export {
   createReviewRequestSchema,
@@ -37,3 +40,9 @@ export {
 export type { SignUpSchema, SignInSchema, ResetPasswordSchema } from "./auth";
 
 export { validate, safeValidate } from "./validate";
+
+export { profileSearchSchema } from "./profile-search";
+export type { ProfileSearchSchema } from "./profile-search";
+
+export { dashboardProfileIdSchema, dashboardTrendWeeksSchema } from "./dashboard";
+export type { DashboardProfileIdSchema } from "./dashboard";
