@@ -46,6 +46,21 @@ const profileColumnsOk = await check(
   { url: `${url}/rest/v1/profiles?select=profession_id,city,state&limit=0` },
 );
 
+const reviewsOk = await check(
+  "public.reviews table exists and is readable",
+  { url: `${url}/rest/v1/reviews?select=id&limit=0` },
+);
+
+const profileRatingsOk = await check(
+  "profiles.average_rating, total_reviews columns exist",
+  { url: `${url}/rest/v1/profiles?select=average_rating,total_reviews&limit=0` },
+);
+
+const reviewRequestsOk = await check(
+  "public.review_requests table exists and is readable",
+  { url: `${url}/rest/v1/review_requests?select=id&limit=0` },
+);
+
 if (professionsOk) {
   const countRes = await fetch(`${url}/rest/v1/professions?select=id`, {
     headers: { ...headers, Prefer: "count=exact" },
@@ -56,11 +71,11 @@ if (professionsOk) {
 
 console.log("");
 
-if (!professionsOk || !profileColumnsOk) {
+if (!professionsOk || !profileColumnsOk || !reviewsOk || !profileRatingsOk || !reviewRequestsOk) {
   console.error("Onboarding database is NOT ready.");
   console.error("Run: npm run db:migrate");
-  console.error("Or apply supabase/migrations/011_create_professions.sql in the Supabase SQL Editor.");
+  console.error("Or apply pending migrations in the Supabase SQL Editor.");
   process.exit(1);
 }
 
-console.log("Onboarding database prerequisites are satisfied.");
+console.log("Database prerequisites are satisfied.");

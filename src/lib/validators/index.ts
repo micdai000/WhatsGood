@@ -13,10 +13,13 @@ export type { CreateProfileSchema, UpdateProfileSchema } from "./profile";
 
 export {
   createReviewSchema,
+  leaveReviewSchema,
   reviewIdSchema,
   reviewsByProfileSchema,
+  reviewsByProfileSlugSchema,
+  reviewsPaginationSchema,
 } from "./review";
-export type { CreateReviewSchema } from "./review";
+export type { CreateReviewSchema, LeaveReviewSchema } from "./review";
 
 export {
   createReviewRequestSchema,

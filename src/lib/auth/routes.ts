@@ -29,6 +29,16 @@ export function isPublicRoute(pathname: string): boolean {
     return true;
   }
 
+  // Leave a review — open to guests and signed-in users
+  if (/^\/review\/[a-z0-9-]+$/.test(pathname)) {
+    return true;
+  }
+
+  // Token-based review request links
+  if (/^\/review\/request\/[0-9a-f-]{36}$/i.test(pathname)) {
+    return true;
+  }
+
   return false;
 }
 

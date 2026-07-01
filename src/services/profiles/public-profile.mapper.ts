@@ -10,6 +10,8 @@ export type PublicProfileRow = {
   state: string | null;
   created_at: string;
   profession_id: string | null;
+  average_rating: number | string | null;
+  total_reviews: number | null;
   professions: { name: string } | { name: string }[] | null;
 };
 
@@ -44,8 +46,8 @@ export function mapPublicProfileRow(row: PublicProfileRow): PublicProfile {
     professionName,
     city: row.city,
     state: row.state,
-    averageRating: DEFAULTS.AVERAGE_RATING,
-    totalReviews: DEFAULTS.TOTAL_REVIEWS,
+    averageRating: Number(row.average_rating ?? DEFAULTS.AVERAGE_RATING),
+    totalReviews: row.total_reviews ?? DEFAULTS.TOTAL_REVIEWS,
     memberSince: row.created_at,
     isComplete: isPublicProfileComplete(row),
   };

@@ -3,6 +3,7 @@ import { Section } from "@/components/layout/section";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { ProfileBio } from "@/components/profile/profile-bio";
 import { ProfileHeader } from "@/components/profile/profile-header";
+import { ProfileReviewsSection } from "@/components/profile/profile-reviews-section";
 import { ProfileStats } from "@/components/profile/profile-stats";
 import { StatusAlert } from "@/components/ui/status-alert";
 import { getPublicProfileUrl } from "@/lib/profile/public-url";
@@ -31,11 +32,19 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
         <ProfileActions
           profileUrl={profileUrl}
           displayName={profile.displayName}
+          leaveReviewHref={`/review/${profile.username}`}
         />
 
         <ProfileStats profile={profile} />
 
         <ProfileBio profile={profile} />
+
+        <ProfileReviewsSection
+          slug={profile.username}
+          displayName={profile.displayName}
+          averageRating={profile.averageRating}
+          totalReviews={profile.totalReviews}
+        />
 
         {profile.isComplete && !profile.bio ? (
           <StatusAlert

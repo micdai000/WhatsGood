@@ -120,6 +120,8 @@ export class ProfileService {
           state,
           created_at,
           profession_id,
+          average_rating,
+          total_reviews,
           professions ( name )
         `,
         )
