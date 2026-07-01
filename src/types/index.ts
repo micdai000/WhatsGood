@@ -2,7 +2,24 @@ export type { ServiceResult, SuccessResult, FailureResult } from "./service-resu
 export { success, failure, isSuccess, isFailure } from "./service-result";
 
 export type { Profile, PublicProfile, CreateProfileInput, UpdateProfileInput } from "./profile";
+export type {
+  ProfileSearchParams,
+  ProfileSearchResult,
+  ProfileSortOrder,
+} from "./search";
+export { PROFILE_SORT_ORDERS } from "./search";
 export type { Review, CreateReviewInput, RatingBreakdown } from "./review";
+export type {
+  DashboardActivityItem,
+  DashboardActivityType,
+  DashboardData,
+  DashboardProfile,
+  DashboardStatistics,
+  PlaceholderMetric,
+  ReviewGrowth,
+  ReviewTrend,
+  ReviewTrendPoint,
+} from "./dashboard";
 export type {
   ReviewRequest,
   ReviewRequestStatus,

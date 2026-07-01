@@ -5,3 +5,5 @@ export { ProfileActions } from "./profile-actions";
 export { ProfileCard } from "./profile-card";
 export { ProfileReviewsSection } from "./profile-reviews-section";
 export { PublicProfileView } from "./public-profile-view";
+export { PublicProfilePreview } from "./public-profile-preview";
+export { EditProfileForm } from "./edit-profile-form";

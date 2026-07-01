@@ -1,5 +1,5 @@
+import type { Profile, PublicProfile } from "@/types";
 import { DEFAULTS } from "@/lib/constants";
-import type { PublicProfile } from "@/types";
 
 export type PublicProfileRow = {
   username: string;
@@ -50,5 +50,35 @@ export function mapPublicProfileRow(row: PublicProfileRow): PublicProfile {
     totalReviews: row.total_reviews ?? DEFAULTS.TOTAL_REVIEWS,
     memberSince: row.created_at,
     isComplete: isPublicProfileComplete(row),
+  };
+}
+
+export function mapProfileToPublicProfile(
+  profile: Profile,
+  options: {
+    professionName: string | null;
+    averageRating?: number;
+    totalReviews?: number;
+  },
+): PublicProfile {
+  const professionName = options.professionName;
+
+  return {
+    username: profile.username,
+    displayName: profile.displayName,
+    avatar: profile.avatar,
+    bio: profile.bio,
+    professionName,
+    city: profile.city,
+    state: profile.state,
+    averageRating: options.averageRating ?? DEFAULTS.AVERAGE_RATING,
+    totalReviews: options.totalReviews ?? DEFAULTS.TOTAL_REVIEWS,
+    memberSince: profile.createdAt,
+    isComplete: Boolean(
+      profile.displayName?.trim() &&
+        professionName &&
+        profile.city?.trim() &&
+        profile.state?.trim(),
+    ),
   };
 }

@@ -6,5 +6,6 @@ export {
   ReviewRequestService,
 } from "./reviewRequests";
 export { professionService, ProfessionService } from "./professions";
+export { dashboardService, DashboardService } from "./dashboard";
 
 export { success, failure, handleServiceError, notImplemented } from "./shared";

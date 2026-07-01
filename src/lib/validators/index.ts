@@ -40,3 +40,9 @@ export {
 export type { SignUpSchema, SignInSchema, ResetPasswordSchema } from "./auth";
 
 export { validate, safeValidate } from "./validate";
+
+export { profileSearchSchema } from "./profile-search";
+export type { ProfileSearchSchema } from "./profile-search";
+
+export { dashboardProfileIdSchema, dashboardTrendWeeksSchema } from "./dashboard";
+export type { DashboardProfileIdSchema } from "./dashboard";

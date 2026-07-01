@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { authService } from "@/services/auth/auth.service";
+import { profileService } from "@/services/profiles/profile.service";
 import { ValidationError } from "@/lib/errors";
 import {
   resetPasswordSchema,
@@ -194,6 +195,23 @@ export async function updatePasswordAction(
       code: "INTERNAL_ERROR",
     };
   }
+}
+
+export async function deleteAccountAction(): Promise<void> {
+  const sessionResult = await authService.getSession();
+
+  if (isFailure(sessionResult) || !sessionResult.data) {
+    redirect("/login");
+  }
+
+  await profileService.deleteUserAvatars(sessionResult.data.user.id);
+
+  const result = await authService.deleteAccount();
+  revalidatePath("/", "layout");
+  if (isFailure(result)) {
+    redirect("/dashboard/settings?error=DELETE_ACCOUNT_FAILED");
+  }
+  redirect("/login?deleted=1");
 }
 
 export async function getSessionAction() {
