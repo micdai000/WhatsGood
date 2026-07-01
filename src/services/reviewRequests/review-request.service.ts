@@ -60,7 +60,7 @@ export class ReviewRequestService {
 
       if (error) {
         logger.error(method, error, { id: requestId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -99,7 +99,7 @@ export class ReviewRequestService {
 
       if (error) {
         logger.error(method, error, { token: requestToken });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -184,7 +184,7 @@ export class ReviewRequestService {
 
       if (error) {
         logger.error(method, error, { profileId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       const total = count ?? 0;
@@ -251,7 +251,7 @@ export class ReviewRequestService {
 
       if (error) {
         logger.error(method, error, { profileId: validated.profileId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       logger.info(method, {
@@ -294,7 +294,7 @@ export class ReviewRequestService {
           return failure(new NotFoundError("Review request"));
         }
 
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -347,7 +347,7 @@ export class ReviewRequestService {
 
       if (error) {
         logger.error(method, error, { id: requestId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       logger.info(method, { requestId });

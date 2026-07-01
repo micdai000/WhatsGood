@@ -108,7 +108,7 @@ export class AdminService {
       ]);
 
       if (usersCountResult.error) {
-        return failure(new DatabaseError(usersCountResult.error.message));
+        return failure(DatabaseError.fromSource(usersCountResult.error));
       }
 
       const ratings = (avgRatingResult.data ?? []) as { average_rating: number | string }[];
@@ -212,11 +212,11 @@ export class AdminService {
       ]);
 
       if (listResult.error) {
-        return failure(new DatabaseError(listResult.error.message));
+        return failure(DatabaseError.fromSource(listResult.error));
       }
 
       if (countResult.error) {
-        return failure(new DatabaseError(countResult.error.message));
+        return failure(DatabaseError.fromSource(countResult.error));
       }
 
       const rows = (listResult.data ?? []) as AdminUserListRow[];
@@ -289,7 +289,7 @@ export class AdminService {
         .range(from, to);
 
       if (error) {
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       const total = count ?? 0;
@@ -338,7 +338,7 @@ export class AdminService {
         .range(from, to);
 
       if (error) {
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       const total = count ?? 0;
@@ -371,7 +371,7 @@ export class AdminService {
         .order("name", { ascending: true });
 
       if (error) {
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       return success(
@@ -420,7 +420,7 @@ export class AdminService {
         if (error.code === "23505") {
           return failure(new ConflictError("A profession with this slug already exists"));
         }
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       await writeAuditLog({
@@ -489,7 +489,7 @@ export class AdminService {
         if (error.code === "23505") {
           return failure(new ConflictError("A profession with this slug already exists"));
         }
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -539,7 +539,7 @@ export class AdminService {
       const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
 
       if (error) {
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       await writeAuditLog({
@@ -607,7 +607,7 @@ export class AdminService {
       const { error } = await supabase.from("profiles").delete().eq("id", profileId);
 
       if (error) {
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       await writeAuditLog({

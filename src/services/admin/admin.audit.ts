@@ -53,7 +53,7 @@ export async function writeAuditLog(input: {
 
     if (error) {
       logger.error(method, error, input);
-      return failure(new DatabaseError(error.message));
+      return failure(DatabaseError.fromSource(error));
     }
 
     return success(mapAuditLogRow(data as AuditLogRow));

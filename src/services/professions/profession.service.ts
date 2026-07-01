@@ -22,7 +22,7 @@ export class ProfessionService {
 
       if (error) {
         logger.error(method, error);
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       const professions = (data ?? []).map((row) =>
@@ -49,7 +49,7 @@ export class ProfessionService {
 
       if (error) {
         logger.error(method, error, { id: professionId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -76,7 +76,7 @@ export class ProfessionService {
 
       if (error) {
         logger.error(method, error, { slug: professionSlug });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {

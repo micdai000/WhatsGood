@@ -71,7 +71,7 @@ export function mapAuthError(error: AuthError): ApplicationError {
     return new AuthorizationError(error.message);
   }
 
-  return new DatabaseError(error.message, { code: error.code });
+  return DatabaseError.fromSource(error, { code: error.code });
 }
 
 export function mapUnknownAuthError(error: unknown): ApplicationError {

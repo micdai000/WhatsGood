@@ -1,15 +1,14 @@
 /**
- * Restricts post-auth redirects to same-origin relative paths.
- * Prevents open-redirect attacks via crafted `next` query params.
+ * Validates post-login redirect targets to prevent open-redirect attacks.
+ * Only same-origin relative paths are allowed.
  */
-export function sanitizeRedirectPath(
-  next: string | null | undefined,
-  fallback = "/login",
+export function getSafeRedirectPath(
+  value: string | null | undefined,
+  fallback = "/dashboard",
 ): string {
-  if (!next) return fallback;
+  if (!value) return fallback;
 
-  const trimmed = next.trim();
-
+  const trimmed = value.trim();
   if (!trimmed.startsWith("/") || trimmed.startsWith("//")) {
     return fallback;
   }
@@ -18,5 +17,12 @@ export function sanitizeRedirectPath(
     return fallback;
   }
 
+  if (trimmed.startsWith("/login") || trimmed.startsWith("/signup")) {
+    return fallback;
+  }
+
   return trimmed;
 }
+
+/** @deprecated Use getSafeRedirectPath */
+export const sanitizeRedirectPath = getSafeRedirectPath;
