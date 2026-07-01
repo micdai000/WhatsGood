@@ -124,6 +124,15 @@ export async function signOutAction(): Promise<void> {
   redirect("/login");
 }
 
+export async function signOutToSignupAction(): Promise<void> {
+  const result = await authService.signOut();
+  revalidatePath("/", "layout");
+  if (isFailure(result)) {
+    redirect("/signup?error=SIGN_OUT_FAILED");
+  }
+  redirect("/signup");
+}
+
 export async function resetPasswordAction(
   _prev: AuthActionState,
   formData: FormData,

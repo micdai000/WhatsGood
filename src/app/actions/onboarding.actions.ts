@@ -10,8 +10,10 @@ import {
   resolvePostAuthRedirect,
 } from "@/lib/onboarding/routing";
 import { ONBOARDING_ROUTES } from "@/lib/onboarding/constants";
-import type { CreateProfileInput } from "@/types";
+import type { CreateProfileInput, Profession } from "@/types";
 import { isFailure, isSuccess } from "@/types";
+import { toSerializableActionResult } from "@/lib/actions/serializable-result";
+import type { SerializableActionResult } from "@/lib/actions/serializable-result";
 
 export type OnboardingCheckState =
   | { status: "loading" }
@@ -60,8 +62,11 @@ export async function redirectAfterAuthAction(): Promise<never> {
   redirect(path);
 }
 
-export async function getProfessionsAction() {
-  return professionService.getProfessions();
+export async function getProfessionsAction(): Promise<
+  SerializableActionResult<Profession[]>
+> {
+  const result = await professionService.getProfessions();
+  return toSerializableActionResult(result);
 }
 
 export async function checkSlugAvailabilityAction(

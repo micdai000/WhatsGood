@@ -17,6 +17,7 @@ export class ProfessionService {
       const { data, error } = await supabase
         .from("professions")
         .select("*")
+        .eq("is_disabled", false)
         .order("name", { ascending: true });
 
       if (error) {

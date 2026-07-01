@@ -46,3 +46,12 @@ export type { ProfileSearchSchema } from "./profile-search";
 
 export { dashboardProfileIdSchema, dashboardTrendWeeksSchema } from "./dashboard";
 export type { DashboardProfileIdSchema } from "./dashboard";
+
+export {
+  adminListParamsSchema,
+  adminCreateProfessionSchema,
+  adminUpdateProfessionSchema,
+  adminProfessionIdSchema,
+  adminReviewIdSchema,
+  adminProfileIdSchema,
+} from "./admin";

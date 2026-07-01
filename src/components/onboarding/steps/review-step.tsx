@@ -20,8 +20,6 @@ import {
 } from "@/hooks/use-onboarding-wizard";
 import { getSiteUrl } from "@/lib/auth/routes";
 import { cn } from "@/lib/utils";
-import { isFailure } from "@/types";
-import type { Profession } from "@/types";
 
 const EDIT_LINKS = [
   { label: "Profession", href: ONBOARDING_ROUTES.profession, key: "profession" },
@@ -43,8 +41,8 @@ export function ReviewStep() {
     if (!state.professionId) return;
 
     getProfessionsAction().then((result) => {
-      if (isFailure(result)) return;
-      const match = result.data.find((p: Profession) => p.id === state.professionId);
+      if (!result.success) return;
+      const match = result.data.find((p) => p.id === state.professionId);
       if (match) setProfessionName(match.name);
     });
   }, [state.professionId]);
