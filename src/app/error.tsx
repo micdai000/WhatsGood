@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
+import { reportError } from "@/lib/monitoring";
 
 export default function Error({
   error,
@@ -13,7 +14,12 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[app-error]", error);
+    reportError({
+      message: error.message,
+      error,
+      severity: "error",
+      context: { tags: { boundary: "app-error", digest: error.digest ?? "unknown" } },
+    });
   }, [error]);
 
   return (

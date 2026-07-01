@@ -6,6 +6,7 @@ import {
   DatabaseError,
   ValidationError,
 } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 
 export function mapAuthError(error: AuthError): ApplicationError {
   const message = error.message.toLowerCase();
@@ -64,11 +65,25 @@ export function mapAuthError(error: AuthError): ApplicationError {
   }
 
   if (error.status === 422 || error.status === 400) {
-    return new ValidationError(error.message);
+    logger.warn("mapAuthError: unmatched validation error", {
+      status: error.status,
+      code: error.code,
+      originalMessage: error.message,
+    });
+    return new ValidationError(
+      "The request could not be processed. Please check your input and try again.",
+    );
   }
 
   if (error.status === 403) {
-    return new AuthorizationError(error.message);
+    logger.warn("mapAuthError: unmatched authorization error", {
+      status: error.status,
+      code: error.code,
+      originalMessage: error.message,
+    });
+    return new AuthorizationError(
+      "You do not have permission to perform this action.",
+    );
   }
 
   return DatabaseError.fromSource(error, { code: error.code });

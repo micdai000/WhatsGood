@@ -47,7 +47,7 @@ Findings were prioritized by launch risk. Items marked **Done** were addressed i
 ### Stack
 
 - **Vitest** — unit tests for pure logic (validators, analytics, routing, serialization)
-- **GitHub Actions** — lint, test, and build on every PR/push to `main`
+- **GitHub Actions** — test and build on every PR/push to `main`
 
 ### Commands
 
@@ -94,6 +94,9 @@ npm run test:coverage  # coverage report
 - [x] Logger redacts sensitive keys in production
 - [x] Public env validation at startup (`src/instrumentation.ts`)
 - [x] Serializable Server Action results (no `BaseError` class leakage)
+- [x] JSON-LD XSS prevention (angle-bracket escaping in structured data)
+- [x] Auth error messages sanitized (no raw Supabase/Postgres text to clients)
+- [x] Review request resend authorization verified
 
 ### Before Launch
 
@@ -194,10 +197,10 @@ Copy `.env.example` → `.env.local` for local development.
 ### Pre-Deploy Verification
 
 ```bash
-npm run lint
 npm run test
 npm run build
 npm run db:verify   # against target Supabase project
+# npm run lint      # add once ESLint is configured
 ```
 
 ### Caching
@@ -290,13 +293,13 @@ npm run db:verify   # against target Supabase project
 
 ## Production Readiness Score
 
-**Overall: 72 / 100**
+**Overall: 77 / 100**
 
 | Area | Score | Notes |
 |------|-------|-------|
-| Security | 75 | RLS + headers + redirect safety; missing CSP and rate limits |
+| Security | 82 | RLS + headers + redirect safety + JSON-LD XSS fix + auth error sanitization; missing CSP and rate limits |
 | Testing | 65 | Solid unit coverage; no E2E or RLS integration tests |
-| Observability | 60 | Abstraction ready; vendor not wired |
+| Observability | 65 | Abstraction ready + error boundaries wired; vendor not connected |
 | Performance | 70 | Indexed search; some duplicate middleware queries |
 | SEO | 75 | Core metadata done; no dynamic sitemap or OG image |
 | Accessibility | 68 | Auth improved; broader audit pending |

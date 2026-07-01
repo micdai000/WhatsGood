@@ -367,6 +367,18 @@ export class ReviewRequestService {
         return failure(existing.error);
       }
 
+      const sessionResult = await authService.getSession();
+
+      if (!isSuccess(sessionResult) || !sessionResult.data) {
+        return failure(new AuthorizationError("You must be signed in"));
+      }
+
+      if (sessionResult.data.user.id !== existing.data.profileId) {
+        return failure(
+          new AuthorizationError("You can only resend your own review requests"),
+        );
+      }
+
       return this.createRequest({
         profileId: existing.data.profileId,
         email: existing.data.email,
