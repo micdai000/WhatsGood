@@ -6,6 +6,8 @@ import {
 } from "@/lib/onboarding/constants";
 import { profileExistsForUser } from "@/lib/onboarding/profile-check";
 import { isAuthRoute, isPublicRoute } from "@/lib/auth/routes";
+import { checkAdminInMiddleware } from "@/lib/admin/authorization";
+import { isAdminRoute } from "@/lib/admin/routes";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -46,6 +48,26 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (isAdminRoute(pathname)) {
+    if (!user) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const isAdmin = await checkAdminInMiddleware(supabase, user.id);
+
+    if (!isAdmin) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/dashboard";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    return supabaseResponse;
+  }
+
   if (user) {
     const hasProfile = await profileExistsForUser(supabase, user.id);
     const onboardingRedirect = resolveOnboardingRedirect(pathname, hasProfile);
@@ -57,7 +79,7 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    if (isAuth) {
+    if (isAuth && pathname !== "/login" && pathname !== "/signup") {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = hasProfile
         ? ONBOARDING_ROUTES.dashboard

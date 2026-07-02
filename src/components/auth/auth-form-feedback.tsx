@@ -3,9 +3,10 @@ import { StatusAlert } from "@/components/ui/status-alert";
 interface AuthFormErrorProps {
   message?: string;
   code?: string;
+  id?: string;
 }
 
-export function AuthFormError({ message, code }: AuthFormErrorProps) {
+export function AuthFormError({ message, code, id }: AuthFormErrorProps) {
   if (!message) return null;
 
   const status =
@@ -19,6 +20,9 @@ export function AuthFormError({ message, code }: AuthFormErrorProps) {
 
   return (
     <StatusAlert
+      id={id}
+      role="alert"
+      aria-live="polite"
       status={status}
       title="Unable to continue"
       description={message}

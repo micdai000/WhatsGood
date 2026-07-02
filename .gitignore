@@ -3,3 +3,12 @@ node_modules/
 .env
 .env.local
 .DS_Store
+
+# Development notes
+*.txt
+
+# Test coverage output
+coverage/
+
+# Log files
+*.log

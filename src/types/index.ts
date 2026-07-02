@@ -28,6 +28,18 @@ export type {
 } from "./review-request";
 export type { Profession } from "./profession";
 export type {
+  AdminActivityItem,
+  AdminDashboardData,
+  AdminDashboardStats,
+  AdminListParams,
+  AdminPlatformUser,
+  AdminRole,
+  AdminUser,
+  AuditLogEntry,
+  CreateProfessionInput,
+  UpdateProfessionInput,
+} from "./admin";
+export type {
   AuthUser,
   AuthSession,
   SignUpInput,

@@ -10,6 +10,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "db:verify": "node scripts/db-verify.mjs",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:push": "npx supabase@2.109.0 db push"
@@ -39,10 +42,13 @@
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
+    "@vitest/coverage-v8": "^4.1.9",
     "eslint": "^9.27.0",
     "postcss": "^8.5.4",
     "postgres": "^3.4.7",
     "tailwindcss": "^4.1.8",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.9"
   }
 }

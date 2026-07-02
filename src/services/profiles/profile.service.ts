@@ -67,7 +67,7 @@ export class ProfileService {
 
       if (error) {
         logger.error(method, error, { id: profileId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -95,7 +95,7 @@ export class ProfileService {
 
       if (error) {
         logger.error(method, error, { slug: username });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -137,7 +137,7 @@ export class ProfileService {
 
       if (error) {
         logger.error(method, error, { slug: username });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -178,7 +178,7 @@ export class ProfileService {
 
       if (error) {
         logger.error(method, error, { params: validated });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       const total = count ?? 0;
@@ -221,7 +221,7 @@ export class ProfileService {
 
       if (error) {
         logger.error(method, error, { params: validated });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       const total = count ?? 0;
@@ -266,7 +266,7 @@ export class ProfileService {
 
       if (error) {
         logger.error(method, error, { slug: username });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -327,7 +327,7 @@ export class ProfileService {
 
       if (uploadError) {
         logger.error(method, uploadError, { userId, path });
-        return failure(new DatabaseError(uploadError.message));
+        return failure(DatabaseError.fromSource(uploadError));
       }
 
       const {
@@ -401,7 +401,7 @@ export class ProfileService {
           return failure(new ConflictError("This username is already taken"));
         }
 
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       logger.info(method, { userId, username: validated.slug });
@@ -562,7 +562,7 @@ export class ProfileService {
           return failure(new ConflictError("This username is already taken"));
         }
 
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (
@@ -616,7 +616,7 @@ export class ProfileService {
 
       if (error) {
         logger.error(method, error, { profileId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       logger.info(method, { profileId });

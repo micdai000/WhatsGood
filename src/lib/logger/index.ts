@@ -1,6 +1,11 @@
+import { reportError } from "@/lib/monitoring";
+
 const isDevelopment = process.env.NODE_ENV === "development";
 
 type LogMeta = Record<string, unknown>;
+
+const SENSITIVE_KEY_PATTERN =
+  /password|token|secret|authorization|cookie|session|api[_-]?key|access[_-]?token|refresh[_-]?token|email/i;
 
 function formatMeta(meta?: LogMeta): string {
   if (!meta || Object.keys(meta).length === 0) return "";
@@ -8,20 +13,21 @@ function formatMeta(meta?: LogMeta): string {
 }
 
 function sanitizeMeta(meta?: LogMeta): LogMeta | undefined {
-  if (!meta || isDevelopment) return meta;
+  if (!meta) return meta;
 
-  const sensitiveKeys = ["password", "token", "email", "secret", "key"];
   const sanitized: LogMeta = {};
 
   for (const [key, value] of Object.entries(meta)) {
-    if (sensitiveKeys.some((k) => key.toLowerCase().includes(k))) {
+    if (SENSITIVE_KEY_PATTERN.test(key)) {
+      sanitized[key] = "[redacted]";
+    } else if (typeof value === "string" && SENSITIVE_KEY_PATTERN.test(value)) {
       sanitized[key] = "[redacted]";
     } else {
       sanitized[key] = value;
     }
   }
 
-  return sanitized;
+  return isDevelopment ? meta : sanitized;
 }
 
 export const logger = {
@@ -46,5 +52,12 @@ export const logger = {
     if (isDevelopment && error instanceof Error && error.stack) {
       console.error(error.stack);
     }
+
+    reportError({
+      message,
+      error,
+      severity: "error",
+      context: { extra: sanitizeMeta(meta) },
+    });
   },
 };

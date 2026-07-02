@@ -45,7 +45,7 @@ export class ReviewService {
 
       if (error) {
         logger.error(method, error, { id: reviewId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -87,7 +87,7 @@ export class ReviewService {
 
       if (error) {
         logger.error(method, error, { profileId: validatedProfileId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       const total = count ?? 0;
@@ -151,7 +151,7 @@ export class ReviewService {
           return failure(new NotFoundError("Profile"));
         }
 
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       logger.info(method, {
@@ -185,7 +185,7 @@ export class ReviewService {
 
       if (error) {
         logger.error(method, error, { profileId: validatedProfileId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       if (!data) {
@@ -219,7 +219,7 @@ export class ReviewService {
 
       if (error) {
         logger.error(method, error, { profileId: validatedProfileId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       const counts: Record<1 | 2 | 3 | 4 | 5, number> = {
@@ -280,7 +280,7 @@ export class ReviewService {
 
       if (error) {
         logger.error(method, error, { id: reviewId, userId });
-        return failure(new DatabaseError(error.message));
+        return failure(DatabaseError.fromSource(error));
       }
 
       logger.info(method, { reviewId, profileId: existing.data.profileId });

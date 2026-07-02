@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getSafeRedirectPath } from "@/lib/auth/safe-redirect";
 import { authService } from "@/services/auth/auth.service";
 import { profileService } from "@/services/profiles/profile.service";
 import { ValidationError } from "@/lib/errors";
@@ -95,7 +96,14 @@ export async function signInAction(
     }
 
     revalidatePath("/", "layout");
-    redirect(await resolvePostAuthRedirect(result.data.user.id));
+
+    const postAuthRedirect = await resolvePostAuthRedirect(result.data.user.id);
+    const requestedRedirect = formData.get("redirect")?.toString();
+    const destination = requestedRedirect
+      ? getSafeRedirectPath(requestedRedirect, postAuthRedirect)
+      : postAuthRedirect;
+
+    redirect(destination);
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") {
       throw error;
@@ -122,6 +130,15 @@ export async function signOutAction(): Promise<void> {
     redirect("/login?error=SIGN_OUT_FAILED");
   }
   redirect("/login");
+}
+
+export async function signOutToSignupAction(): Promise<void> {
+  const result = await authService.signOut();
+  revalidatePath("/", "layout");
+  if (isFailure(result)) {
+    redirect("/signup?error=SIGN_OUT_FAILED");
+  }
+  redirect("/signup");
 }
 
 export async function resetPasswordAction(

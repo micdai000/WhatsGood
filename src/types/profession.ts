@@ -3,5 +3,6 @@ export interface Profession {
   name: string;
   slug: string;
   icon: string | null;
+  isDisabled: boolean;
   createdAt: string;
 }

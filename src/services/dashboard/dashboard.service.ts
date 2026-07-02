@@ -97,7 +97,7 @@ export class DashboardService {
 
       if (profileResult.error) {
         logger.error(method, profileResult.error, { profileId: validatedProfileId });
-        return failure(new DatabaseError(profileResult.error.message));
+        return failure(DatabaseError.fromSource(profileResult.error));
       }
 
       if (!profileResult.data) {
@@ -106,12 +106,12 @@ export class DashboardService {
 
       if (reviewsResult.error) {
         logger.error(method, reviewsResult.error, { profileId: validatedProfileId });
-        return failure(new DatabaseError(reviewsResult.error.message));
+        return failure(DatabaseError.fromSource(reviewsResult.error));
       }
 
       if (requestsResult.error) {
         logger.error(method, requestsResult.error, { profileId: validatedProfileId });
-        return failure(new DatabaseError(requestsResult.error.message));
+        return failure(DatabaseError.fromSource(requestsResult.error));
       }
 
       const source = mapDashboardSourceData({

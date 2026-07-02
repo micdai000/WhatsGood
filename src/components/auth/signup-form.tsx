@@ -18,10 +18,13 @@ import { Label } from "@/components/ui/label";
 import { Muted } from "@/components/typography/typography";
 
 const initialState: AuthActionState = { success: false };
+const FORM_ERROR_ID = "signup-form-error";
 
 export function SignUpForm() {
   const [password, setPassword] = useState("");
   const [state, formAction, pending] = useActionState(signUpAction, initialState);
+
+  const describedBy = state.message ? FORM_ERROR_ID : undefined;
 
   return (
     <AuthCard
@@ -31,7 +34,11 @@ export function SignUpForm() {
       {state.success ? (
         <AuthFormSuccess message={state.message} />
       ) : (
-        <AuthFormError message={state.message} code={state.code} />
+        <AuthFormError
+          id={FORM_ERROR_ID}
+          message={state.message}
+          code={state.code}
+        />
       )}
 
       {!state.success ? (
@@ -44,6 +51,8 @@ export function SignUpForm() {
               autoComplete="name"
               required
               placeholder="Jane Smith"
+              aria-invalid={Boolean(state.fieldErrors?.fullName)}
+              aria-describedby={describedBy}
             />
           </div>
 
@@ -56,6 +65,8 @@ export function SignUpForm() {
               autoComplete="email"
               required
               placeholder="you@example.com"
+              aria-invalid={Boolean(state.fieldErrors?.email)}
+              aria-describedby={describedBy}
             />
           </div>
 
@@ -67,6 +78,8 @@ export function SignUpForm() {
               autoComplete="new-password"
               required
               onPasswordChange={setPassword}
+              aria-invalid={Boolean(state.fieldErrors?.password)}
+              aria-describedby={describedBy}
             />
             <PasswordStrengthIndicator password={password} />
           </div>

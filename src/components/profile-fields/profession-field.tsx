@@ -6,7 +6,6 @@ import { LoadingState } from "@/components/layout/loading-state";
 import { ErrorState } from "@/components/layout/error-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { isFailure } from "@/types";
 import type { Profession } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -29,8 +28,8 @@ export function ProfessionField({
 
   useEffect(() => {
     getProfessionsAction().then((result) => {
-      if (isFailure(result)) {
-        setLoadError(result.error.message);
+      if (!result.success) {
+        setLoadError(result.message);
       } else {
         setProfessions(result.data);
       }
@@ -47,6 +46,16 @@ export function ProfessionField({
       <ErrorState
         title="Unable to load professions"
         description={loadError}
+        onRetry={() => window.location.reload()}
+      />
+    );
+  }
+
+  if (professions.length === 0) {
+    return (
+      <ErrorState
+        title="No professions available"
+        description="Profession categories have not been set up yet. Apply database migrations or contact support."
         onRetry={() => window.location.reload()}
       />
     );

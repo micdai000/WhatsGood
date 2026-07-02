@@ -5,6 +5,7 @@ export type ProfessionRow = {
   name: string;
   slug: string;
   icon: string | null;
+  is_disabled: boolean;
   created_at: string;
 };
 
@@ -14,6 +15,7 @@ export function mapProfessionRow(row: ProfessionRow): Profession {
     name: row.name,
     slug: row.slug,
     icon: row.icon,
+    isDisabled: row.is_disabled ?? false,
     createdAt: row.created_at,
   };
 }
