@@ -1,7 +1,7 @@
 import { getSiteUrl } from "@/lib/auth/routes";
 
 export function getPublicProfilePath(username: string): string {
-  return `/@${username}`;
+  return `/u/${username}`;
 }
 
 export function getPublicProfileUrl(username: string): string {

@@ -1,7 +1,5 @@
-"use client";
-
 import { useActionState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import {
   resetPasswordAction,
   type AuthActionState,
@@ -56,7 +54,7 @@ export function ForgotPasswordForm() {
       ) : null}
 
       <Muted className="mt-6 text-center">
-        <Link href="/login" className="font-medium text-foreground hover:underline">
+        <Link to="/login" className="font-medium text-foreground hover:underline">
           Back to sign in
         </Link>
       </Muted>

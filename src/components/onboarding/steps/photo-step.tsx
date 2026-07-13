@@ -1,5 +1,3 @@
-"use client";
-
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
 import { ProfilePhotoField } from "@/components/profile-fields";
 import { useOnboardingWizard } from "@/hooks/use-onboarding-wizard";

@@ -1,6 +1,4 @@
-import "server-only";
-
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { authService } from "@/services/auth/auth.service";
 import {
   ApplicationError,
@@ -50,7 +48,7 @@ export class ReviewRequestService {
 
     try {
       const { id: requestId } = validate(reviewRequestIdSchema, { id });
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data, error } = await supabase
         .from("review_requests")
@@ -84,7 +82,7 @@ export class ReviewRequestService {
 
     try {
       const { token: requestToken } = validate(reviewRequestTokenSchema, { token });
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data, error } = await supabase
         .from("review_requests")
@@ -174,7 +172,7 @@ export class ReviewRequestService {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error, count } = await supabase
         .from("review_requests")
         .select("*", { count: "exact" })
@@ -235,7 +233,7 @@ export class ReviewRequestService {
         );
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const expiresAt = computeExpiresAt();
 
       const { data, error } = await supabase
@@ -271,7 +269,7 @@ export class ReviewRequestService {
 
     try {
       const { token: requestToken } = validate(reviewRequestTokenSchema, { token });
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data, error } = await supabase.rpc("complete_review_request", {
         p_token: requestToken,
@@ -337,7 +335,7 @@ export class ReviewRequestService {
         );
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("review_requests")
         .update({ status: "expired" })

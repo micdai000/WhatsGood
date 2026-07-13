@@ -1,5 +1,3 @@
-"use client";
-
 import { Muted } from "@/components/typography/typography";
 import { cn } from "@/lib/utils";
 

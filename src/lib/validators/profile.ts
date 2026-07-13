@@ -48,7 +48,7 @@ export const createProfileSchema = z.object({
     .optional()
     .refine(
       (url) => url == null || isAllowedProfilePhotoUrl(url),
-      "Profile photo must be uploaded through TrustLoop",
+      "Profile photo must be uploaded through Meritt",
     ),
 });
 

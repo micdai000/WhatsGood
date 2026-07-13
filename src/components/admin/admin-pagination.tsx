@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { buttonVariants } from "@/components/ui/button";
 import { Muted } from "@/components/typography/typography";
 import type { PaginatedResult } from "@/types";
@@ -49,7 +49,7 @@ export function AdminPagination({
       <div className="flex gap-2">
         {prevPage ? (
           <Link
-            href={buildPageUrl(basePath, prevPage, params)}
+            to={buildPageUrl(basePath, prevPage, params)}
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
             Previous
@@ -57,7 +57,7 @@ export function AdminPagination({
         ) : null}
         {nextPage ? (
           <Link
-            href={buildPageUrl(basePath, nextPage, params)}
+            to={buildPageUrl(basePath, nextPage, params)}
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
             Next

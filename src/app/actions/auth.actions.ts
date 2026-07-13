@@ -1,7 +1,3 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { getSafeRedirectPath } from "@/lib/auth/safe-redirect";
 import { authService } from "@/services/auth/auth.service";
 import { profileService } from "@/services/profiles/profile.service";
@@ -21,6 +17,7 @@ export type AuthActionState = {
   message?: string;
   code?: string;
   fieldErrors?: Record<string, string[]>;
+  redirect?: string;
 };
 
 function toActionState(
@@ -95,19 +92,14 @@ export async function signInAction(
       return toActionState(result.error);
     }
 
-    revalidatePath("/", "layout");
-
     const postAuthRedirect = await resolvePostAuthRedirect(result.data.user.id);
     const requestedRedirect = formData.get("redirect")?.toString();
     const destination = requestedRedirect
       ? getSafeRedirectPath(requestedRedirect, postAuthRedirect)
       : postAuthRedirect;
 
-    redirect(destination);
+    return { success: true, redirect: destination };
   } catch (error) {
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
-      throw error;
-    }
     if (error instanceof ValidationError) {
       return toActionState({
         message: error.message,
@@ -123,22 +115,20 @@ export async function signInAction(
   }
 }
 
-export async function signOutAction(): Promise<void> {
+export async function signOutAction(): Promise<AuthActionState> {
   const result = await authService.signOut();
-  revalidatePath("/", "layout");
   if (isFailure(result)) {
-    redirect("/login?error=SIGN_OUT_FAILED");
+    return { success: false, redirect: "/login?error=SIGN_OUT_FAILED" };
   }
-  redirect("/login");
+  return { success: true, redirect: "/login" };
 }
 
-export async function signOutToSignupAction(): Promise<void> {
+export async function signOutToSignupAction(): Promise<AuthActionState> {
   const result = await authService.signOut();
-  revalidatePath("/", "layout");
   if (isFailure(result)) {
-    redirect("/signup?error=SIGN_OUT_FAILED");
+    return { success: false, redirect: "/signup?error=SIGN_OUT_FAILED" };
   }
-  redirect("/signup");
+  return { success: true, redirect: "/signup" };
 }
 
 export async function resetPasswordAction(
@@ -214,21 +204,23 @@ export async function updatePasswordAction(
   }
 }
 
-export async function deleteAccountAction(): Promise<void> {
+export async function deleteAccountAction(): Promise<AuthActionState> {
   const sessionResult = await authService.getSession();
 
   if (isFailure(sessionResult) || !sessionResult.data) {
-    redirect("/login");
+    return { success: false, redirect: "/login" };
   }
 
   await profileService.deleteUserAvatars(sessionResult.data.user.id);
 
   const result = await authService.deleteAccount();
-  revalidatePath("/", "layout");
   if (isFailure(result)) {
-    redirect("/dashboard/settings?error=DELETE_ACCOUNT_FAILED");
+    return {
+      success: false,
+      redirect: "/dashboard/settings?error=DELETE_ACCOUNT_FAILED",
+    };
   }
-  redirect("/login?deleted=1");
+  return { success: true, redirect: "/login?deleted=1" };
 }
 
 export async function getSessionAction() {

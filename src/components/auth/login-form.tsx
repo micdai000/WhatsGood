@@ -1,8 +1,6 @@
-"use client";
-
+import { useEffect } from "react";
 import { useActionState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { signInAction, type AuthActionState } from "@/app/actions/auth.actions";
 import { AuthCard } from "@/components/auth/auth-card";
 import { AuthDivider } from "@/components/auth/auth-divider";
@@ -17,16 +15,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Muted } from "@/components/typography/typography";
+import { useAuthContext } from "@/contexts/auth-context";
 
 const initialState: AuthActionState = { success: false };
 const FORM_ERROR_ID = "login-form-error";
 
 export function LoginForm() {
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const { refresh } = useAuthContext();
+  const [searchParams] = useSearchParams();
   const verified = searchParams.get("verified") === "true";
   const errorCode = searchParams.get("error");
   const redirectTo = searchParams.get("redirect");
   const [state, formAction, pending] = useActionState(signInAction, initialState);
+
+  useEffect(() => {
+    if (state.redirect) {
+      void refresh().then(() => {
+        navigate(state.redirect!, { replace: true });
+      });
+    }
+  }, [state.redirect, navigate, refresh]);
 
   const expiredMessage =
     errorCode === "EXPIRED_TOKEN"
@@ -43,7 +52,7 @@ export function LoginForm() {
   return (
     <AuthCard
       title="Welcome back"
-      description="Sign in to your TrustLoop account"
+      description="Sign in to your Meritt Pros account"
     >
       {verified ? (
         <AuthFormSuccess message="Email verified. You can now sign in." />
@@ -99,7 +108,7 @@ export function LoginForm() {
         <div className="flex items-center justify-between gap-4">
           <RememberMeCheckbox />
           <Link
-            href="/forgot-password"
+            to="/forgot-password"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             Forgot password?
@@ -116,7 +125,7 @@ export function LoginForm() {
 
       <Muted className="mt-6 text-center">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-medium text-foreground hover:underline">
+        <Link to="/signup" className="font-medium text-foreground hover:underline">
           Sign up
         </Link>
       </Muted>

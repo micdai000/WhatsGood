@@ -1,6 +1,4 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useTransition } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -16,7 +14,7 @@ interface FilterPanelProps {
 }
 
 export function FilterPanel({ params, professions, className }: FilterPanelProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [isPending, startTransition] = useTransition();
   const [city, setCity] = useUrlSyncedState(params.city);
   const [state, setState] = useUrlSyncedState(params.state);
@@ -29,7 +27,7 @@ export function FilterPanel({ params, professions, className }: FilterPanelProps
     };
 
     startTransition(() => {
-      router.push(buildSearchUrl("/search", next));
+      navigate(buildSearchUrl("/search", next));
     });
   }
 

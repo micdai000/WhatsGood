@@ -61,6 +61,18 @@ const reviewRequestsOk = await check(
   { url: `${url}/rest/v1/review_requests?select=id&limit=0` },
 );
 
+const badgeColumnsOk = await check(
+  "profiles.current_badge_tier, current_badge_period columns exist",
+  {
+    url: `${url}/rest/v1/profiles?select=current_badge_tier,current_badge_period&limit=0`,
+  },
+);
+
+const badgeSnapshotsOk = await check(
+  "public.badge_snapshots table exists and is readable",
+  { url: `${url}/rest/v1/badge_snapshots?select=id&limit=0` },
+);
+
 if (professionsOk) {
   const countRes = await fetch(`${url}/rest/v1/professions?select=id`, {
     headers: { ...headers, Prefer: "count=exact" },
@@ -71,7 +83,15 @@ if (professionsOk) {
 
 console.log("");
 
-if (!professionsOk || !profileColumnsOk || !reviewsOk || !profileRatingsOk || !reviewRequestsOk) {
+if (
+  !professionsOk ||
+  !profileColumnsOk ||
+  !reviewsOk ||
+  !profileRatingsOk ||
+  !reviewRequestsOk ||
+  !badgeColumnsOk ||
+  !badgeSnapshotsOk
+) {
   console.error("Onboarding database is NOT ready.");
   console.error("Run: npm run db:migrate");
   console.error("Or apply pending migrations in the Supabase SQL Editor.");

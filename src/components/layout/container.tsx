@@ -5,9 +5,9 @@ interface ContainerProps extends React.ComponentProps<"div"> {
 }
 
 const sizeClasses = {
-  default: "max-w-5xl",
+  default: "max-w-[1180px]",
   narrow: "max-w-3xl",
-  wide: "max-w-6xl",
+  wide: "max-w-[1180px]",
 } as const;
 
 export function Container({

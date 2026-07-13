@@ -1,6 +1,4 @@
-import "server-only";
-
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { authService } from "@/services/auth/auth.service";
 import {
   AuthorizationError,
@@ -57,7 +55,7 @@ export class ProfileService {
 
     try {
       const { id: profileId } = validate(profileIdSchema, { id });
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data, error } = await supabase
         .from("profiles")
@@ -85,7 +83,7 @@ export class ProfileService {
 
     try {
       const { slug: username } = validate(profileSlugSchema, { slug });
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data, error } = await supabase
         .from("profiles")
@@ -113,7 +111,7 @@ export class ProfileService {
 
     try {
       const { slug: username } = validate(profileSlugSchema, { slug });
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data, error } = await supabase
         .from("profiles")
@@ -129,6 +127,8 @@ export class ProfileService {
           profession_id,
           average_rating,
           total_reviews,
+          current_badge_tier,
+          current_badge_period,
           professions ( name )
         `,
         )
@@ -165,7 +165,7 @@ export class ProfileService {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
 
-      const supabase = await createClient();
+      const supabase = createClient();
       let query = supabase
         .from("profiles")
         .select("*", { count: "exact" });
@@ -208,7 +208,7 @@ export class ProfileService {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
 
-      const supabase = await createClient();
+      const supabase = createClient();
       let query = supabase
         .from("profiles")
         .select(PUBLIC_PROFILE_SELECT, { count: "exact" });
@@ -256,7 +256,7 @@ export class ProfileService {
 
     try {
       const { slug: username } = validate(profileSlugSchema, { slug });
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data, error } = await supabase
         .from("profiles")
@@ -315,7 +315,7 @@ export class ProfileService {
         : "jpg";
       const path = `${userId}/${Date.now()}.${safeExtension}`;
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const buffer = Buffer.from(await file.arrayBuffer());
 
       const { error: uploadError } = await supabase.storage
@@ -378,7 +378,7 @@ export class ProfileService {
         return failure(new ConflictError("This username is already taken"));
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("profiles")
         .insert({
@@ -420,7 +420,7 @@ export class ProfileService {
         return success(undefined);
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { error } = await supabase.storage.from(AVATARS_BUCKET).remove([path]);
 
       if (error) {
@@ -447,7 +447,7 @@ export class ProfileService {
         return failure(new AuthorizationError("You can only delete your own photos"));
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data: files, error: listError } = await supabase.storage
         .from(AVATARS_BUCKET)
         .list(userId);
@@ -547,7 +547,7 @@ export class ProfileService {
         updates.avatar = validated.profilePhoto;
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("profiles")
         .update(updates)
@@ -608,7 +608,7 @@ export class ProfileService {
 
       await this.deleteUserAvatars(profileId);
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { error } = await supabase
         .from("profiles")
         .delete()

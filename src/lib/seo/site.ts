@@ -1,6 +1,6 @@
 import { getSiteUrl } from "@/lib/auth/routes";
 
-export const SITE_NAME = "TrustLoop";
+export const SITE_NAME = "Meritt Pros";
 
 export const SITE_DESCRIPTION =
   "Build trust through verified reviews. Professional reputation for independent experts.";

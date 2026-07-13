@@ -1,21 +1,28 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { QuickActionCard } from "@/components/dashboard/quick-action-card";
 import { AdminStatGrid } from "@/components/admin";
 import { Muted, Paragraph } from "@/components/typography/typography";
+import { Spinner } from "@/components/ui/spinner";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { adminService } from "@/services/admin";
-import { isFailure } from "@/types";
 import { Briefcase, MessageSquare, UserCircle, Users } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export default function AdminDashboardPage() {
+  const result = useServiceQuery(() => adminService.getDashboard(), []);
 
-export default async function AdminDashboardPage() {
-  const result = await adminService.getDashboard();
+  if (result.status === "loading") {
+    return (
+      <div className="flex min-h-[30vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
 
-  if (isFailure(result)) {
+  if (result.status === "error") {
     return (
       <Paragraph className="text-destructive" role="alert">
-        {result.error.message}
+        {result.message}
       </Paragraph>
     );
   }
@@ -26,7 +33,7 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       <div>
         <h2 className="text-xl font-semibold">Platform overview</h2>
-        <Muted className="text-sm">Internal metrics for TrustLoop operations.</Muted>
+        <Muted className="text-sm">Internal metrics for Meritt operations.</Muted>
       </div>
 
       <AdminStatGrid statistics={statistics} />
@@ -79,7 +86,7 @@ export default async function AdminDashboardPage() {
       </DashboardCard>
 
       <Muted className="text-xs">
-        <Link href="/dashboard" className="underline hover:text-foreground">
+        <Link to="/dashboard" className="underline hover:text-foreground">
           Return to professional dashboard
         </Link>
       </Muted>

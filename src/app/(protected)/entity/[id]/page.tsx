@@ -1,9 +1,7 @@
-"use client";
-
 import { useState } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { AppImage } from "@/components/ui/app-image";
 import { ChevronLeft, Heart, TrendingUp, TrendingDown, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -41,7 +39,7 @@ export default function EntityDetailPage() {
             This page doesn&apos;t exist.
           </p>
           <Link
-            href="/"
+            to="/"
             className="mt-4 inline-block text-[14px] font-semibold text-[#D4A017]"
           >
             Go back
@@ -79,7 +77,7 @@ export default function EntityDetailPage() {
     <div className="w-full pb-28">
       {/* Cinematic hero image */}
       <div className="entity-hero">
-        <Image
+        <AppImage
           src={entity.image}
           alt={entity.name}
           fill
@@ -88,7 +86,7 @@ export default function EntityDetailPage() {
           priority
         />
         <Link
-          href="/"
+          to="/"
           className="absolute top-5 left-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm"
         >
           <ChevronLeft className="h-5 w-5 text-[#111]" />

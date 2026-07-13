@@ -1,5 +1,3 @@
-import "server-only";
-
 import { profileService } from "@/services/profiles/profile.service";
 import { isFailure, isSuccess } from "@/types";
 import { ONBOARDING_ROUTES } from "./constants";

@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { OnboardingLayout } from "@/components/onboarding/onboarding-layout";
@@ -15,7 +13,7 @@ export function WelcomeContent() {
     <OnboardingLayout>
       <div className="space-y-8 rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
         <ProgressHeader
-          title="Welcome to TrustLoop"
+          title="Welcome to Meritt Pros"
           description="Let's set up your professional presence."
           currentStep={1}
           totalSteps={ONBOARDING.TOTAL_STEPS}
@@ -29,7 +27,7 @@ export function WelcomeContent() {
 
         <ProgressFooter>
           <Link
-            href={ONBOARDING_ROUTES.profession}
+            to={ONBOARDING_ROUTES.profession}
             className={cn(buttonVariants({ size: "lg" }), "w-full")}
           >
             Create My Profile

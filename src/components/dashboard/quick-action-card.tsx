@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { Paragraph, Muted } from "@/components/typography/typography";
@@ -39,7 +39,7 @@ export function QuickActionCard({
     return (
       <DashboardCard className={cn("transition-shadow hover:shadow-md", className)}>
         <Link
-          href={href}
+          to={href}
           className={cn(
             buttonVariants({ variant: "ghost" }),
             "h-auto w-full justify-start whitespace-normal p-0 hover:bg-transparent",

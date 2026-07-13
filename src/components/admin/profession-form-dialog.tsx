@@ -1,7 +1,5 @@
-"use client";
-
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Loader2, Plus } from "lucide-react";
 import {
   adminCreateProfessionAction,
@@ -32,7 +30,7 @@ export function ProfessionFormDialog({
   triggerLabel,
 }: ProfessionFormDialogProps) {
   const isEdit = Boolean(profession);
-  const router = useRouter();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -84,7 +82,7 @@ export function ProfessionFormDialog({
               }
 
               setOpen(false);
-              router.refresh();
+              navigate(0);
             });
           }}
         >

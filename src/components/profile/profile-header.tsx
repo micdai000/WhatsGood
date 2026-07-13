@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AppImage } from "@/components/ui/app-image";
 import { MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { H1, Muted } from "@/components/typography/typography";
@@ -34,7 +34,7 @@ export function ProfileHeader({ profile, className }: ProfileHeaderProps) {
     >
       <div className="relative size-28 shrink-0 overflow-hidden rounded-full border-2 border-border bg-muted shadow-sm sm:size-32">
         {profile.avatar ? (
-          <Image
+          <AppImage
             src={profile.avatar}
             alt={`${profile.displayName}'s profile photo`}
             fill

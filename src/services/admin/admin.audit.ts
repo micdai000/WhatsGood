@@ -1,6 +1,4 @@
-import "server-only";
-
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { DatabaseError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import type { AuditLogEntry, ServiceResult } from "@/types";
@@ -38,7 +36,7 @@ export async function writeAuditLog(input: {
   const method = "writeAuditLog";
 
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("audit_logs")
       .insert({

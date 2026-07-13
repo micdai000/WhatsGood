@@ -1,44 +1,57 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { Link, Navigate } from "react-router-dom";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { PageHeader } from "@/components/layout/page-header";
 import { EditProfileForm } from "@/components/profile/edit-profile-form";
 import { buttonVariants } from "@/components/ui/button";
-import { authService } from "@/services/auth/auth.service";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuthContext } from "@/contexts/auth-context";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { profileService } from "@/services/profiles/profile.service";
 import { professionService } from "@/services/professions/profession.service";
-import { isFailure, isSuccess } from "@/types";
 import { cn } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export default function EditProfilePage() {
+  const { user } = useAuthContext();
+  const profileResult = useServiceQuery(
+    () => profileService.getProfile(user!.id),
+    [user?.id],
+  );
 
-export default async function EditProfilePage() {
-  const sessionResult = await authService.getSession();
+  const username =
+    profileResult.status === "success" ? profileResult.data.username : null;
 
-  if (!isSuccess(sessionResult) || !sessionResult.data) {
-    redirect("/login");
+  const publicProfileResult = useServiceQuery(
+    () => profileService.getPublicProfile(username!),
+    [username],
+  );
+
+  const professionsResult = useServiceQuery(
+    () => professionService.getProfessions(),
+    [],
+  );
+
+  if (
+    profileResult.status === "loading" ||
+    (username && publicProfileResult.status === "loading") ||
+    professionsResult.status === "loading"
+  ) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
   }
 
-  const userId = sessionResult.data.user.id;
-  const profileResult = await profileService.getProfile(userId);
-
-  if (isFailure(profileResult)) {
-    redirect("/welcome");
+  if (profileResult.status === "error") {
+    return <Navigate to="/welcome" replace />;
   }
 
   const profile = profileResult.data;
-
-  const [publicProfileResult, professionsResult] = await Promise.all([
-    profileService.getPublicProfile(profile.username),
-    professionService.getProfessions(),
-  ]);
-
-  const publicProfile = isSuccess(publicProfileResult)
-    ? publicProfileResult.data
-    : null;
-
-  const professions = isSuccess(professionsResult) ? professionsResult.data : [];
+  const publicProfile =
+    publicProfileResult.status === "success" ? publicProfileResult.data : null;
+  const professions =
+    professionsResult.status === "success" ? professionsResult.data : [];
 
   return (
     <Section>
@@ -46,10 +59,10 @@ export default async function EditProfilePage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <PageHeader
             title="Edit profile"
-            description="Update how you appear on your public TrustLoop profile."
+            description="Update how you appear on your public Meritt profile."
           />
           <Link
-            href={`/u/${profile.username}`}
+            to={`/u/${profile.username}`}
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             target="_blank"
             rel="noopener noreferrer"
@@ -62,8 +75,9 @@ export default async function EditProfilePage() {
           profile={profile}
           professions={professions}
           stats={{
-            averageRating: publicProfile?.averageRating ?? 0,
             totalReviews: publicProfile?.totalReviews ?? 0,
+            badgeTier: publicProfile?.badgeTier ?? "none",
+            badgePeriod: publicProfile?.badgePeriod ?? null,
           }}
         />
       </Container>

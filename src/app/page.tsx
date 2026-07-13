@@ -1,66 +1,115 @@
-import Link from "next/link";
-import { Search, BookOpen, Plus } from "lucide-react";
-import {
-  eliteEntities,
-  trendingUpEntities,
-  mostFollowedEntities,
-  homeLibraries,
-  trendingDownEntities,
-  recentlyAddedEntities,
-  homeActivity,
-} from "@/data/home-feed";
-import { BelowFoldLoader } from "@/components/home/below-fold-loader";
-import { HomeActivitySection } from "@/components/home/home-activity-section";
+import { Link } from "react-router-dom";
+import { Search, UserRound } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { ResultsGrid } from "@/components/search";
+import { Spinner } from "@/components/ui/spinner";
 import { Container } from "@/components/layout/container";
 import { PageWrapper } from "@/components/layout/page-wrapper";
 import { Section } from "@/components/layout/section";
-import { H1, Muted } from "@/components/typography/typography";
-
-const quickActions = [
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/libraries", label: "Libraries", icon: BookOpen },
-  { href: "/create", label: "Add", icon: Plus },
-] as const;
+import { Eyebrow, H1, Muted } from "@/components/typography/typography";
+import { MerittSection } from "@/components/ui/meritt-surface";
+import { useServiceQuery } from "@/hooks/use-service-query";
+import { profileService } from "@/services/profiles/profile.service";
 
 export default function HomePage() {
+  const featured = useServiceQuery(
+    () =>
+      profileService.searchProfiles({
+        page: 1,
+        limit: 6,
+        sort: "rating",
+      }),
+    [],
+  );
+
   return (
     <PageWrapper>
-      <Section spacing="tight" className="pb-0 pt-8 sm:pt-10">
+      <Section spacing="loose" className="pb-10 pt-24 sm:pt-28">
         <Container>
-          <div className="max-w-sm space-y-1">
-            <H1>Meritt</H1>
-            <Muted>What people believe is worth choosing.</Muted>
-          </div>
+          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+            <div className="max-w-xl space-y-5">
+              <Eyebrow>For independent professionals</Eyebrow>
+              <H1>Meritt Pros</H1>
+              <Muted className="text-base leading-relaxed">
+                Find tutors, coaches, consultants, and other professionals —
+                backed by verified reviews from real clients.
+              </Muted>
 
-          <div className="mt-6 grid grid-cols-3 gap-2.5">
-            {quickActions.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className="flex flex-col items-center gap-2 rounded-2xl bg-neutral-50 py-4 ring-1 ring-neutral-100 transition-colors hover:bg-neutral-100"
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111] shadow-sm ring-1 ring-neutral-100">
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
-                </span>
-                <span className="text-[13px] font-semibold text-[#111]">
-                  {label}
-                </span>
-              </Link>
-            ))}
+              <div className="flex flex-wrap gap-3 pt-1">
+                <Link to="/search" className={buttonVariants({ size: "lg" })}>
+                  <Search className="size-4" aria-hidden />
+                  Browse professionals
+                </Link>
+                <Link
+                  to="/signup"
+                  className={buttonVariants({ variant: "outline", size: "lg" })}
+                >
+                  <UserRound className="size-4" aria-hidden />
+                  Join as a pro
+                </Link>
+              </div>
+            </div>
+
+            <div className="meritt-card p-4">
+              <div className="meritt-panel space-y-3">
+                <Eyebrow>How it works</Eyebrow>
+                <ol className="space-y-3 text-sm text-muted-foreground">
+                  <li>
+                    <span className="font-medium text-foreground">1. Search</span>{" "}
+                    — filter by profession, city, and rating.
+                  </li>
+                  <li>
+                    <span className="font-medium text-foreground">2. Compare</span>{" "}
+                    — read verified reviews on each profile.
+                  </li>
+                  <li>
+                    <span className="font-medium text-foreground">3. Choose</span>{" "}
+                    — connect with the professional you trust.
+                  </li>
+                </ol>
+              </div>
+            </div>
           </div>
         </Container>
       </Section>
 
-      <HomeActivitySection items={homeActivity} />
+      <MerittSection variant="white" className="py-14 sm:py-16">
+        <Container className="space-y-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <Eyebrow>Featured</Eyebrow>
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                Top professionals
+              </h2>
+              <Muted className="mt-1">
+                Highly rated pros on Meritt Pros right now.
+              </Muted>
+            </div>
+            <Link
+              to="/search"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              View all
+            </Link>
+          </div>
 
-      <BelowFoldLoader
-        eliteEntities={eliteEntities}
-        trendingUpEntities={trendingUpEntities}
-        mostFollowedEntities={mostFollowedEntities}
-        homeLibraries={homeLibraries}
-        trendingDownEntities={trendingDownEntities}
-        recentlyAddedEntities={recentlyAddedEntities}
-      />
+          {featured.status === "loading" ? (
+            <div className="flex justify-center py-12">
+              <Spinner className="h-8 w-8" />
+            </div>
+          ) : featured.status === "success" && featured.data.items.length > 0 ? (
+            <ResultsGrid profiles={featured.data.items} />
+          ) : (
+            <div className="meritt-panel text-center text-sm text-muted-foreground">
+              No professionals to show yet.{" "}
+              <Link to="/signup" className="font-medium text-foreground underline">
+                Be the first to join
+              </Link>
+              .
+            </div>
+          )}
+        </Container>
+      </MerittSection>
     </PageWrapper>
   );
 }

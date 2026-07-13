@@ -1,7 +1,5 @@
-"use client";
-
-import Link from "next/link";
-import Image from "next/image";
+import { Link } from "react-router-dom";
+import { AppImage } from "@/components/ui/app-image";
 import { TrendingDown } from "lucide-react";
 import { categoryLabels, type Entity, type Library } from "@/data/mock";
 import { EntityCard } from "@/components/ui/entity-card";
@@ -93,14 +91,14 @@ export function BelowFoldSections({
             {trendingDownEntities.map((entity, i) => (
               <Link
                 key={entity.id}
-                href={`/entity/${entity.id}`}
+                to={`/entity/${entity.id}`}
                 className="flex items-center gap-4 py-3.5 border-b border-neutral-100 last:border-0"
               >
                 <span className="text-2xl font-bold text-neutral-200 tabular-nums w-8 text-center shrink-0">
                   {i + 1}
                 </span>
                 <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden">
-                  <Image
+                  <AppImage
                     src={entity.image}
                     alt={entity.name}
                     fill

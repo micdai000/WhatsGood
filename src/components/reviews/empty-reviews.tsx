@@ -2,7 +2,7 @@ import { MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { H3, Muted } from "@/components/typography/typography";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface EmptyReviewsProps {
@@ -29,7 +29,7 @@ export function EmptyReviews({
           </Muted>
         </div>
         {leaveReviewHref ? (
-          <Link href={leaveReviewHref} className={buttonVariants()}>
+          <Link to={leaveReviewHref} className={buttonVariants()}>
             Leave a review
           </Link>
         ) : null}

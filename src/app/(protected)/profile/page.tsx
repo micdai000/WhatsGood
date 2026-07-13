@@ -1,8 +1,6 @@
-"use client";
-
 import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { AppImage } from "@/components/ui/app-image";
+import { Link } from "react-router-dom";
 import { Settings, Share2 } from "lucide-react";
 import {
   currentUser,
@@ -62,7 +60,7 @@ export default function ProfilePage() {
       {/* Profile header */}
       <div className="pt-2 page-x flex flex-col items-center">
         <div className="relative size-[88px] overflow-hidden rounded-full">
-          <Image
+          <AppImage
             src={currentUser.avatar}
             alt={currentUser.displayName}
             fill
@@ -157,7 +155,7 @@ export default function ProfilePage() {
               <p className="py-12 text-center text-[14px] text-neutral-400">
                 You haven&apos;t created any libraries yet.{" "}
                 <Link
-                  href="/create"
+                  to="/create"
                   className="font-semibold text-[#D4A017] hover:underline"
                 >
                   Create one
@@ -174,7 +172,7 @@ export default function ProfilePage() {
                 {likedEntities.map((entity, i) => (
                   <Link
                     key={entity.id}
-                    href={`/entity/${entity.id}`}
+                    to={`/entity/${entity.id}`}
                     className={
                       "flex items-center gap-3.5 py-3" +
                       (i < likedEntities.length - 1
@@ -183,7 +181,7 @@ export default function ProfilePage() {
                     }
                   >
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl">
-                      <Image
+                      <AppImage
                         src={entity.image}
                         alt={entity.name}
                         fill

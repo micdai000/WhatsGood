@@ -1,9 +1,7 @@
-"use client";
-
-import Image from "next/image";
-import Link from "next/link";
+import { AppImage } from "@/components/ui/app-image";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Loader2, Pencil } from "lucide-react";
 import {
   createProfileAction,
@@ -31,7 +29,7 @@ const EDIT_LINKS = [
 ] as const;
 
 export function ReviewStep() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { state, isReady } = useOnboardingWizard();
   const [professionName, setProfessionName] = useState<string>("—");
   const [submitting, setSubmitting] = useState(false);
@@ -49,7 +47,7 @@ export function ReviewStep() {
 
   if (!isReady) return null;
 
-  const publicUrl = `${getSiteUrl()}/@${state.slug}`;
+  const publicUrl = `${getSiteUrl()}/u/${state.slug}`;
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -64,7 +62,7 @@ export function ReviewStep() {
     }
 
     clearOnboardingStorage();
-    router.replace(ONBOARDING_ROUTES.dashboard);
+    navigate(ONBOARDING_ROUTES.dashboard);
   }
 
   return (
@@ -82,7 +80,7 @@ export function ReviewStep() {
         <div className="flex items-start gap-4 rounded-lg border border-border bg-muted/20 p-4">
           {state.profilePhotoUrl ? (
             <div className="relative size-16 shrink-0 overflow-hidden rounded-full border border-border">
-              <Image
+              <AppImage
                 src={state.profilePhotoUrl}
                 alt=""
                 fill
@@ -120,7 +118,7 @@ export function ReviewStep() {
           {EDIT_LINKS.map((link) => (
             <Link
               key={link.key}
-              href={link.href}
+              to={link.href}
               className={cn(
                 buttonVariants({ variant: "outline", size: "sm" }),
                 "gap-1.5",

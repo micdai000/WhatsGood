@@ -1,7 +1,3 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { authService } from "@/services/auth/auth.service";
 import { profileService } from "@/services/profiles/profile.service";
 import { professionService } from "@/services/professions/profession.service";
@@ -51,15 +47,14 @@ export async function checkOnboardingStatusAction(): Promise<OnboardingCheckStat
   };
 }
 
-export async function redirectAfterAuthAction(): Promise<never> {
+export async function redirectAfterAuthAction(): Promise<string> {
   const sessionResult = await authService.getSession();
 
   if (!isSuccess(sessionResult) || !sessionResult.data) {
-    redirect("/login");
+    return "/login";
   }
 
-  const path = await resolvePostAuthRedirect(sessionResult.data.user.id);
-  redirect(path);
+  return resolvePostAuthRedirect(sessionResult.data.user.id);
 }
 
 export async function getProfessionsAction(): Promise<
@@ -137,22 +132,21 @@ export async function createProfileAction(
     };
   }
 
-  revalidatePath("/", "layout");
   return { success: true, data: { username: result.data.username } };
 }
 
-export async function completeOnboardingAction(): Promise<never> {
+export async function completeOnboardingAction(): Promise<string> {
   const sessionResult = await authService.getSession();
 
   if (!isSuccess(sessionResult) || !sessionResult.data) {
-    redirect("/login");
+    return "/login";
   }
 
   const onboarding = await getOnboardingStatus(sessionResult.data.user.id);
 
   if (!onboarding.ok || onboarding.status !== "has_profile") {
-    redirect(ONBOARDING_ROUTES.welcome);
+    return ONBOARDING_ROUTES.welcome;
   }
 
-  redirect(ONBOARDING_ROUTES.dashboard);
+  return ONBOARDING_ROUTES.dashboard;
 }

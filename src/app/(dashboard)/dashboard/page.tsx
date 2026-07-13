@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { Link, Navigate } from "react-router-dom";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import {
@@ -14,26 +13,30 @@ import {
 } from "@/components/dashboard";
 import { ReviewCard } from "@/components/reviews/review-card";
 import { Muted } from "@/components/typography/typography";
-import { authService } from "@/services/auth/auth.service";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuthContext } from "@/contexts/auth-context";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { dashboardService } from "@/services/dashboard";
-import { isFailure, isSuccess } from "@/types";
-
-export const dynamic = "force-dynamic";
 
 const RECENT_LIMIT = 5;
 
-export default async function DashboardPage() {
-  const sessionResult = await authService.getSession();
+export default function DashboardPage() {
+  const { user } = useAuthContext();
+  const dashboardResult = useServiceQuery(
+    () => dashboardService.getDashboard(user!.id),
+    [user?.id],
+  );
 
-  if (!isSuccess(sessionResult) || !sessionResult.data) {
-    redirect("/login");
+  if (dashboardResult.status === "loading") {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
   }
 
-  const userId = sessionResult.data.user.id;
-  const dashboardResult = await dashboardService.getDashboard(userId);
-
-  if (isFailure(dashboardResult)) {
-    redirect("/welcome");
+  if (dashboardResult.status === "error") {
+    return <Navigate to="/welcome" replace />;
   }
 
   const {
@@ -95,7 +98,7 @@ export default async function DashboardPage() {
               Recent review requests
             </h2>
             <Link
-              href="/dashboard/review-requests"
+              to="/dashboard/review-requests"
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               View all

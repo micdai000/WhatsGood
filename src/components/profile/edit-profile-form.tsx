@@ -1,8 +1,6 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { updateProfileAction } from "@/app/actions/profile.actions";
 import { checkSlugAvailabilityAction } from "@/app/actions/onboarding.actions";
@@ -21,6 +19,7 @@ import { Muted } from "@/components/typography/typography";
 import { mapProfileToPublicProfile } from "@/services/profiles/public-profile.mapper";
 import { createProfileSchema } from "@/lib/validators";
 import type { Profile, Profession } from "@/types";
+import type { BadgeTier } from "@/types/badge";
 import { cn } from "@/lib/utils";
 
 interface EditProfileFormState {
@@ -37,8 +36,9 @@ interface EditProfileFormProps {
   profile: Profile;
   professions: Profession[];
   stats: {
-    averageRating: number;
     totalReviews: number;
+    badgeTier: BadgeTier;
+    badgePeriod: string | null;
   };
 }
 
@@ -63,7 +63,7 @@ export function EditProfileForm({
   professions,
   stats,
 }: EditProfileFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [baseline, setBaseline] = useState<EditProfileFormState>(() =>
     toFormState(profile),
   );
@@ -125,8 +125,9 @@ export function EditProfileForm({
     },
     {
       professionName,
-      averageRating: stats.averageRating,
       totalReviews: stats.totalReviews,
+      badgeTier: stats.badgeTier,
+      badgePeriod: stats.badgePeriod,
     },
   );
 
@@ -194,7 +195,6 @@ export function EditProfileForm({
 
     setBaseline({ ...formState });
     setSuccessMessage("Profile updated successfully.");
-    router.refresh();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -307,7 +307,7 @@ export function EditProfileForm({
             )}
           </Button>
           <Link
-            href="/dashboard"
+            to="/dashboard"
             className={cn(buttonVariants({ variant: "outline" }))}
             onClick={(event) => {
               if (isDirty && !window.confirm("Discard unsaved changes?")) {

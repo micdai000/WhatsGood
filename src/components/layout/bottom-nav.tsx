@@ -1,25 +1,33 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Search, Plus, BookOpen, User } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Home, LayoutDashboard, Search, UserRound } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { useAuthContext } from "@/contexts/auth-context";
 import { isAuthRoute } from "@/lib/auth/routes";
 import { cn } from "@/lib/utils";
 
-const tabs = [
+const publicTabs = [
   { href: "/", icon: Home, label: "Home" },
   { href: "/search", icon: Search, label: "Search" },
-  { href: "/create", icon: Plus, label: "Create" },
-  { href: "/libraries", icon: BookOpen, label: "Libraries" },
-  { href: "/profile", icon: User, label: "Profile" },
+  { href: "/signup", icon: UserRound, label: "Join" },
+  { href: "/login", icon: LayoutDashboard, label: "Log in" },
+] as const;
+
+const proTabs = [
+  { href: "/", icon: Home, label: "Home" },
+  { href: "/search", icon: Search, label: "Search" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/dashboard/settings", icon: UserRound, label: "Account" },
 ] as const;
 
 export function BottomNav() {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
+  const { user, loading } = useAuthContext();
 
   if (pathname === "/style-guide" || isAuthRoute(pathname)) {
     return null;
   }
+
+  const tabs = !loading && user ? proTabs : publicTabs;
 
   return (
     <nav
@@ -29,31 +37,19 @@ export function BottomNav() {
       <div className="flex items-center justify-around px-4 pb-[env(safe-area-inset-bottom,8px)] pt-1.5">
         {tabs.map(({ href, icon: Icon, label }) => {
           const isActive =
-            href === "/" ? pathname === "/" : pathname.startsWith(href);
-          const isCreate = href === "/create";
-
-          if (isCreate) {
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-label={label}
-                className="flex items-center justify-center -mt-4"
-              >
-                <span className="flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-background">
-                  <Icon size={22} strokeWidth={2} />
-                </span>
-              </Link>
-            );
-          }
+            href === "/"
+              ? pathname === "/"
+              : href === "/dashboard"
+                ? pathname === "/dashboard" || pathname.startsWith("/dashboard/")
+                : pathname.startsWith(href);
 
           return (
             <Link
               key={href}
-              href={href}
+              to={href}
               aria-label={label}
               aria-current={isActive ? "page" : undefined}
-              className="flex items-center justify-center px-3 py-2"
+              className="flex flex-col items-center justify-center gap-0.5 px-3 py-2"
             >
               <Icon
                 size={22}
@@ -63,6 +59,14 @@ export function BottomNav() {
                   isActive ? "text-foreground" : "text-muted-foreground",
                 )}
               />
+              <span
+                className={cn(
+                  "text-[10px] font-medium",
+                  isActive ? "text-foreground" : "text-muted-foreground",
+                )}
+              >
+                {label}
+              </span>
             </Link>
           );
         })}

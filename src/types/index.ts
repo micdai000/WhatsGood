@@ -28,6 +28,12 @@ export type {
 } from "./review-request";
 export type { Profession } from "./profession";
 export type {
+  BadgeSnapshot,
+  BadgeTier,
+  ComponentBreakdown,
+  ProfileBadge,
+} from "./badge";
+export type {
   AdminActivityItem,
   AdminDashboardData,
   AdminDashboardStats,

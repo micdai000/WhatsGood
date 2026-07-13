@@ -9,7 +9,7 @@ interface DashboardCardProps {
 
 export function DashboardCard({ title, children, className }: DashboardCardProps) {
   return (
-    <Card className={cn("shadow-sm", className)}>
+    <Card className={cn("border-border shadow-[var(--shadow-meritt-card)]", className)}>
       {title ? (
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold">{title}</CardTitle>

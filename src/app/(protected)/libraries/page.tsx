@@ -1,7 +1,5 @@
-"use client";
-
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
 import { currentUser, libraryMatchesQuery } from "@/data/mock";
 import { useLibraries } from "@/lib/libraries-store";
@@ -65,7 +63,7 @@ export default function LibrariesPage() {
         {activeTab === "yours" && (
           <div className="flex flex-col gap-4">
             <Link
-              href="/libraries/create"
+              to="/libraries/create"
               className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-neutral-200 py-10 text-center transition-all hover:border-[#D4A017] hover:bg-amber-50/30"
             >
               <Plus className="h-6 w-6 text-neutral-300" />

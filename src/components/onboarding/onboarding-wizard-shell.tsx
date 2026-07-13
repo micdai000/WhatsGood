@@ -1,7 +1,4 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { OnboardingLayout } from "@/components/onboarding/onboarding-layout";
 import { ProgressFooter } from "@/components/onboarding/progress-footer";
 import { ProgressHeader } from "@/components/onboarding/progress-header";
@@ -35,8 +32,8 @@ export function OnboardingWizardShell({
   continueDisabled = false,
   hideBack = false,
 }: OnboardingWizardShellProps) {
-  const pathname = usePathname();
-  const router = useRouter();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { isReady } = useOnboardingWizard();
   const stepMeta = getStepMetaForRoute(pathname);
   const previousRoute = getPreviousRoute(pathname);
@@ -53,7 +50,7 @@ export function OnboardingWizardShell({
     }
 
     if (nextRoute) {
-      router.push(nextRoute);
+      navigate(nextRoute);
     }
   }
 
@@ -73,7 +70,7 @@ export function OnboardingWizardShell({
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
             {!hideBack && previousRoute ? (
               <Link
-                href={previousRoute}
+                to={previousRoute}
                 className={cn(
                   buttonVariants({ variant: "outline" }),
                   "w-full sm:w-auto",

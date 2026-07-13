@@ -1,7 +1,5 @@
-"use client";
-
 import { useTransition } from "react";
-import Link from "next/link";
+import { Link, useNavigate } from "react-router-dom";
 import { LogOut, UserRound } from "lucide-react";
 import {
   signOutAction,
@@ -25,14 +23,17 @@ export function AlreadySignedInPanel({
   continueLabel = "Continue to Dashboard",
   mode,
 }: AlreadySignedInPanelProps) {
+  const navigate = useNavigate();
   const [pending, startTransition] = useTransition();
 
   function handleSignOut(redirect: "login" | "signup") {
     startTransition(async () => {
-      if (redirect === "signup") {
-        await signOutToSignupAction();
-      } else {
-        await signOutAction();
+      const result =
+        redirect === "signup"
+          ? await signOutToSignupAction()
+          : await signOutAction();
+      if (result.redirect) {
+        navigate(result.redirect, { replace: true });
       }
     });
   }
@@ -54,7 +55,7 @@ export function AlreadySignedInPanel({
 
         <div className="flex flex-col gap-3">
           <Link
-            href={continueHref}
+            to={continueHref}
             className={cn(buttonVariants({ variant: "default" }), "w-full")}
           >
             {continueLabel}

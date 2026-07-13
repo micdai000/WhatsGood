@@ -8,5 +8,6 @@ export {
 export { professionService, ProfessionService } from "./professions";
 export { dashboardService, DashboardService } from "./dashboard";
 export { adminService, AdminService } from "./admin";
+export { badgeService, BadgeService } from "./badges";
 
 export { success, failure, handleServiceError, notImplemented } from "./shared";

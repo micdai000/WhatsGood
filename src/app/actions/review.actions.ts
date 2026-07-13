@@ -1,6 +1,3 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
 import { ValidationError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { reviewService } from "@/services/reviews/review.service";
@@ -102,14 +99,9 @@ export async function createReviewAction(
         });
       }
 
-      revalidatePath(`/review/request/${requestToken}`);
-      revalidatePath("/dashboard/review-requests");
     }
 
-    revalidatePath(`/u/${slug}`);
-    revalidatePath(`/@${slug}`);
-    revalidatePath(`/review/${slug}`);
-    revalidatePath("/dashboard");
+
 
     return { success: true, data: result.data };
   } catch (error) {
@@ -140,9 +132,6 @@ export async function deleteReviewAction(
     return mapServiceFailure(result);
   }
 
-  revalidatePath(`/u/${slug}`);
-  revalidatePath(`/@${slug}`);
-  revalidatePath("/dashboard");
 
   return { success: true, data: undefined };
 }

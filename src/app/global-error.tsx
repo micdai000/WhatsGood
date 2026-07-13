@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect } from "react";
 import { reportError } from "@/lib/monitoring";
 
@@ -43,7 +41,7 @@ export default function GlobalError({
           }}
         >
           <h1 style={{ fontSize: "1.5rem", fontWeight: 600 }}>
-            TrustLoop is temporarily unavailable
+            Meritt is temporarily unavailable
           </h1>
           <p style={{ marginTop: "0.75rem", color: "#6b7280" }}>
             A critical error occurred. Please try again in a moment.

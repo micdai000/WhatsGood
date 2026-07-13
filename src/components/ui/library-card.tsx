@@ -1,5 +1,5 @@
-import Link from "next/link";
-import Image from "next/image";
+import { Link } from "react-router-dom";
+import { AppImage } from "@/components/ui/app-image";
 import { ChevronRight, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "./user-avatar";
@@ -18,15 +18,15 @@ export function LibraryCard({ library, className }: LibraryCardProps) {
 
   return (
     <Link
-      href={`/library/${library.id}`}
+      to={`/library/${library.id}`}
       className={cn(
-        "group block shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-neutral-100 transition-all duration-200 hover:ring-neutral-200 hover:shadow-lg active:scale-[0.99]",
+        "group meritt-card block shrink-0 overflow-hidden transition-all duration-200 hover:-translate-y-0.5",
         !className?.includes("w-") && "card-row-item card-row-item--wide",
         className,
       )}
     >
       <div className="relative aspect-[2/1] w-full overflow-hidden sm:aspect-[21/9]">
-        <Image
+        <AppImage
           src={library.coverImage}
           alt={library.name}
           fill
@@ -54,7 +54,7 @@ export function LibraryCard({ library, className }: LibraryCardProps) {
                 key={entity.id}
                 className="relative h-9 w-9 overflow-hidden rounded-lg ring-2 ring-white"
               >
-                <Image
+                <AppImage
                   src={entity.image}
                   alt={entity.name}
                   fill

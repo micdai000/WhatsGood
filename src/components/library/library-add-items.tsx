@@ -1,7 +1,5 @@
-"use client";
-
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -55,7 +53,7 @@ export function LibraryAddItems({
           </p>
         </div>
         <Link
-          href="/create"
+          to="/create"
           className="shrink-0 text-[13px] font-semibold text-[#D4A017] hover:underline"
         >
           Add new to Meritt

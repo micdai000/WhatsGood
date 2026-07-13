@@ -5,16 +5,23 @@ import {
 import { DisableProfessionButton } from "@/components/admin/disable-profession-button";
 import { Badge } from "@/components/ui/badge";
 import { Muted, Paragraph } from "@/components/typography/typography";
+import { Spinner } from "@/components/ui/spinner";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { adminService } from "@/services/admin";
-import { isFailure } from "@/types";
 
-export const dynamic = "force-dynamic";
+export default function AdminProfessionsPage() {
+  const result = useServiceQuery(() => adminService.getProfessions(), []);
 
-export default async function AdminProfessionsPage() {
-  const result = await adminService.getProfessions();
+  if (result.status === "loading") {
+    return (
+      <div className="flex min-h-[30vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
 
-  if (isFailure(result)) {
-    return <Paragraph className="text-destructive">{result.error.message}</Paragraph>;
+  if (result.status === "error") {
+    return <Paragraph className="text-destructive">{result.message}</Paragraph>;
   }
 
   const professions = result.data;

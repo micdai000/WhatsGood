@@ -1,6 +1,3 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
 import { adminService } from "@/services/admin";
 import { ValidationError } from "@/lib/errors";
 import type {
@@ -34,8 +31,6 @@ export async function adminDeleteReviewAction(
     return toAdminActionError(result.error);
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/admin/reviews");
   return { success: true, data: undefined };
 }
 
@@ -48,9 +43,7 @@ export async function adminDeleteProfileAction(
     return toAdminActionError(result.error);
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/admin/profiles");
-  revalidatePath("/search");
+
   return { success: true, data: undefined };
 }
 
@@ -63,8 +56,6 @@ export async function adminCreateProfessionAction(
     if (isFailure(result)) {
       return toAdminActionError(result.error);
     }
-
-    revalidatePath("/admin/professions");
     return { success: true, data: { id: result.data.id } };
   } catch (error) {
     if (error instanceof ValidationError) {
@@ -88,8 +79,6 @@ export async function adminUpdateProfessionAction(
     if (isFailure(result)) {
       return toAdminActionError(result.error);
     }
-
-    revalidatePath("/admin/professions");
     return { success: true, data: undefined };
   } catch (error) {
     if (error instanceof ValidationError) {

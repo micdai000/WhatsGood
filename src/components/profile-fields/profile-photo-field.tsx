@@ -1,7 +1,5 @@
-"use client";
-
 import { useRef, useState } from "react";
-import Image from "next/image";
+import { AppImage } from "@/components/ui/app-image";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { uploadProfilePhotoAction } from "@/app/actions/onboarding.actions";
 import { Button } from "@/components/ui/button";
@@ -62,7 +60,7 @@ export function ProfilePhotoField({
       <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-border bg-muted/20 p-6">
         {value ? (
           <div className="relative size-32 overflow-hidden rounded-full border border-border">
-            <Image
+            <AppImage
               src={value}
               alt={`${displayName} profile photo preview`}
               fill

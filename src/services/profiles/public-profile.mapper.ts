@@ -1,3 +1,4 @@
+import type { BadgeTier } from "@/types/badge";
 import type { Profile, PublicProfile } from "@/types";
 import { DEFAULTS } from "@/lib/constants";
 
@@ -12,6 +13,8 @@ export type PublicProfileRow = {
   profession_id: string | null;
   average_rating: number | string | null;
   total_reviews: number | null;
+  current_badge_tier: BadgeTier | null;
+  current_badge_period: string | null;
   professions: { name: string } | { name: string }[] | null;
 };
 
@@ -48,6 +51,8 @@ export function mapPublicProfileRow(row: PublicProfileRow): PublicProfile {
     state: row.state,
     averageRating: Number(row.average_rating ?? DEFAULTS.AVERAGE_RATING),
     totalReviews: row.total_reviews ?? DEFAULTS.TOTAL_REVIEWS,
+    badgeTier: row.current_badge_tier ?? "none",
+    badgePeriod: row.current_badge_period ?? null,
     memberSince: row.created_at,
     isComplete: isPublicProfileComplete(row),
   };
@@ -59,6 +64,8 @@ export function mapProfileToPublicProfile(
     professionName: string | null;
     averageRating?: number;
     totalReviews?: number;
+    badgeTier?: BadgeTier;
+    badgePeriod?: string | null;
   },
 ): PublicProfile {
   const professionName = options.professionName;
@@ -73,6 +80,8 @@ export function mapProfileToPublicProfile(
     state: profile.state,
     averageRating: options.averageRating ?? DEFAULTS.AVERAGE_RATING,
     totalReviews: options.totalReviews ?? DEFAULTS.TOTAL_REVIEWS,
+    badgeTier: options.badgeTier ?? "none",
+    badgePeriod: options.badgePeriod ?? null,
     memberSince: profile.createdAt,
     isComplete: Boolean(
       profile.displayName?.trim() &&

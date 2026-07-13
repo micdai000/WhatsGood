@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Suspense } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   AdminDeleteProfileButton,
   AdminEmptyState,
@@ -7,31 +6,39 @@ import {
   AdminSearchForm,
 } from "@/components/admin";
 import { Muted, Paragraph } from "@/components/typography/typography";
+import { Spinner } from "@/components/ui/spinner";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { adminService } from "@/services/admin";
 import { formatDate } from "@/lib/utils/format-date";
-import { isFailure } from "@/types";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export default function AdminProfilesPage() {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("query") ?? undefined;
+  const pageParam = searchParams.get("page");
+  const page = Number(pageParam ?? 1);
 
-interface AdminProfilesPageProps {
-  searchParams: Promise<{ query?: string; page?: string }>;
-}
+  const result = useServiceQuery(
+    () =>
+      adminService.getProfiles({
+        query,
+        page: Number.isFinite(page) ? page : 1,
+        limit: 20,
+      }),
+    [query, pageParam],
+  );
 
-export default async function AdminProfilesPage({
-  searchParams,
-}: AdminProfilesPageProps) {
-  const params = await searchParams;
-  const page = Number(params.page ?? 1);
-  const result = await adminService.getProfiles({
-    query: params.query,
-    page: Number.isFinite(page) ? page : 1,
-    limit: 20,
-  });
+  if (result.status === "loading") {
+    return (
+      <div className="flex min-h-[30vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
 
-  if (isFailure(result)) {
-    return <Paragraph className="text-destructive">{result.error.message}</Paragraph>;
+  if (result.status === "error") {
+    return <Paragraph className="text-destructive">{result.message}</Paragraph>;
   }
 
   const { items, ...pagination } = result.data;
@@ -43,9 +50,7 @@ export default async function AdminProfilesPage({
         <Muted className="text-sm">Search and moderate professional profiles.</Muted>
       </div>
 
-      <Suspense>
-        <AdminSearchForm placeholder="Search by name, username, or location…" />
-      </Suspense>
+      <AdminSearchForm placeholder="Search by name, username, or location…" />
 
       {items.length === 0 ? (
         <AdminEmptyState
@@ -89,7 +94,7 @@ export default async function AdminProfilesPage({
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
                       <Link
-                        href={`/u/${profile.username}`}
+                        to={`/u/${profile.username}`}
                         className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -112,7 +117,7 @@ export default async function AdminProfilesPage({
       <AdminPagination
         result={{ ...pagination, items }}
         basePath="/admin/profiles"
-        params={{ query: params.query }}
+        params={{ query }}
       />
     </div>
   );

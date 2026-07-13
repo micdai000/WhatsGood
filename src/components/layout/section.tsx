@@ -5,9 +5,9 @@ interface SectionProps extends React.ComponentProps<"section"> {
 }
 
 const spacingClasses = {
-  tight: "py-8 sm:py-10",
-  default: "py-10 sm:py-14",
-  loose: "py-14 sm:py-20",
+  tight: "py-10 sm:py-12",
+  default: "py-14 sm:py-20",
+  loose: "py-20 sm:py-24",
 } as const;
 
 export function Section({

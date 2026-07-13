@@ -1,7 +1,5 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { checkOnboardingStatusAction } from "@/app/actions/onboarding.actions";
 import { WelcomeContent } from "@/components/onboarding/welcome-content";
 import { LoadingState } from "@/components/layout/loading-state";
@@ -11,7 +9,7 @@ import { ONBOARDING_ROUTES } from "@/lib/onboarding/constants";
 import { UserRound } from "lucide-react";
 
 export function WelcomePageClient() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [state, setState] = useState<
     Awaited<ReturnType<typeof checkOnboardingStatusAction>> | "loading"
   >("loading");
@@ -48,7 +46,7 @@ export function WelcomePageClient() {
   }
 
   if (state.status === "has_profile") {
-    router.replace(ONBOARDING_ROUTES.dashboard);
+    navigate(ONBOARDING_ROUTES.dashboard);
     return <LoadingState label="Redirecting to your dashboard…" fullPage />;
   }
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { ChevronUp, Minus, ChevronDown } from "lucide-react";
 import { type VoteType } from "@/data/mock";

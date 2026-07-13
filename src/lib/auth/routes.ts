@@ -1,3 +1,5 @@
+import { getSiteUrl as getPublicSiteUrl } from "@/lib/public-env";
+
 export const PUBLIC_ROUTES = [
   "/",
   "/about",
@@ -48,10 +50,5 @@ export function isAuthRoute(pathname: string): boolean {
 }
 
 export function getSiteUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL;
-  if (explicit) return explicit.replace(/\/$/, "");
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
-  }
-  return "http://localhost:3000";
+  return getPublicSiteUrl();
 }

@@ -18,9 +18,14 @@ function createTypography(
   };
 }
 
+export const Eyebrow = createTypography(
+  "p",
+  "meritt-eyebrow",
+);
+
 export const H1 = createTypography(
   "h1",
-  "text-3xl font-semibold tracking-tight text-foreground sm:text-4xl",
+  "text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1]",
 );
 
 export const H2 = createTypography(
@@ -56,4 +61,9 @@ export const PageTitle = createTypography(
 export const SectionTitle = createTypography(
   "h2",
   "text-lg font-semibold tracking-tight text-foreground sm:text-xl",
+);
+
+export const SectionEyebrow = createTypography(
+  "p",
+  "meritt-eyebrow mb-2",
 );

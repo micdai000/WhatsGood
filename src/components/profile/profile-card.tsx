@@ -1,10 +1,10 @@
-import Link from "next/link";
-import Image from "next/image";
+import { Link } from "react-router-dom";
+import { AppImage } from "@/components/ui/app-image";
+import { TrustBadge } from "@/components/badges";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Paragraph, Muted } from "@/components/typography/typography";
 import { getPublicProfilePath } from "@/lib/profile/public-url";
-import { formatRating } from "@/lib/utils/format-rating";
 import type { PublicProfile } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -26,12 +26,12 @@ export function ProfileCard({ profile, className }: ProfileCardProps) {
   return (
     <Card className={cn("shadow-sm transition-shadow hover:shadow-md", className)}>
       <Link
-        href={getPublicProfilePath(profile.username)}
+        to={getPublicProfilePath(profile.username)}
         className="flex items-center gap-4 p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <div className="relative size-14 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
           {profile.avatar ? (
-            <Image
+            <AppImage
               src={profile.avatar}
               alt=""
               fill
@@ -57,8 +57,9 @@ export function ProfileCard({ profile, className }: ProfileCardProps) {
                 {profile.professionName}
               </Badge>
             ) : null}
+            <TrustBadge tier={profile.badgeTier} size="sm" />
             <Muted className="text-xs tabular-nums">
-              {formatRating(profile.averageRating)} · {profile.totalReviews} reviews
+              {profile.totalReviews} reviews
             </Muted>
           </div>
         </div>

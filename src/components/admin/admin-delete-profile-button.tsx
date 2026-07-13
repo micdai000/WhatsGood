@@ -1,5 +1,3 @@
-"use client";
-
 import { AdminConfirmDelete } from "@/components/admin/admin-confirm-delete";
 import { adminDeleteProfileAction } from "@/app/actions/admin.actions";
 

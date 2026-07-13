@@ -1,41 +1,82 @@
-import { Suspense } from "react";
+import { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { PageHeader } from "@/components/layout/page-header";
 import {
   EmptyResults,
   FilterPanel,
-  LoadingResults,
   ResultsGrid,
   SearchForm,
   SearchPagination,
   SortDropdown,
 } from "@/components/search";
+import { Spinner } from "@/components/ui/spinner";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { parseProfileSearchParams } from "@/lib/search/params";
 import { profileService } from "@/services/profiles/profile.service";
 import { professionService } from "@/services/professions/profession.service";
-import { isFailure } from "@/types";
 
-export const dynamic = "force-dynamic";
-
-interface SearchPageProps {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+function searchParamsToRecord(
+  searchParams: URLSearchParams,
+): Record<string, string | string[] | undefined> {
+  const record: Record<string, string | string[] | undefined> = {};
+  searchParams.forEach((value, key) => {
+    record[key] = value;
+  });
+  return record;
 }
 
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const resolvedParams = await searchParams;
-  const params = parseProfileSearchParams(resolvedParams);
+export default function SearchPage() {
+  const [searchParams] = useSearchParams();
+  const params = useMemo(
+    () => parseProfileSearchParams(searchParamsToRecord(searchParams)),
+    [searchParams],
+  );
 
-  const [searchResult, professionsResult] = await Promise.all([
-    profileService.searchProfiles(params),
-    professionService.getProfessions(),
-  ]);
+  const searchResult = useServiceQuery(
+    () => profileService.searchProfiles(params),
+    [
+      params.query,
+      params.professionId,
+      params.city,
+      params.state,
+      params.sort,
+      params.page,
+      params.limit,
+    ],
+  );
 
-  if (isFailure(searchResult)) {
-    throw new Error(searchResult.error.message);
+  const professionsResult = useServiceQuery(
+    () => professionService.getProfessions(),
+    [],
+  );
+
+  if (
+    searchResult.status === "loading" ||
+    professionsResult.status === "loading"
+  ) {
+    return (
+      <Section spacing="default">
+        <Container className="space-y-6">
+          <PageHeader
+            title="Find professionals"
+            description="Discover trusted tutors, coaches, consultants, and more on Meritt Pros."
+          />
+          <div className="flex justify-center py-12">
+            <Spinner className="h-8 w-8" />
+          </div>
+        </Container>
+      </Section>
+    );
   }
 
-  const professions = isFailure(professionsResult) ? [] : professionsResult.data;
+  if (searchResult.status === "error") {
+    throw new Error(searchResult.message);
+  }
+
+  const professions =
+    professionsResult.status === "success" ? professionsResult.data : [];
   const results = searchResult.data;
   const hasActiveFilters = Boolean(
     params.query || params.professionId || params.city || params.state,
@@ -46,16 +87,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <Container className="space-y-6">
         <PageHeader
           title="Find professionals"
-          description="Discover trusted tutors, coaches, consultants, and more on TrustLoop."
+          description="Discover trusted tutors, coaches, consultants, and more on Meritt Pros."
         />
 
-        <Suspense fallback={<LoadingResults count={3} />}>
-          <SearchForm params={params} />
-        </Suspense>
+        <SearchForm params={params} />
 
-        <Suspense fallback={null}>
-          <FilterPanel params={params} professions={professions} />
-        </Suspense>
+        <FilterPanel params={params} professions={professions} />
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
@@ -63,9 +100,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               ? "No results"
               : `${results.total} professional${results.total === 1 ? "" : "s"} found`}
           </p>
-          <Suspense fallback={null}>
-            <SortDropdown params={params} />
-          </Suspense>
+          <SortDropdown params={params} />
         </div>
 
         {results.items.length > 0 ? (

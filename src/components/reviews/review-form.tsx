@@ -1,7 +1,5 @@
-"use client";
-
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { createReviewAction } from "@/app/actions/review.actions";
 import { StarRatingInput } from "@/components/reviews/star-rating-input";
 import { Button } from "@/components/ui/button";
@@ -62,7 +60,7 @@ export function ReviewForm({
   lockEmail = false,
   className,
 }: ReviewFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [form, setForm] = useState<FormState>({
     ...initialState,
     reviewerEmail: prefilledEmail ?? "",
@@ -116,8 +114,7 @@ export function ReviewForm({
       }
 
       toast.success("Thank you! Your review has been submitted.");
-      router.push(getPublicProfileUrl(slug));
-      router.refresh();
+      navigate(getPublicProfileUrl(slug));
     });
   }
 

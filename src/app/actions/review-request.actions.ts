@@ -1,6 +1,3 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
 import { ValidationError } from "@/lib/errors";
 import { authService } from "@/services/auth/auth.service";
 import { reviewRequestService } from "@/services/reviewRequests/review-request.service";
@@ -54,9 +51,6 @@ export async function createReviewRequestAction(
       return mapServiceFailure(result);
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/review-requests");
-
     return {
       success: true,
       data: {
@@ -90,9 +84,6 @@ export async function expireReviewRequestAction(
   if (isFailure(result)) {
     return mapServiceFailure(result);
   }
-
-  revalidatePath("/dashboard");
-  revalidatePath("/dashboard/review-requests");
 
   return { success: true, data: result.data };
 }

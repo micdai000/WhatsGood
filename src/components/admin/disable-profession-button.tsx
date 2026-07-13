@@ -1,7 +1,5 @@
-"use client";
-
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { adminUpdateProfessionAction } from "@/app/actions/admin.actions";
 import { Button } from "@/components/ui/button";
 
@@ -16,7 +14,7 @@ export function DisableProfessionButton({
   isDisabled,
   name,
 }: DisableProfessionButtonProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [pending, startTransition] = useTransition();
 
   return (
@@ -28,7 +26,7 @@ export function DisableProfessionButton({
       onClick={() => {
         startTransition(async () => {
           await adminUpdateProfessionAction(id, { isDisabled: !isDisabled });
-          router.refresh();
+          navigate(0);
         });
       }}
     >

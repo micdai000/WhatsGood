@@ -36,6 +36,18 @@ export const REVIEW_REQUEST = {
 } as const;
 
 export const ONBOARDING = {
-  STORAGE_KEY: "trustloop-onboarding-v1",
+  STORAGE_KEY: "meritt-onboarding-v1",
   TOTAL_STEPS: 8,
 } as const;
+
+export {
+  BADGE_TIERS,
+  BAYESIAN_CONFIDENCE_C,
+  FIXED_THRESHOLD_FALLBACK,
+  MIN_COHORT_SIZE_FOR_PERCENTILE,
+  MIN_REVIEWS_FOR_ELIGIBILITY,
+  PERCENTILE_CUTOFFS,
+  RECENCY_HALF_LIFE_DAYS,
+  TRUST_SCORE_WEIGHTS,
+  VERIFIED_MULTIPLIER,
+} from "./badges";

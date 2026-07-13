@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import {

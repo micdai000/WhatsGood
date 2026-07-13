@@ -1,5 +1,3 @@
-"use client";
-
 import { LibrariesProvider } from "@/lib/libraries-store";
 import { LikesProvider } from "@/lib/likes-store";
 

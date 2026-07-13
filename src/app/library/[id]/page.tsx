@@ -1,9 +1,7 @@
-"use client";
-
 import { useMemo, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useParams, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { AppImage } from "@/components/ui/app-image";
 import { ChevronLeft, Share2, Users, X, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { allEntities, formatCount } from "@/data/mock";
@@ -15,7 +13,7 @@ import { LibraryAddItems } from "@/components/library/library-add-items";
 
 export default function LibraryDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const isNew = searchParams.get("new") === "1";
 
   const {
@@ -25,7 +23,7 @@ export default function LibraryDetailPage() {
     removeEntityFromLibrary,
   } = useLibraries();
 
-  const library = getLibrary(id);
+  const library = id ? getLibrary(id) : undefined;
   const [following, setFollowing] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(isNew);
 
@@ -47,7 +45,7 @@ export default function LibraryDetailPage() {
             This library doesn&apos;t exist.
           </p>
           <Link
-            href="/libraries"
+            to="/libraries"
             className="mt-4 inline-block text-[14px] font-semibold text-[#D4A017]"
           >
             Back to libraries
@@ -60,7 +58,7 @@ export default function LibraryDetailPage() {
   return (
     <div className="w-full pb-28">
       <div className="entity-hero">
-        <Image
+        <AppImage
           src={library.coverImage}
           alt={library.name}
           fill
@@ -70,7 +68,7 @@ export default function LibraryDetailPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
         <Link
-          href="/libraries"
+          to="/libraries"
           className="absolute top-5 left-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm"
         >
           <ChevronLeft className="h-5 w-5 text-[#111]" />

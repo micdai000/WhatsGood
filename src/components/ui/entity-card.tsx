@@ -1,7 +1,5 @@
-"use client";
-
-import Link from "next/link";
-import Image from "next/image";
+import { Link } from "react-router-dom";
+import { AppImage } from "@/components/ui/app-image";
 import { cn } from "@/lib/utils";
 import { TierBadge } from "./tier-badge";
 import { formatCount, categoryLabels, formatFoodLocationLabel, type Entity } from "@/data/mock";
@@ -22,11 +20,11 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
   if (size === "large") {
     return (
       <Link
-        href={`/entity/${entity.id}`}
+        to={`/entity/${entity.id}`}
         className={cn("card-row-item", className)}
       >
-        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl">
-          <Image
+        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[1.5rem] border border-border">
+          <AppImage
             src={entity.image}
             alt={entity.name}
             fill
@@ -43,7 +41,7 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
           </div>
         </div>
         <div className="mt-3">
-          <h3 className="text-base font-semibold text-[#111] leading-snug truncate">
+          <h3 className="truncate text-base font-semibold leading-snug text-foreground">
             {entity.name}
           </h3>
           {entity.category === "food" && entity.foodLocations && (
@@ -92,14 +90,14 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
 
   return (
     <Link
-      href={`/entity/${entity.id}`}
+      to={`/entity/${entity.id}`}
       className={cn(
-        "flex rounded-2xl bg-white p-2.5 gap-3.5 hover:bg-neutral-50 transition-colors",
+        "meritt-panel flex gap-3.5 p-2.5 transition-colors hover:bg-white",
         className,
       )}
     >
-      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl">
-        <Image
+      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-border">
+        <AppImage
           src={entity.image}
           alt={entity.name}
           fill
@@ -108,10 +106,10 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
         />
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center">
-        <p className="text-[11px] uppercase tracking-widest text-neutral-400 font-medium">
+        <p className="mt-0.5 text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
           {categoryLabels[entity.category]}
         </p>
-        <h3 className="text-[15px] font-semibold text-[#111] leading-snug mt-0.5 truncate">
+        <h3 className="mt-0.5 truncate text-[15px] font-semibold leading-snug text-foreground">
           {entity.name}
         </h3>
         {entity.category === "food" && entity.foodLocations && (

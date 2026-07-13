@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useTransition } from "react";
 import { createReviewRequestAction } from "@/app/actions/review-request.actions";
 import { CopyLinkButton } from "@/components/dashboard/copy-link-button";
