@@ -11,7 +11,7 @@ import {
   StatisticsGrid,
   TrendChart,
 } from "@/components/dashboard";
-import { ReviewCard } from "@/components/reviews/review-card";
+import { ReviewList } from "@/components/reviews/review-list";
 import { Muted } from "@/components/typography/typography";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuthContext } from "@/contexts/auth-context";
@@ -52,20 +52,26 @@ export default function DashboardPage() {
   return (
     <Section>
       <Container className="space-y-8">
+        {/* 1. Welcome Header */}
         <DashboardHeader profile={profile} />
 
+        {/* 2. Key Statistics */}
         <StatisticsGrid statistics={statistics} />
 
+        {/* 3. Quick Actions — primary navigation hub */}
         <QuickActions profile={profile} />
 
-        <section
-          className="grid gap-4 lg:grid-cols-2"
-          aria-label="Analytics charts"
-        >
-          <TrendChart trend={reviewTrend} />
-          <RatingDistribution distribution={ratingDistribution} />
-        </section>
+        {/* 4. Recent Activity */}
+        {recentActivity.length > 0 ? (
+          <ActivityFeed items={recentActivity} />
+        ) : (
+          <EmptyDashboard
+            title="No activity yet"
+            description="Activity will appear here as you receive reviews and send requests."
+          />
+        )}
 
+        {/* 5. Recent Reviews */}
         <section className="space-y-4" aria-labelledby="recent-reviews-heading">
           <div className="flex items-center justify-between gap-4">
             <h2 id="recent-reviews-heading" className="text-lg font-semibold">
@@ -77,13 +83,7 @@ export default function DashboardPage() {
           </div>
 
           {recentReviews.length > 0 ? (
-            <ul className="space-y-4">
-              {recentReviews.map((review) => (
-                <li key={review.id}>
-                  <ReviewCard review={review} />
-                </li>
-              ))}
-            </ul>
+            <ReviewList reviews={recentReviews} />
           ) : (
             <EmptyDashboard
               title="No reviews yet"
@@ -92,6 +92,16 @@ export default function DashboardPage() {
           )}
         </section>
 
+        {/* Analytics — deeper insights */}
+        <section
+          className="grid gap-4 lg:grid-cols-2"
+          aria-label="Analytics charts"
+        >
+          <TrendChart trend={reviewTrend} />
+          <RatingDistribution distribution={ratingDistribution} />
+        </section>
+
+        {/* Review Requests */}
         <section className="space-y-4" aria-labelledby="recent-requests-heading">
           <div className="flex items-center justify-between gap-4">
             <h2 id="recent-requests-heading" className="text-lg font-semibold">
@@ -120,10 +130,6 @@ export default function DashboardPage() {
             />
           )}
         </section>
-
-        {recentActivity.length > 0 ? (
-          <ActivityFeed items={recentActivity} />
-        ) : null}
       </Container>
     </Section>
   );

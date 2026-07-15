@@ -1,4 +1,4 @@
-import { activityFeed, allEntities, libraries, type Entity } from "./mock";
+import { activityFeed, allEntities, type Entity } from "./mock";
 
 function byScoreDesc(a: Entity, b: Entity) {
   return b.score - a.score;
@@ -30,7 +30,5 @@ export const mostFollowedEntities = [...allEntities]
 export const recentlyAddedEntities = allEntities
   .filter((e) => e.recentlyAdded)
   .slice(0, 8);
-
-export const homeLibraries = libraries.slice(0, 6);
 
 export const homeActivity = activityFeed.slice(0, 5);

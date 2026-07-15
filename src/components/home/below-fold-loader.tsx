@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import type { Entity, Library } from "@/data/mock";
+import type { Entity } from "@/data/mock";
 import { BelowFoldSkeleton } from "./below-fold-skeleton";
 
 const BelowFoldSections = lazy(() =>
@@ -10,7 +10,6 @@ interface BelowFoldLoaderProps {
   eliteEntities: Entity[];
   trendingUpEntities: Entity[];
   mostFollowedEntities: Entity[];
-  homeLibraries: Library[];
   trendingDownEntities: Entity[];
   recentlyAddedEntities: Entity[];
 }

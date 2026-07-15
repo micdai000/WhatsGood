@@ -12,17 +12,14 @@ import {
   formatFoodLocationLabel,
   type FoodLocation,
 } from "@/data/mock";
-import { useLibraries } from "@/lib/libraries-store";
 import { useLikes } from "@/lib/likes-store";
 import { TierBadge } from "@/components/ui/tier-badge";
 import { VoteButtons } from "@/components/ui/vote-buttons";
-import { LibraryCard } from "@/components/ui/library-card";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FoodLocationPicker } from "@/components/ui/food-location-picker";
 
 export default function EntityDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { libraries } = useLibraries();
   const { isLiked, toggleLike } = useLikes();
   const entity = allEntities.find((e) => e.id === id);
 
@@ -57,10 +54,6 @@ export default function EntityDetailPage() {
   const displayTier = activeLocation?.tier ?? entity.tier;
   const displayVotes = activeLocation?.totalVotes ?? entity.totalVotes;
   const displayTrending = activeLocation?.trending ?? entity.trending;
-
-  const includedInLibraries = libraries.filter((lib) =>
-    lib.entityIds.includes(entity.id),
-  );
 
   const currentVote =
     !isFood || activeLocation
@@ -214,21 +207,6 @@ export default function EntityDetailPage() {
           )}
         </div>
 
-        {/* Included In Libraries */}
-        <div className="mt-10 mb-8">
-          <SectionHeader title="Included In" />
-          {includedInLibraries.length > 0 ? (
-            <div className="card-row card-row--wide hide-scrollbar">
-              {includedInLibraries.map((lib) => (
-                <LibraryCard key={lib.id} library={lib} />
-              ))}
-            </div>
-          ) : (
-            <p className="py-6 text-[14px] text-neutral-300">
-              No one has added this to a library yet.
-            </p>
-          )}
-        </div>
       </div>
     </div>
   );

@@ -7,7 +7,6 @@ import {
   ChevronUp,
   ChevronDown,
   Minus,
-  Plus,
   UserPlus,
   ArrowUpRight,
 } from "lucide-react";
@@ -25,7 +24,6 @@ const iconConfig: Record<
   demote: { icon: ChevronDown, bg: "bg-red-500/10", text: "text-red-500" },
   tier_up: { icon: ArrowUpRight, bg: "bg-violet-500/10", text: "text-violet-600" },
   tier_down: { icon: ChevronDown, bg: "bg-orange-500/10", text: "text-orange-500" },
-  create_library: { icon: Plus, bg: "bg-amber-500/10", text: "text-amber-600" },
   follow: { icon: UserPlus, bg: "bg-sky-500/10", text: "text-sky-600" },
   maintain: { icon: Minus, bg: "bg-amber-500/10", text: "text-amber-600" },
 };
@@ -60,13 +58,6 @@ function ActivityDescription({ item }: { item: ActivityItem }) {
         <>
           <strong className="text-[#111]">{item.userName}</strong> maintained{" "}
           <EntityLink name={item.entityName!} id={item.entityId} />
-        </>
-      );
-    case "create_library":
-      return (
-        <>
-          <strong className="text-[#111]">{item.userName}</strong> created{" "}
-          <strong className="text-[#111]">{item.libraryName}</strong>
         </>
       );
     case "tier_up":

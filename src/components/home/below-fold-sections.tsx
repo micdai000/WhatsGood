@@ -1,16 +1,14 @@
 import { Link } from "react-router-dom";
 import { AppImage } from "@/components/ui/app-image";
 import { TrendingDown } from "lucide-react";
-import { categoryLabels, type Entity, type Library } from "@/data/mock";
+import { categoryLabels, type Entity } from "@/data/mock";
 import { EntityCard } from "@/components/ui/entity-card";
-import { LibraryCard } from "@/components/ui/library-card";
 import { SectionHeader } from "@/components/ui/section-header";
 
 interface BelowFoldSectionsProps {
   eliteEntities: Entity[];
   trendingUpEntities: Entity[];
   mostFollowedEntities: Entity[];
-  homeLibraries: Library[];
   trendingDownEntities: Entity[];
   recentlyAddedEntities: Entity[];
 }
@@ -19,7 +17,6 @@ export function BelowFoldSections({
   eliteEntities,
   trendingUpEntities,
   mostFollowedEntities,
-  homeLibraries,
   trendingDownEntities,
   recentlyAddedEntities,
 }: BelowFoldSectionsProps) {
@@ -63,20 +60,6 @@ export function BelowFoldSections({
         <div className="card-row page-x hide-scrollbar">
           {mostFollowedEntities.map((entity) => (
             <EntityCard key={entity.id} entity={entity} size="large" />
-          ))}
-        </div>
-      </section>
-
-      <section className="section-gap">
-        <div className="page-x">
-          <SectionHeader
-            title="Libraries"
-            subtitle="Curated collections from the community"
-          />
-        </div>
-        <div className="card-row card-row--wide page-x hide-scrollbar">
-          {homeLibraries.map((lib) => (
-            <LibraryCard key={lib.id} library={lib} />
           ))}
         </div>
       </section>

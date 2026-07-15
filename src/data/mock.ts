@@ -55,28 +55,13 @@ export interface Vote {
   foodLocationId?: string;
 }
 
-export interface Library {
-  id: string;
-  name: string;
-  description: string;
-  coverImage: string;
-  entityCount: number;
-  followerCount: number;
-  creator: User;
-  entityIds: string[];
-  isPublic: boolean;
-  isLocationBased?: boolean;
-  location?: string;
-}
-
 export interface ActivityItem {
   id: string;
-  type: "promote" | "demote" | "maintain" | "create_library" | "tier_up" | "tier_down" | "follow";
+  type: "promote" | "demote" | "maintain" | "tier_up" | "tier_down" | "follow";
   userName?: string;
   userAvatar?: string;
   entityName?: string;
   entityId?: string;
-  libraryName?: string;
   tier?: Tier;
   previousTier?: Tier;
   timestamp: string;
@@ -478,32 +463,6 @@ export function entityMatchesQuery(entity: Entity, query: string): boolean {
   return tokens.every((token) => combined.includes(token));
 }
 
-export function libraryMatchesQuery(library: Library, query: string): boolean {
-  const normalizedQuery = normalizeSearchText(query);
-  if (!normalizedQuery) return true;
-
-  const texts = [
-    library.name,
-    library.description,
-    library.creator.displayName,
-    library.creator.username,
-    library.location ?? "",
-  ].map(normalizeSearchText);
-
-  const combined = texts.join(" ");
-
-  if (texts.some((text) => text.includes(normalizedQuery))) {
-    return true;
-  }
-
-  if (combined.includes(normalizedQuery)) {
-    return true;
-  }
-
-  const tokens = normalizedQuery.split(" ").filter(Boolean);
-  return tokens.every((token) => combined.includes(token));
-}
-
 // ─── PLACES (20) ────────────────────────────────────
 
 export const places: Entity[] = [
@@ -855,49 +814,6 @@ export const entityRegions = [
   ),
 ].sort();
 
-// ─── LIBRARIES ──────────────────────────────────────
-
-export const libraries: Library[] = [
-  {
-    id: "l1", name: "Fast Food Hall of Fame", description: "The chains that earned their reputation.",
-    coverImage: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop",
-    entityCount: 24, followerCount: 4890, creator: users[1],
-    entityIds: ["f1", "f2", "f3", "f5", "f9", "f12", "f16", "f18"], isPublic: true,
-  },
-  {
-    id: "l2", name: "Must-Visit Natural Wonders", description: "Places that make you feel small in the best way.",
-    coverImage: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=800&h=600&fit=crop",
-    entityCount: 18, followerCount: 6420, creator: users[2],
-    entityIds: ["p1", "p2", "p3", "p4", "p5", "p9", "p13", "p18", "p20"], isPublic: true,
-  },
-  {
-    id: "l3", name: "Peak Television", description: "Shows that define the golden age.",
-    coverImage: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&h=600&fit=crop",
-    entityCount: 31, followerCount: 8650, creator: users[3],
-    entityIds: ["m1", "m2", "m3", "m4", "m5", "m7", "m9", "m10", "m15", "m19"], isPublic: true,
-  },
-  {
-    id: "l4", name: "Tokyo in 72 Hours", description: "Everything you need in a long weekend in Tokyo.",
-    coverImage: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=600&fit=crop",
-    entityCount: 15, followerCount: 3310, creator: users[4],
-    entityIds: ["p1", "p8", "e4"], isPublic: true,
-    isLocationBased: true, location: "Tokyo, Japan",
-  },
-  {
-    id: "l5", name: "LA Food Scene", description: "The definitive guide to eating well in Los Angeles.",
-    coverImage: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop",
-    entityCount: 42, followerCount: 5670, creator: users[1],
-    entityIds: ["f1", "f3", "f4", "f6", "f7", "f20"], isPublic: true,
-    isLocationBased: true, location: "Los Angeles, CA",
-  },
-  {
-    id: "l6", name: "Weekend Experiences", description: "Immersive experiences worth your Saturday.",
-    coverImage: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&h=600&fit=crop",
-    entityCount: 20, followerCount: 2540, creator: currentUser,
-    entityIds: ["e1", "e2", "e3", "e4", "e6", "e7", "e8", "e17"], isPublic: true,
-  },
-];
-
 // ─── ACTIVITY FEED ──────────────────────────────────
 
 export const activityFeed: ActivityItem[] = [
@@ -908,10 +824,6 @@ export const activityFeed: ActivityItem[] = [
   {
     id: "a2", type: "tier_up", entityName: "Costco Pizza", entityId: "f1",
     tier: "elite", previousTier: "platinum", timestamp: "5m ago",
-  },
-  {
-    id: "a3", type: "create_library", userName: "Sarah Chen", userAvatar: users[1].avatar,
-    libraryName: "Fast Food Hall of Fame", timestamp: "12m ago",
   },
   {
     id: "a4", type: "promote", userName: "Emily Rodriguez", userAvatar: users[3].avatar,
@@ -968,10 +880,6 @@ export const activityFeed: ActivityItem[] = [
   {
     id: "a17", type: "maintain", userName: "Sarah Chen", userAvatar: users[1].avatar,
     entityName: "In-N-Out Burger", entityId: "f3", timestamp: "6h ago",
-  },
-  {
-    id: "a18", type: "create_library", userName: "James Wilson", userAvatar: users[2].avatar,
-    libraryName: "Must-Visit Natural Wonders", timestamp: "8h ago",
   },
 ];
 

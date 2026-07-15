@@ -2,12 +2,13 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
+import { UserMenu } from "@/components/layout/user-menu";
 import { useAuthContext } from "@/contexts/auth-context";
 import { isAuthRoute } from "@/lib/auth/routes";
 import { SITE_NAME } from "@/lib/seo/site";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
+const publicNavLinks = [
   { href: "/search", label: "Discover" },
   { href: "/about", label: "About" },
   { href: "/pricing", label: "Pricing" },
@@ -20,6 +21,12 @@ export function SiteHeader({ className }: { className?: string }) {
   if (isAuthRoute(pathname)) {
     return null;
   }
+
+  const isAuthenticated = !loading && !!user;
+
+  const navLinks = isAuthenticated
+    ? [{ href: "/dashboard", label: "Dashboard" }, ...publicNavLinks]
+    : publicNavLinks;
 
   return (
     <header
@@ -51,31 +58,24 @@ export function SiteHeader({ className }: { className?: string }) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          {loading ? null : user ? (
+        {loading ? null : isAuthenticated ? (
+          <UserMenu userId={user.id} email={user.email} />
+        ) : (
+          <div className="flex items-center gap-2">
             <Link
-              to="/dashboard"
-              className={buttonVariants({ size: "sm" })}
+              to="/login"
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "sm" }),
+                "hidden sm:inline-flex",
+              )}
             >
-              Dashboard
+              Log in
             </Link>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "hidden sm:inline-flex",
-                )}
-              >
-                Log in
-              </Link>
-              <Link to="/signup" className={buttonVariants({ size: "sm" })}>
-                Join as a pro
-              </Link>
-            </>
-          )}
-        </div>
+            <Link to="/signup" className={buttonVariants({ size: "sm" })}>
+              Join as a pro
+            </Link>
+          </div>
+        )}
       </Container>
     </header>
   );
