@@ -1,6 +1,4 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useTransition } from "react";
 import { Label } from "@/components/ui/label";
 import { buildSearchUrl } from "@/lib/search/params";
@@ -20,13 +18,13 @@ interface SortDropdownProps {
 }
 
 export function SortDropdown({ params, className }: SortDropdownProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [isPending, startTransition] = useTransition();
 
   function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const sort = event.target.value as ProfileSearchParams["sort"];
     startTransition(() => {
-      router.push(
+      navigate(
         buildSearchUrl("/search", {
           ...params,
           sort,

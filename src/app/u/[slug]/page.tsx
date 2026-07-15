@@ -1,68 +1,42 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { useParams } from "react-router-dom";
 import { PublicProfileView } from "@/components/profile/public-profile-view";
+import ProfileNotFound from "@/app/u/[slug]/not-found";
 import { JsonLd } from "@/components/seo/json-ld";
+import { Spinner } from "@/components/ui/spinner";
+import { useServiceQuery } from "@/hooks/use-service-query";
+import { NotFoundError } from "@/lib/errors";
 import { getCanonicalUrl } from "@/lib/seo/site";
+import { getPublicProfilePath } from "@/lib/profile/public-url";
 import { profileService } from "@/services/profiles/profile.service";
-import { isFailure } from "@/types";
+import { failure } from "@/types";
 
-export const dynamic = "force-dynamic";
+export default function PublicProfilePage() {
+  const { slug } = useParams<{ slug: string }>();
 
-interface PublicProfilePageProps {
-  params: Promise<{ slug: string }>;
-}
+  const result = useServiceQuery(
+    () => {
+      if (!slug) {
+        return Promise.resolve(failure(new NotFoundError("Profile")));
+      }
+      return profileService.getPublicProfile(slug);
+    },
+    [slug],
+  );
 
-export async function generateMetadata({
-  params,
-}: PublicProfilePageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const result = await profileService.getPublicProfile(slug);
-
-  if (isFailure(result)) {
-    return { title: "Profile not found | TrustLoop" };
+  if (!slug) {
+    return <ProfileNotFound />;
   }
 
-  const { displayName, professionName, bio } = result.data;
-  const description =
-    bio?.trim() ||
-    (professionName
-      ? `${displayName} — ${professionName} on TrustLoop`
-      : `${displayName} on TrustLoop`);
+  if (result.status === "loading") {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
 
-  const profileUrl = getCanonicalUrl(`/@${slug}`);
-
-  return {
-    title: displayName,
-    description,
-    alternates: {
-      canonical: profileUrl,
-    },
-    openGraph: {
-      title: `${displayName} | TrustLoop`,
-      description,
-      type: "profile",
-      url: profileUrl,
-    },
-    twitter: {
-      card: "summary",
-      title: `${displayName} | TrustLoop`,
-      description,
-    },
-  };
-}
-
-export default async function PublicProfilePage({
-  params,
-}: PublicProfilePageProps) {
-  const { slug } = await params;
-  const result = await profileService.getPublicProfile(slug);
-
-  if (isFailure(result)) {
-    if (result.error.code === "NOT_FOUND") {
-      notFound();
-    }
-
-    throw new Error(result.error.message);
+  if (result.status === "error") {
+    return <ProfileNotFound />;
   }
 
   const profile = result.data;
@@ -72,7 +46,7 @@ export default async function PublicProfilePage({
     "@type": "Person",
     name: profile.displayName,
     description: profile.bio ?? undefined,
-    url: getCanonicalUrl(`/@${profile.username}`),
+    url: getCanonicalUrl(getPublicProfilePath(profile.username)),
     jobTitle: profile.professionName ?? undefined,
     address: profile.city
       ? {

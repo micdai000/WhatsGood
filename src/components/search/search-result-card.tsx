@@ -1,11 +1,11 @@
-import Link from "next/link";
-import Image from "next/image";
-import { MapPin, Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import { AppImage } from "@/components/ui/app-image";
+import { MapPin } from "lucide-react";
+import { TrustBadge } from "@/components/badges";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Paragraph, Muted } from "@/components/typography/typography";
 import { getPublicProfilePath } from "@/lib/profile/public-url";
-import { formatRating } from "@/lib/utils/format-rating";
 import type { PublicProfile } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -37,14 +37,14 @@ export function SearchResultCard({ profile, className }: SearchResultCardProps) 
       )}
     >
       <Link
-        href={getPublicProfilePath(profile.username)}
+        to={getPublicProfilePath(profile.username)}
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <CardContent className="flex flex-1 flex-col gap-4 p-4">
           <div className="flex items-start gap-3">
             <div className="relative size-14 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
               {profile.avatar ? (
-                <Image
+                <AppImage
                   src={profile.avatar}
                   alt=""
                   fill
@@ -81,17 +81,11 @@ export function SearchResultCard({ profile, className }: SearchResultCardProps) 
             </Muted>
           ) : null}
 
-          <div className="mt-auto flex items-center gap-1.5 text-sm">
-            <Star
-              className="size-4 fill-amber-400 text-amber-400"
-              aria-hidden
-            />
-            <span className="font-medium tabular-nums">
-              {formatRating(profile.averageRating)}
-            </span>
+          <div className="mt-auto flex flex-wrap items-center gap-2">
+            <TrustBadge tier={profile.badgeTier} size="sm" />
             <Muted className="text-xs">
-              ({profile.totalReviews}{" "}
-              {profile.totalReviews === 1 ? "review" : "reviews"})
+              {profile.totalReviews}{" "}
+              {profile.totalReviews === 1 ? "review" : "reviews"}
             </Muted>
           </div>
         </CardContent>

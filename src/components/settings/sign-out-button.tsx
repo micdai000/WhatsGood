@@ -1,11 +1,11 @@
-"use client";
-
 import { useTransition } from "react";
+import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth.actions";
 import { Button } from "@/components/ui/button";
 
 export function SignOutButton() {
+  const navigate = useNavigate();
   const [pending, startTransition] = useTransition();
 
   return (
@@ -15,7 +15,10 @@ export function SignOutButton() {
       disabled={pending}
       onClick={() => {
         startTransition(async () => {
-          await signOutAction();
+          const result = await signOutAction();
+          if (result.redirect) {
+            navigate(result.redirect, { replace: true });
+          }
         });
       }}
     >

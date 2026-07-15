@@ -1,6 +1,4 @@
-import "server-only";
-
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { authService } from "@/services/auth/auth.service";
 import {
   AuthorizationError,
@@ -35,7 +33,7 @@ export class ReviewService {
 
     try {
       const { id: reviewId } = validate(reviewIdSchema, { id });
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data, error } = await supabase
         .from("reviews")
@@ -77,7 +75,7 @@ export class ReviewService {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error, count } = await supabase
         .from("reviews")
         .select("*", { count: "exact" })
@@ -118,7 +116,7 @@ export class ReviewService {
         reviewRequestId: input.reviewRequestId ?? null,
       });
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("reviews")
         .insert({
@@ -176,7 +174,7 @@ export class ReviewService {
         profileId,
       });
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("profiles")
         .select("average_rating, total_reviews")
@@ -211,7 +209,7 @@ export class ReviewService {
         profileId,
       });
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("reviews")
         .select("rating")
@@ -272,7 +270,7 @@ export class ReviewService {
         );
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { error } = await supabase
         .from("reviews")
         .delete()

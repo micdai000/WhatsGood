@@ -1,3 +1,4 @@
+import { SITE_NAME } from "@/lib/seo/site";
 import { cn } from "@/lib/utils";
 import {
   Card,
@@ -21,9 +22,9 @@ export function AuthCard({
   className,
 }: AuthCardProps) {
   return (
-    <Card className={cn("w-full max-w-md shadow-sm", className)}>
+    <Card className={cn("w-full max-w-md border-border shadow-[var(--shadow-meritt-card)]", className)}>
       <CardHeader className="text-center">
-        <p className="text-sm font-semibold text-foreground">TrustLoop</p>
+        <p className="text-sm font-semibold text-foreground">{SITE_NAME}</p>
         <CardTitle className="text-2xl">{title}</CardTitle>
         {description ? (
           <CardDescription>{description}</CardDescription>

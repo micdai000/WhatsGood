@@ -1,6 +1,4 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useTransition } from "react";
 import { SearchBar } from "@/components/search/search-bar";
 import { useUrlSyncedState } from "@/hooks/use-url-synced-state";
@@ -14,7 +12,7 @@ interface SearchFormProps {
 }
 
 export function SearchForm({ params, className }: SearchFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useUrlSyncedState(params.query);
 
@@ -23,7 +21,7 @@ export function SearchForm({ params, className }: SearchFormProps) {
     const trimmed = query.trim();
 
     startTransition(() => {
-      router.push(
+      navigate(
         buildSearchUrl("/search", {
           ...params,
           query: trimmed || undefined,

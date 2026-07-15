@@ -1,8 +1,6 @@
-"use client";
-
 import { useActionState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   updatePasswordAction,
   type AuthActionState,
@@ -27,7 +25,7 @@ export function ResetPasswordForm({
 }: {
   hasRecoverySession?: boolean;
 }) {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [password, setPassword] = useState("");
   const [state, formAction, pending] = useActionState(
     updatePasswordAction,
@@ -87,7 +85,7 @@ export function ResetPasswordForm({
       ) : null}
 
       <Muted className="mt-6 text-center">
-        <Link href="/login" className="font-medium text-foreground hover:underline">
+        <Link to="/login" className="font-medium text-foreground hover:underline">
           Back to sign in
         </Link>
       </Muted>

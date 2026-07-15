@@ -23,7 +23,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
           <StatusAlert
             status="warning"
             title="Profile setup in progress"
-            description="This professional is still completing their TrustLoop profile. Check back soon for their full public presence."
+            description="This professional is still completing their Meritt profile. Check back soon for their full public presence."
           />
         ) : null}
 
@@ -42,7 +42,9 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
         <ProfileReviewsSection
           slug={profile.username}
           displayName={profile.displayName}
-          averageRating={profile.averageRating}
+          professionName={profile.professionName}
+          badgeTier={profile.badgeTier}
+          badgePeriod={profile.badgePeriod}
           totalReviews={profile.totalReviews}
         />
 

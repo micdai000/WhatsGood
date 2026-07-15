@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
@@ -11,7 +11,7 @@ export function HomeHero() {
         <div className="max-w-2xl space-y-3">
           <H1>Build trust through verified reviews</H1>
           <Paragraph className="text-muted-foreground">
-            TrustLoop helps independent professionals collect authentic
+            Meritt helps independent professionals collect authentic
             feedback, showcase their reputation, and grow with confidence.
           </Paragraph>
           <Muted>
@@ -20,11 +20,11 @@ export function HomeHero() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Link href="/auth/signup" className={buttonVariants()}>
+          <Link to="/auth/signup" className={buttonVariants()}>
             Get started free
           </Link>
           <Link
-            href="/search"
+            to="/search"
             className={buttonVariants({ variant: "outline" })}
           >
             Explore professionals

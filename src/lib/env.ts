@@ -1,8 +1,9 @@
 import { z } from "zod";
-
-const serverEnvSchema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-});
+import {
+  getSiteUrl,
+  getSupabaseAnonKey,
+  getSupabaseUrl,
+} from "@/lib/public-env";
 
 const basePublicEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
@@ -11,28 +12,25 @@ const basePublicEnvSchema = z.object({
 });
 
 const productionPublicEnvSchema = basePublicEnvSchema.extend({
-  NEXT_PUBLIC_SITE_URL: z.string().url({ message: "NEXT_PUBLIC_SITE_URL is required in production" }),
+  NEXT_PUBLIC_SITE_URL: z.string().url({
+    message: "NEXT_PUBLIC_SITE_URL is required in production",
+  }),
 });
 
 export type PublicEnv = z.infer<typeof basePublicEnvSchema>;
 
 let validatedPublicEnv: PublicEnv | null = null;
 
-/**
- * Validates required public environment variables.
- * Called from instrumentation during production builds/startup.
- * NEXT_PUBLIC_SITE_URL is required in production, optional in development.
- */
 export function validatePublicEnv(): PublicEnv {
   if (validatedPublicEnv) return validatedPublicEnv;
 
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = import.meta.env.PROD;
   const schema = isProduction ? productionPublicEnvSchema : basePublicEnvSchema;
 
   const result = schema.safeParse({
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_SUPABASE_URL: getSupabaseUrl(),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: getSupabaseAnonKey(),
+    NEXT_PUBLIC_SITE_URL: getSiteUrl(),
   });
 
   if (!result.success) {
@@ -49,9 +47,9 @@ export function validatePublicEnv(): PublicEnv {
 }
 
 export function getNodeEnv(): string {
-  return serverEnvSchema.parse({ NODE_ENV: process.env.NODE_ENV }).NODE_ENV;
+  return import.meta.env.MODE;
 }
 
 export function isProduction(): boolean {
-  return getNodeEnv() === "production";
+  return import.meta.env.PROD;
 }

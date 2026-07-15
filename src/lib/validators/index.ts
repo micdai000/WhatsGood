@@ -55,3 +55,11 @@ export {
   adminReviewIdSchema,
   adminProfileIdSchema,
 } from "./admin";
+
+export {
+  badgeSnapshotSchema,
+  profileBadgeQuerySchema,
+  badgePeriodSchema,
+  badgeHistoryQuerySchema,
+} from "./badge";
+export type { BadgeSnapshotSchema, ProfileBadgeQuerySchema } from "./badge";

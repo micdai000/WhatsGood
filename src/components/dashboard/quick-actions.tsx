@@ -56,7 +56,7 @@ export function QuickActions({ profile, className }: QuickActionsProps) {
         />
         <QuickActionCard
           title="Discover professionals"
-          description="See how others appear in TrustLoop search."
+          description="See how others appear in Meritt search."
           href="/search"
           icon={Search}
         />

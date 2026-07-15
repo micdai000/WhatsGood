@@ -1,5 +1,3 @@
-"use client";
-
 import { type ToasterProps, Toaster as Sonner } from "sonner";
 import {
   CircleCheckIcon,

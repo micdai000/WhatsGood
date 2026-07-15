@@ -1,3 +1,5 @@
+import type { BadgeTier } from "./badge";
+
 export interface Profile {
   id: string;
   username: string;
@@ -27,6 +29,8 @@ export interface PublicProfile {
   state: string | null;
   averageRating: number;
   totalReviews: number;
+  badgeTier: BadgeTier;
+  badgePeriod: string | null;
   memberSince: string;
   isComplete: boolean;
 }

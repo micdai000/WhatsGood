@@ -1,6 +1,3 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
 import { authService } from "@/services/auth/auth.service";
 import { profileService } from "@/services/profiles/profile.service";
 import { createProfileSchema, validate } from "@/lib/validators";
@@ -59,11 +56,8 @@ export async function updateProfileAction(
       return toProfileActionError(result.error);
     }
 
-    revalidatePath("/", "layout");
-    revalidatePath(`/u/${previousUsername}`);
-    revalidatePath(`/u/${result.data.username}`);
-    revalidatePath("/dashboard");
-    revalidatePath("/search");
+
+
 
     return {
       success: true,

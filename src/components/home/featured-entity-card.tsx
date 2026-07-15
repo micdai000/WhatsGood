@@ -1,5 +1,5 @@
-import Link from "next/link";
-import Image from "next/image";
+import { Link } from "react-router-dom";
+import { AppImage } from "@/components/ui/app-image";
 import { categoryLabels, formatCount, type Entity } from "@/data/mock";
 import { TierBadge } from "@/components/ui/tier-badge";
 import {
@@ -17,10 +17,10 @@ interface FeaturedEntityCardProps {
 
 export function FeaturedEntityCard({ entity }: FeaturedEntityCardProps) {
   return (
-    <Link href={`/entity/${entity.id}`} className="block">
+    <Link to={`/entity/${entity.id}`} className="block">
       <Card className="overflow-hidden transition-shadow hover:shadow-md">
         <div className="relative hero-media">
-          <Image
+          <AppImage
             src={entity.image}
             alt={entity.name}
             fill

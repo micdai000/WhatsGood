@@ -12,8 +12,8 @@ export function PageWrapper({
   return (
     <div
       className={cn(
-        "min-h-dvh w-full",
-        variant === "muted" ? "bg-muted/40" : "bg-background",
+        "min-h-dvh w-full bg-background",
+        variant === "muted" && "bg-muted/60",
         className,
       )}
       {...props}

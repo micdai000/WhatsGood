@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { UserX } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
@@ -20,13 +20,13 @@ export default function ProfileNotFound() {
             username may be incorrect, or the profile may have been removed.
           </Paragraph>
           <Muted className="mt-2 text-sm">
-            Double-check the link you were given, including the @username.
+            Double-check the link you were given, including the username.
           </Muted>
           <Link
-            href="/"
+            to="/search"
             className={cn(buttonVariants({ variant: "outline" }), "mt-8")}
           >
-            Go to homepage
+            Browse professionals
           </Link>
         </div>
       </Container>

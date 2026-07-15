@@ -1,46 +1,71 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Navigate, useParams } from "react-router-dom";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { PageTitle, Muted, Paragraph } from "@/components/typography/typography";
 import { StatusAlert } from "@/components/ui/status-alert";
+import { Spinner } from "@/components/ui/spinner";
 import { reviewRequestService } from "@/services/reviewRequests/review-request.service";
 import { isFailure } from "@/types";
+import type { ReviewRequest } from "@/types";
 
-export const dynamic = "force-dynamic";
+type RequestData = ReviewRequest & {
+  profileUsername: string;
+  profileDisplayName: string;
+};
 
-interface ReviewRequestPageProps {
-  params: Promise<{ token: string }>;
-}
+type PageState =
+  | { status: "loading" }
+  | { status: "not_found" }
+  | { status: "error"; code: string; message: string }
+  | { status: "success"; data: RequestData };
 
-export async function generateMetadata({
-  params,
-}: ReviewRequestPageProps): Promise<Metadata> {
-  const { token } = await params;
-  const result = await reviewRequestService.getRequestByToken(token);
+export default function ReviewRequestPage() {
+  const { token } = useParams<{ token: string }>();
+  const [state, setState] = useState<PageState>({ status: "loading" });
 
-  if (isFailure(result)) {
-    return { title: "Review request | TrustLoop" };
+  useEffect(() => {
+    if (!token) return;
+
+    let cancelled = false;
+    setState({ status: "loading" });
+
+    reviewRequestService.getRequestByToken(token).then((result) => {
+      if (cancelled) return;
+
+      if (isFailure(result)) {
+        const { code, message } = result.error;
+        if (code === "NOT_FOUND") {
+          setState({ status: "not_found" });
+          return;
+        }
+        setState({ status: "error", code, message });
+        return;
+      }
+
+      setState({ status: "success", data: result.data });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  if (state.status === "loading") {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
   }
 
-  return {
-    title: `Review ${result.data.profileDisplayName} | TrustLoop`,
-    description: `Share your experience with ${result.data.profileDisplayName}.`,
-  };
-}
+  if (state.status === "not_found") {
+    return <Navigate to="/" replace />;
+  }
 
-export default async function ReviewRequestPage({ params }: ReviewRequestPageProps) {
-  const { token } = await params;
-  const result = await reviewRequestService.getRequestByToken(token);
-
-  if (isFailure(result)) {
-    const { code, message } = result.error;
-
-    if (code === "NOT_FOUND") {
-      notFound();
-    }
-
+  if (state.status === "error") {
+    const { code, message } = state;
     return (
       <Section spacing="default">
         <Container size="narrow" className="space-y-6">
@@ -61,7 +86,7 @@ export default async function ReviewRequestPage({ params }: ReviewRequestPagePro
     );
   }
 
-  const request = result.data;
+  const request = state.data;
 
   return (
     <Section spacing="default">

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AppImage } from "@/components/ui/app-image";
 import { cn } from "@/lib/utils";
 
 interface AvatarProps {
@@ -18,7 +18,7 @@ export function UserAvatar({ src, alt, size = 40, className }: AvatarProps) {
       )}
       style={{ width: size, height: size }}
     >
-      <Image
+      <AppImage
         src={src}
         alt={alt}
         width={size}

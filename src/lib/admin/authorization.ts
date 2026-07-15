@@ -1,6 +1,4 @@
-import "server-only";
-
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { authService } from "@/services/auth/auth.service";
 import { AuthorizationError } from "@/lib/errors";
 import { failure, success } from "@/services/shared";
@@ -30,7 +28,7 @@ export async function getCurrentAdmin(): Promise<AdminUser | null> {
     return null;
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data } = await supabase
     .from("admin_users")
     .select("user_id, role, created_at, created_by")
@@ -48,7 +46,7 @@ export async function isAdmin(userId?: string): Promise<boolean> {
   }
 
   const targetId = userId ?? sessionResult.data.user.id;
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data } = await supabase
     .from("admin_users")
@@ -67,7 +65,7 @@ export async function isOwner(userId?: string): Promise<boolean> {
   }
 
   const targetId = userId ?? sessionResult.data.user.id;
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data } = await supabase
     .from("admin_users")

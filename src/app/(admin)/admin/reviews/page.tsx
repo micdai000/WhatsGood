@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   AdminDeleteReviewButton,
   AdminEmptyState,
@@ -6,30 +6,38 @@ import {
   AdminSearchForm,
 } from "@/components/admin";
 import { Muted, Paragraph } from "@/components/typography/typography";
+import { Spinner } from "@/components/ui/spinner";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { adminService } from "@/services/admin";
 import { formatDate } from "@/lib/utils/format-date";
 import { formatRating } from "@/lib/utils/format-rating";
-import { isFailure } from "@/types";
 
-export const dynamic = "force-dynamic";
+export default function AdminReviewsPage() {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("query") ?? undefined;
+  const pageParam = searchParams.get("page");
+  const page = Number(pageParam ?? 1);
 
-interface AdminReviewsPageProps {
-  searchParams: Promise<{ query?: string; page?: string }>;
-}
+  const result = useServiceQuery(
+    () =>
+      adminService.getReviews({
+        query,
+        page: Number.isFinite(page) ? page : 1,
+        limit: 20,
+      }),
+    [query, pageParam],
+  );
 
-export default async function AdminReviewsPage({
-  searchParams,
-}: AdminReviewsPageProps) {
-  const params = await searchParams;
-  const page = Number(params.page ?? 1);
-  const result = await adminService.getReviews({
-    query: params.query,
-    page: Number.isFinite(page) ? page : 1,
-    limit: 20,
-  });
+  if (result.status === "loading") {
+    return (
+      <div className="flex min-h-[30vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
 
-  if (isFailure(result)) {
-    return <Paragraph className="text-destructive">{result.error.message}</Paragraph>;
+  if (result.status === "error") {
+    return <Paragraph className="text-destructive">{result.message}</Paragraph>;
   }
 
   const { items, ...pagination } = result.data;
@@ -43,9 +51,7 @@ export default async function AdminReviewsPage({
         </Muted>
       </div>
 
-      <Suspense>
-        <AdminSearchForm placeholder="Search reviews by name, email, or content…" />
-      </Suspense>
+      <AdminSearchForm placeholder="Search reviews by name, email, or content…" />
 
       {items.length === 0 ? (
         <AdminEmptyState
@@ -79,7 +85,7 @@ export default async function AdminReviewsPage({
       <AdminPagination
         result={{ ...pagination, items }}
         basePath="/admin/reviews"
-        params={{ query: params.query }}
+        params={{ query }}
       />
     </div>
   );

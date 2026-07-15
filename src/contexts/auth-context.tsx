@@ -1,16 +1,10 @@
-"use client";
-
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { AuthSession, AuthUser } from "@/types";
-import {
-  getCurrentUserAction,
-  getSessionAction,
-  refreshSessionAction,
-} from "@/app/actions/auth.actions";
-import { isSuccess } from "@/types";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { mapSupabaseUser } from "@/lib/auth/map-user";
+import type { AuthSession } from "@/types";
 
 interface AuthContextValue {
-  user: AuthUser | null;
+  user: AuthSession["user"] | null;
   session: AuthSession | null;
   loading: boolean;
   refresh: () => Promise<void>;
@@ -18,40 +12,61 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({
-  children,
-  initialSession,
-}: {
-  children: React.ReactNode;
-  initialSession: AuthSession | null;
-}) {
-  const [session, setSession] = useState<AuthSession | null>(initialSession);
-  const [loading, setLoading] = useState(false);
+function mapSupabaseSession(
+  session: Awaited<
+    ReturnType<ReturnType<typeof createClient>["auth"]["getSession"]>
+  >["data"]["session"],
+): AuthSession | null {
+  if (!session?.user?.email_confirmed_at) {
+    return null;
+  }
+
+  return {
+    user: mapSupabaseUser(session.user),
+    expiresAt: session.expires_at ?? null,
+  };
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await refreshSessionAction();
-      if (isSuccess(result) && result.data) {
-        setSession(result.data);
-        return;
-      }
+    const supabase = createClient();
+    const {
+      data: { session: currentSession },
+    } = await supabase.auth.getSession();
+    setSession(mapSupabaseSession(currentSession));
+  }, []);
 
-      const sessionResult = await getSessionAction();
-      if (isSuccess(sessionResult)) {
-        setSession(sessionResult.data);
-        return;
-      }
+  useEffect(() => {
+    const supabase = createClient();
+    let mounted = true;
 
-      const userResult = await getCurrentUserAction();
-      if (isSuccess(userResult) && userResult.data) {
-        setSession({ user: userResult.data, expiresAt: null });
-      } else {
-        setSession(null);
-      }
-    } finally {
+    async function hydrate() {
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
+
+      if (!mounted) return;
+      setSession(mapSupabaseSession(currentSession));
       setLoading(false);
     }
+
+    void hydrate();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      if (!mounted) return;
+      setSession(mapSupabaseSession(currentSession));
+      setLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const value = useMemo<AuthContextValue>(

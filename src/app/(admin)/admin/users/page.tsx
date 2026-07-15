@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Suspense } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   AdminEmptyState,
   AdminPagination,
@@ -7,27 +6,37 @@ import {
 } from "@/components/admin";
 import { Badge } from "@/components/ui/badge";
 import { Muted, Paragraph } from "@/components/typography/typography";
+import { Spinner } from "@/components/ui/spinner";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { adminService } from "@/services/admin";
 import { formatDate } from "@/lib/utils/format-date";
-import { isFailure } from "@/types";
 
-export const dynamic = "force-dynamic";
+export default function AdminUsersPage() {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("query") ?? undefined;
+  const pageParam = searchParams.get("page");
+  const page = Number(pageParam ?? 1);
 
-interface AdminUsersPageProps {
-  searchParams: Promise<{ query?: string; page?: string }>;
-}
+  const result = useServiceQuery(
+    () =>
+      adminService.getUsers({
+        query,
+        page: Number.isFinite(page) ? page : 1,
+        limit: 20,
+      }),
+    [query, pageParam],
+  );
 
-export default async function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
-  const params = await searchParams;
-  const page = Number(params.page ?? 1);
-  const result = await adminService.getUsers({
-    query: params.query,
-    page: Number.isFinite(page) ? page : 1,
-    limit: 20,
-  });
+  if (result.status === "loading") {
+    return (
+      <div className="flex min-h-[30vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
 
-  if (isFailure(result)) {
-    return <Paragraph className="text-destructive">{result.error.message}</Paragraph>;
+  if (result.status === "error") {
+    return <Paragraph className="text-destructive">{result.message}</Paragraph>;
   }
 
   const { items, ...pagination } = result.data;
@@ -39,9 +48,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
         <Muted className="text-sm">Search platform accounts and view roles.</Muted>
       </div>
 
-      <Suspense>
-        <AdminSearchForm placeholder="Search by email or user ID…" />
-      </Suspense>
+      <AdminSearchForm placeholder="Search by email or user ID…" />
 
       {items.length === 0 ? (
         <AdminEmptyState
@@ -89,7 +96,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                   <td className="px-4 py-3">
                     {user.profileUsername ? (
                       <Link
-                        href={`/u/${user.profileUsername}`}
+                        to={`/u/${user.profileUsername}`}
                         className="text-primary hover:underline"
                         target="_blank"
                         rel="noopener noreferrer"
@@ -120,7 +127,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
       <AdminPagination
         result={{ ...pagination, items }}
         basePath="/admin/users"
-        params={{ query: params.query }}
+        params={{ query }}
       />
     </div>
   );

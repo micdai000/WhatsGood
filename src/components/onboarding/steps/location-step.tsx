@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
 import { LocationFields } from "@/components/profile-fields";

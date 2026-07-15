@@ -1,6 +1,4 @@
-import "server-only";
-
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { DatabaseError, NotFoundError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { professionIdSchema, professionSlugSchema, validate } from "@/lib/validators";
@@ -13,7 +11,7 @@ export class ProfessionService {
     const method = "ProfessionService.getProfessions";
 
     try {
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("professions")
         .select("*")
@@ -40,7 +38,7 @@ export class ProfessionService {
 
     try {
       const { id: professionId } = validate(professionIdSchema, { id });
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("professions")
         .select("*")
@@ -67,7 +65,7 @@ export class ProfessionService {
 
     try {
       const { slug: professionSlug } = validate(professionSlugSchema, { slug });
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("professions")
         .select("*")

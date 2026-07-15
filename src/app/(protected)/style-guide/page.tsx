@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { toast } from "sonner";
 import { ChevronDown, User } from "lucide-react";
@@ -133,7 +131,7 @@ export default function StyleGuidePage() {
 
           <PageHeader
             title="Design System"
-            description="Visual reference for TrustLoop UI components, tokens, and layout patterns."
+            description="Visual reference for Meritt UI components, tokens, and layout patterns."
           />
         </Container>
       </Section>
@@ -146,7 +144,7 @@ export default function StyleGuidePage() {
           <PageTitle>Page Title</PageTitle>
           <SectionTitle>Section Title</SectionTitle>
           <Paragraph>
-            Paragraph — TrustLoop helps professionals build credibility through
+            Paragraph — Meritt helps professionals build credibility through
             verified client reviews.
           </Paragraph>
           <Muted>Muted text for secondary information and descriptions.</Muted>
@@ -324,7 +322,7 @@ export default function StyleGuidePage() {
               <DialogHeader>
                 <DialogTitle>Share your profile</DialogTitle>
                 <DialogDescription>
-                  Copy your TrustLoop link and send it to clients.
+                  Copy your Meritt link and send it to clients.
                 </DialogDescription>
               </DialogHeader>
             </DialogContent>

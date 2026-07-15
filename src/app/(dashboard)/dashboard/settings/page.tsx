@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { Link, useSearchParams } from "react-router-dom";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { PageHeader } from "@/components/layout/page-header";
@@ -12,25 +11,14 @@ import {
 import { StatusAlert } from "@/components/ui/status-alert";
 import { Muted, Paragraph } from "@/components/typography/typography";
 import { buttonVariants } from "@/components/ui/button";
-import { authService } from "@/services/auth/auth.service";
-import { isSuccess } from "@/types";
+import { useAuthContext } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
-
-interface SettingsPageProps {
-  searchParams: Promise<{ error?: string }>;
-}
-
-export default async function SettingsPage({ searchParams }: SettingsPageProps) {
-  const sessionResult = await authService.getSession();
-
-  if (!isSuccess(sessionResult) || !sessionResult.data) {
-    redirect("/login");
-  }
-
-  const { error } = await searchParams;
-  const email = sessionResult.data.user.email;
+export default function SettingsPage() {
+  const { user } = useAuthContext();
+  const [searchParams] = useSearchParams();
+  const error = searchParams.get("error");
+  const email = user!.email;
 
   return (
     <Section>
@@ -68,7 +56,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
               Update your display name, username, bio, photo, and location.
             </Muted>
             <Link
-              href="/dashboard/profile/edit"
+              to="/dashboard/profile/edit"
               className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             >
               Edit profile
@@ -79,7 +67,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         <DashboardCard title="Session">
           <div className="space-y-3">
             <Muted className="text-sm">
-              Sign out of TrustLoop on this device.
+              Sign out of Meritt on this device.
             </Muted>
             <SignOutButton />
           </div>

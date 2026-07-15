@@ -1,7 +1,5 @@
-"use client";
-
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/auth-context";
 import type { AuthSession, AuthUser } from "@/types";
 
@@ -24,14 +22,14 @@ export function useCurrentUser(): {
 }
 
 export function useRequireAuth(redirectTo = "/login") {
-  const router = useRouter();
+  const navigate = useNavigate();
   const auth = useAuthContext();
 
   useEffect(() => {
     if (!auth.loading && !auth.user) {
-      router.replace(redirectTo);
+      navigate(redirectTo);
     }
-  }, [auth.loading, auth.user, redirectTo, router]);
+  }, [auth.loading, auth.user, redirectTo, navigate]);
 
   return auth;
 }

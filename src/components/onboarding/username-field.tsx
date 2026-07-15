@@ -1,11 +1,10 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Check, Loader2, X } from "lucide-react";
 import { checkSlugAvailabilityAction } from "@/app/actions/onboarding.actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Muted } from "@/components/typography/typography";
+import { getSiteUrl } from "@/lib/auth/routes";
 import { sanitizeSlug } from "@/lib/utils/slug";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +23,7 @@ type AvailabilityState =
   | "error";
 
 export function UsernameField({ value, onChange, error }: UsernameFieldProps) {
+  const profileHost = new URL(getSiteUrl()).host;
   const [availability, setAvailability] = useState<AvailabilityState>("idle");
   const [availabilityMessage, setAvailabilityMessage] = useState<string>("");
 
@@ -90,7 +90,7 @@ export function UsernameField({ value, onChange, error }: UsernameFieldProps) {
         />
       </div>
       <Muted id="username-hint">
-        Your public profile URL will be trustloop.app/@{value || "username"}
+        Your public profile URL will be {profileHost}/u/{value || "username"}
       </Muted>
       {error ? (
         <p className="text-sm text-destructive" role="alert">

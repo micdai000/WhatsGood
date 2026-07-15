@@ -20,7 +20,7 @@ export function EmptyResults({ hasFilters = false, className }: EmptyResultsProp
           <Muted className="max-w-sm text-sm">
             {hasFilters
               ? "Try changing your filters or search terms."
-              : "Check back soon as more professionals join TrustLoop."}
+              : "Check back soon as more professionals join Meritt."}
           </Muted>
         </div>
       </CardContent>

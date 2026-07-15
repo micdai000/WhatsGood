@@ -5,12 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  --color-meritt-surface: #F9F9F7;
+  --color-meritt-panel: #F8FAFC;
+  --color-meritt-ink: #0F172A;
   --color-gold: #D4A017;
   --color-gold-light: #E8C547;
   --color-gold-dark: #B8860B;
-  --color-surface: #FAFAFA;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --radius-card: 16px;
+  --radius-card: 2rem;
+  --radius-panel: 1.5rem;
+  --shadow-meritt-card: 0 24px 80px -58px rgba(15, 23, 42, 0.75);
 }
 
 @layer base {
@@ -28,19 +32,19 @@
 
   body {
     font-family: var(--font-sans);
-    color: #111;
-    background-color: #fff;
+    color: var(--foreground);
+    background-color: var(--background);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
     width: 100%;
     min-height: 100dvh;
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground selection:bg-primary selection:text-primary-foreground;
   }
 
   @media (min-width: 1024px) {
     body {
-      background-color: #f5f5f5;
+      background-color: var(--background);
     }
   }
 
@@ -84,7 +88,7 @@
     width: 100%;
     max-width: var(--shell-max);
     margin-inline: auto;
-    background-color: #fff;
+    background-color: var(--background);
   }
 
   @media (min-width: 640px) {
@@ -222,6 +226,42 @@
       margin-top: 3rem;
     }
   }
+
+  /* Meritt / themeritt.com design primitives */
+  .meritt-card {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    box-shadow: var(--shadow-meritt-card);
+  }
+
+  .meritt-panel {
+    border-radius: var(--radius-panel);
+    border: 1px solid var(--border);
+    background-color: var(--color-meritt-panel);
+    padding: 1.25rem;
+  }
+
+  .meritt-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .meritt-section {
+    border-block: 1px solid var(--border);
+    padding-block: 5rem;
+  }
+
+  .meritt-section-white {
+    background-color: var(--card);
+  }
+
+  .meritt-section-surface {
+    background-color: var(--background);
+  }
 }
 
 @keyframes shimmer {
@@ -230,7 +270,7 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 8px;
@@ -303,46 +343,49 @@
 }
 
 :root {
-  --background: oklch(0.995 0 0);
-  --foreground: oklch(0.18 0.02 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 260);
-  --primary: oklch(0.28 0.04 264);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.96 0.005 260);
-  --secondary-foreground: oklch(0.28 0.04 264);
-  --muted: oklch(0.96 0.005 260);
-  --muted-foreground: oklch(0.52 0.02 260);
-  --accent: oklch(0.96 0.01 264);
-  --accent-foreground: oklch(0.28 0.04 264);
-  --destructive: oklch(0.55 0.2 25);
-  --border: oklch(0.91 0.005 260);
-  --input: oklch(0.91 0.005 260);
-  --ring: oklch(0.65 0.03 264);
-  --success: oklch(0.52 0.14 155);
-  --success-foreground: oklch(0.98 0 0);
-  --warning: oklch(0.78 0.13 85);
-  --warning-foreground: oklch(0.28 0.04 85);
-  --error: oklch(0.55 0.2 25);
-  --error-foreground: oklch(0.98 0 0);
-  --slate: oklch(0.35 0.03 260);
-  --slate-foreground: oklch(0.98 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #F9F9F7;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #0F172A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F8FAFC;
+  --secondary-foreground: #0F172A;
+  --muted: #F8FAFC;
+  --muted-foreground: #64748B;
+  --accent: #F1F5F9;
+  --accent-foreground: #0F172A;
+  --destructive: #DC2626;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #94A3B8;
+  --success: #059669;
+  --success-foreground: #FFFFFF;
+  --warning: #D97706;
+  --warning-foreground: #FFFFFF;
+  --error: #DC2626;
+  --error-foreground: #FFFFFF;
+  --slate: #334155;
+  --slate-foreground: #FFFFFF;
+  --chart-1: #0F172A;
+  --chart-2: #475569;
+  --chart-3: #64748B;
+  --chart-4: #94A3B8;
+  --chart-5: #CBD5E1;
+  --radius: 0.75rem;
+  --radius-card: 2rem;
+  --radius-panel: 1.5rem;
+  --shadow-meritt-card: 0 24px 80px -58px rgba(15, 23, 42, 0.75);
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #0F172A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F8FAFC;
+  --sidebar-accent-foreground: #0F172A;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #94A3B8;
 }
 
 .dark {

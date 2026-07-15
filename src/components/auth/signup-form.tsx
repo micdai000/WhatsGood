@@ -1,7 +1,5 @@
-"use client";
-
 import { useActionState, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { signUpAction, type AuthActionState } from "@/app/actions/auth.actions";
 import { AuthCard } from "@/components/auth/auth-card";
 import { AuthDivider } from "@/components/auth/auth-divider";
@@ -95,7 +93,7 @@ export function SignUpForm() {
 
       <Muted className="mt-6 text-center">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-foreground hover:underline">
+        <Link to="/login" className="font-medium text-foreground hover:underline">
           Sign in
         </Link>
       </Muted>

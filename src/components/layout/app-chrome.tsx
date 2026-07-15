@@ -1,13 +1,11 @@
-"use client";
-
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router-dom";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { isOnboardingRoute } from "@/lib/onboarding/constants";
 
 export function AppChrome({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const isOnboarding = isOnboardingRoute(pathname);
 
   return (

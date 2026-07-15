@@ -1,7 +1,5 @@
-import "server-only";
-
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { mapSupabaseUser } from "@/lib/auth/map-user";
 import { mapUnknownAuthError } from "@/lib/auth/map-auth-error";
 import { getSiteUrl } from "@/lib/auth/routes";
@@ -19,7 +17,7 @@ import type {
 import { isSuccess } from "@/types";
 
 export class AuthService {
-  private async getClient(): Promise<SupabaseClient> {
+  private getClient(): SupabaseClient {
     return createClient();
   }
 
@@ -37,7 +35,7 @@ export class AuthService {
     const method = "AuthService.signUp";
 
     try {
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
       const { data, error } = await supabase.auth.signUp({
         email: input.email,
         password: input.password,
@@ -74,7 +72,7 @@ export class AuthService {
     const method = "AuthService.signIn";
 
     try {
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
       const { data, error } = await supabase.auth.signInWithPassword({
         email: input.email,
         password: input.password,
@@ -116,7 +114,7 @@ export class AuthService {
     const method = "AuthService.signOut";
 
     try {
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
       const { error } = await supabase.auth.signOut();
 
       if (error) {
@@ -137,7 +135,7 @@ export class AuthService {
     const method = "AuthService.resetPassword";
 
     try {
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
       const { error } = await supabase.auth.resetPasswordForEmail(input.email, {
         redirectTo: `${getSiteUrl()}/auth/callback?type=recovery`,
       });
@@ -160,7 +158,7 @@ export class AuthService {
     const method = "AuthService.updatePassword";
 
     try {
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
       const { error } = await supabase.auth.updateUser({
         password: input.password,
       });
@@ -181,7 +179,7 @@ export class AuthService {
     const method = "AuthService.verifyEmail";
 
     try {
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
       const { data, error } = await supabase.auth.verifyOtp({
         token_hash: tokenHash,
         type: "email",
@@ -214,7 +212,7 @@ export class AuthService {
     const method = "AuthService.getCurrentUser";
 
     try {
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
       const {
         data: { user },
         error,
@@ -235,34 +233,30 @@ export class AuthService {
     const method = "AuthService.getSession";
 
     try {
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
       const {
-        data: { user },
+        data: { session },
         error,
-      } = await supabase.auth.getUser();
+      } = await supabase.auth.getSession();
 
       if (error) {
         logger.error(method, error);
         return failure(mapUnknownAuthError(error));
       }
 
-      if (!user) {
+      if (!session?.user) {
         return success(null);
       }
 
-      if (!user.email_confirmed_at) {
+      if (!session.user.email_confirmed_at) {
         await supabase.auth.signOut();
         return success(null);
       }
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
       return success(
         this.mapSession(
-          mapSupabaseUser(user),
-          session?.expires_at ?? null,
+          mapSupabaseUser(session.user),
+          session.expires_at ?? null,
         ),
       );
     } catch (error) {
@@ -283,7 +277,7 @@ export class AuthService {
       }
 
       const userId = sessionResult.data.user.id;
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
 
       const { error } = await supabase.rpc("delete_own_account");
 
@@ -304,7 +298,7 @@ export class AuthService {
     const method = "AuthService.refreshSession";
 
     try {
-      const supabase = await this.getClient();
+      const supabase = this.getClient();
       const {
         data: { session },
         error,

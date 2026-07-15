@@ -1,5 +1,3 @@
-"use client";
-
 import {
   createContext,
   useCallback,
@@ -7,7 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ONBOARDING } from "@/lib/constants";
 import {
   EMPTY_ONBOARDING_STATE,
@@ -57,8 +55,8 @@ export function OnboardingWizardProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [state, setState] = useState<OnboardingWizardState>(EMPTY_ONBOARDING_STATE);
   const [hydrated, setHydrated] = useState(false);
 
@@ -76,9 +74,9 @@ export function OnboardingWizardProvider({
     if (!hydrated || pathname === "/welcome") return;
 
     if (!isStepAccessible(pathname, state)) {
-      router.replace(getEarliestIncompleteRoute(state));
+      navigate(getEarliestIncompleteRoute(state));
     }
-  }, [pathname, hydrated, router, state]);
+  }, [pathname, hydrated, navigate, state]);
 
   const updateState = useCallback((patch: Partial<OnboardingWizardState>) => {
     setState((prev) => {

@@ -1,7 +1,4 @@
-"use client";
-
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTransition } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,8 +14,8 @@ export function AdminSearchForm({
   placeholder = "Search…",
   className,
 }: AdminSearchFormProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [pending, startTransition] = useTransition();
   const query = searchParams.get("query") ?? "";
 
@@ -40,7 +37,7 @@ export function AdminSearchForm({
         params.delete("page");
 
         startTransition(() => {
-          router.push(`?${params.toString()}`);
+          navigate(`?${params.toString()}`);
         });
       }}
     >
@@ -61,7 +58,7 @@ export function AdminSearchForm({
         {pending ? "Searching…" : "Search"}
       </Button>
       {query ? (
-        <Link href="?" className={cn(buttonVariants({ variant: "ghost" }))}>
+        <Link to="?" className={cn(buttonVariants({ variant: "ghost" }))}>
           Clear
         </Link>
       ) : null}

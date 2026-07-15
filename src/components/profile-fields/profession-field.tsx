@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { getProfessionsAction } from "@/app/actions/onboarding.actions";
 import { LoadingState } from "@/components/layout/loading-state";

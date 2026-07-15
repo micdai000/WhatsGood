@@ -2,7 +2,7 @@
  * Profile photos must be uploaded to the project's Supabase avatars bucket.
  */
 export function isAllowedProfilePhotoUrl(url: string): boolean {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!supabaseUrl) return false;
 
   try {

@@ -9,7 +9,7 @@ export default function SearchLoading() {
       <Container className="space-y-6">
         <PageHeader
           title="Find professionals"
-          description="Discover trusted tutors, coaches, consultants, and more on TrustLoop."
+          description="Discover trusted tutors, coaches, consultants, and more on Meritt."
         />
         <LoadingResults />
       </Container>

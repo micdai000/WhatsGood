@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
@@ -10,27 +9,32 @@ import {
   ReviewRequestCard,
 } from "@/components/dashboard";
 import { buttonVariants } from "@/components/ui/button";
-import { authService } from "@/services/auth/auth.service";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuthContext } from "@/contexts/auth-context";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { reviewRequestService } from "@/services/reviewRequests/review-request.service";
-import { isFailure, isSuccess } from "@/types";
 
-export const dynamic = "force-dynamic";
+export default function ReviewRequestsPage() {
+  const { user } = useAuthContext();
+  const requestsResult = useServiceQuery(
+    () =>
+      reviewRequestService.getRequestsForProfile(user!.id, {
+        page: 1,
+        limit: 50,
+      }),
+    [user?.id],
+  );
 
-export default async function ReviewRequestsPage() {
-  const sessionResult = await authService.getSession();
-
-  if (!isSuccess(sessionResult) || !sessionResult.data) {
-    redirect("/login");
+  if (requestsResult.status === "loading") {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
   }
 
-  const userId = sessionResult.data.user.id;
-  const requestsResult = await reviewRequestService.getRequestsForProfile(userId, {
-    page: 1,
-    limit: 50,
-  });
-
-  if (isFailure(requestsResult)) {
-    throw new Error(requestsResult.error.message);
+  if (requestsResult.status === "error") {
+    throw new Error(requestsResult.message);
   }
 
   const requests = requestsResult.data.items;
@@ -40,7 +44,7 @@ export default async function ReviewRequestsPage() {
       <Container className="space-y-8">
         <div>
           <Link
-            href="/dashboard"
+            to="/dashboard"
             className={buttonVariants({
               variant: "ghost",
               size: "sm",

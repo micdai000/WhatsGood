@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
 import { UsernameField } from "@/components/onboarding/username-field";
@@ -16,7 +14,7 @@ export function UsernameStep() {
   return (
     <OnboardingWizardShell
       title="Choose your username"
-      description="Pick a unique handle for your public TrustLoop profile."
+      description="Pick a unique handle for your public Meritt profile."
       continueDisabled={!state.slug.trim()}
       onContinue={async () => {
         const parsed = onboardingUsernameSchema.safeParse({ slug: state.slug });

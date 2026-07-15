@@ -1,7 +1,5 @@
-"use client";
-
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Share2, PenLine } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -28,8 +26,8 @@ export function ProfileActions({
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
         await navigator.share({
-          title: `${displayName} on TrustLoop`,
-          text: `Check out ${displayName}'s professional profile on TrustLoop.`,
+          title: `${displayName} on Meritt`,
+          text: `Check out ${displayName}'s professional profile on Meritt.`,
           url: profileUrl,
         });
         return;
@@ -61,7 +59,7 @@ export function ProfileActions({
         Share Profile
       </Button>
       <Link
-        href={leaveReviewHref}
+        to={leaveReviewHref}
         className={buttonVariants({ variant: "outline", className: "w-full sm:w-auto" })}
       >
         <PenLine className="size-4" aria-hidden />

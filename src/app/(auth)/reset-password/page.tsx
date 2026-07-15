@@ -1,19 +1,18 @@
-import { Suspense } from "react";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
-import { LoadingState } from "@/components/layout/loading-state";
-import { authService } from "@/services/auth/auth.service";
-import { isSuccess } from "@/types";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuthContext } from "@/contexts/auth-context";
 
-export const dynamic = "force-dynamic";
+export default function ResetPasswordPage() {
+  const { session, loading } = useAuthContext();
+  const hasRecoverySession = session !== null;
 
-export default async function ResetPasswordPage() {
-  const sessionResult = await authService.getSession();
-  const hasRecoverySession =
-    isSuccess(sessionResult) && sessionResult.data !== null;
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
 
-  return (
-    <Suspense fallback={<LoadingState label="Loading…" />}>
-      <ResetPasswordForm hasRecoverySession={hasRecoverySession} />
-    </Suspense>
-  );
+  return <ResetPasswordForm hasRecoverySession={hasRecoverySession} />;
 }

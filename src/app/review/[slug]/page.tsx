@@ -1,50 +1,34 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import Image from "next/image";
+import { AppImage } from "@/components/ui/app-image";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { buttonVariants } from "@/components/ui/button";
 import { PageTitle, Muted, Paragraph } from "@/components/typography/typography";
 import { StatusAlert } from "@/components/ui/status-alert";
+import { Spinner } from "@/components/ui/spinner";
+import { useServiceQuery } from "@/hooks/use-service-query";
 import { getPublicProfileUrl } from "@/lib/profile/public-url";
 import { profileService } from "@/services/profiles/profile.service";
-import { isFailure } from "@/types";
 
-export const dynamic = "force-dynamic";
+export default function LeaveReviewPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const result = useServiceQuery(
+    () => profileService.getPublicProfile(slug!),
+    [slug],
+  );
 
-interface LeaveReviewPageProps {
-  params: Promise<{ slug: string }>;
-}
-
-export async function generateMetadata({
-  params,
-}: LeaveReviewPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const result = await profileService.getPublicProfile(slug);
-
-  if (isFailure(result)) {
-    return { title: "Leave a review | TrustLoop" };
+  if (result.status === "loading") {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
   }
 
-  return {
-    title: `Review ${result.data.displayName} | TrustLoop`,
-    description: `Share your experience working with ${result.data.displayName} on TrustLoop.`,
-  };
-}
-
-export default async function LeaveReviewPage({ params }: LeaveReviewPageProps) {
-  const { slug } = await params;
-  const result = await profileService.getPublicProfile(slug);
-
-  if (isFailure(result)) {
-    if (result.error.code === "NOT_FOUND") {
-      notFound();
-    }
-
-    throw new Error(result.error.message);
+  if (result.status === "error") {
+    return <Navigate to="/" replace />;
   }
 
   const profile = result.data;
@@ -55,7 +39,7 @@ export default async function LeaveReviewPage({ params }: LeaveReviewPageProps) 
       <Container size="narrow" className="space-y-8">
         <div>
           <Link
-            href={profileUrl}
+            to={profileUrl}
             className={buttonVariants({ variant: "ghost", size: "sm", className: "-ml-2 mb-4 inline-flex" })}
           >
             <ArrowLeft className="size-4" aria-hidden />
@@ -71,7 +55,7 @@ export default async function LeaveReviewPage({ params }: LeaveReviewPageProps) 
         <div className="flex items-center gap-4 rounded-xl border bg-card p-4 shadow-sm">
           <div className="relative size-14 shrink-0 overflow-hidden rounded-full border bg-muted">
             {profile.avatar ? (
-              <Image
+              <AppImage
                 src={profile.avatar}
                 alt={`${profile.displayName}'s profile photo`}
                 fill

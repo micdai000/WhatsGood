@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useTransition } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { buildSearchUrl } from "@/lib/search/params";
@@ -49,7 +47,7 @@ export function SearchPagination({
       <div className="flex gap-2">
         {prevHref ? (
           <Link
-            href={prevHref}
+            to={prevHref}
             className={buttonVariants({ variant: "outline", size: "sm" })}
             onClick={() => startTransition(() => {})}
           >
@@ -68,7 +66,7 @@ export function SearchPagination({
         )}
         {nextHref ? (
           <Link
-            href={nextHref}
+            to={nextHref}
             className={buttonVariants({ variant: "outline", size: "sm" })}
             onClick={() => startTransition(() => {})}
           >

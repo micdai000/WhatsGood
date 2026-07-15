@@ -1,7 +1,5 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
   Briefcase,
   LayoutDashboard,
@@ -35,7 +33,7 @@ interface AdminShellProps {
 }
 
 export function AdminShell({ role, children }: AdminShellProps) {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
 
   return (
     <Section>
@@ -46,7 +44,7 @@ export function AdminShell({ role, children }: AdminShellProps) {
               <Shield className="size-5" aria-hidden />
             </div>
             <div>
-              <h1 className="text-lg font-semibold">TrustLoop Admin</h1>
+              <h1 className="text-lg font-semibold">Meritt Admin</h1>
               <p className="text-sm text-muted-foreground">Internal moderation tools</p>
             </div>
           </div>
@@ -67,7 +65,7 @@ export function AdminShell({ role, children }: AdminShellProps) {
                 return (
                   <li key={item.href} className="shrink-0 lg:shrink">
                     <Link
-                      href={item.href}
+                      to={item.href}
                       className={cn(
                         "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                         isActive

@@ -1,6 +1,4 @@
-import "server-only";
-
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { requireAdmin } from "@/lib/admin/authorization";
 import {
   AuthorizationError,
@@ -64,7 +62,7 @@ export class AdminService {
         return failure(adminResult.error);
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const [
         usersCountResult,
@@ -200,7 +198,7 @@ export class AdminService {
       const limit = validated.limit;
       const offset = (page - 1) * limit;
 
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const [listResult, countResult] = await Promise.all([
         supabase.rpc("admin_list_users", {
@@ -274,7 +272,7 @@ export class AdminService {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
 
-      const supabase = await createClient();
+      const supabase = createClient();
       let query = supabase.from("profiles").select("*", { count: "exact" });
 
       if (validated.query) {
@@ -323,7 +321,7 @@ export class AdminService {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
 
-      const supabase = await createClient();
+      const supabase = createClient();
       let query = supabase.from("reviews").select("*", { count: "exact" });
 
       if (validated.query) {
@@ -364,7 +362,7 @@ export class AdminService {
         return failure(adminResult.error);
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("professions")
         .select("*")
@@ -394,7 +392,7 @@ export class AdminService {
       }
 
       const validated = validate(adminCreateProfessionSchema, input);
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data: existing } = await supabase
         .from("professions")
@@ -457,7 +455,7 @@ export class AdminService {
         return failure(new ValidationError("No profession fields to update"));
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
 
       if (validated.name) {
         const { data: duplicate } = await supabase
@@ -524,7 +522,7 @@ export class AdminService {
       }
 
       const { id: reviewId } = validate(adminReviewIdSchema, { id });
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data: existing } = await supabase
         .from("reviews")
@@ -578,7 +576,7 @@ export class AdminService {
         );
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const { data: ownerCheck } = await supabase
         .from("admin_users")

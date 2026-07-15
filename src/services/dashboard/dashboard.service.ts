@@ -1,6 +1,4 @@
-import "server-only";
-
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { authService } from "@/services/auth/auth.service";
 import {
   AuthorizationError,
@@ -75,7 +73,7 @@ export class DashboardService {
         id: profileId,
       });
 
-      const supabase = await createClient();
+      const supabase = createClient();
 
       const [profileResult, reviewsResult, requestsResult] = await Promise.all([
         supabase

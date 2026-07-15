@@ -1,7 +1,5 @@
-"use client";
-
-import Image from "next/image";
-import Link from "next/link";
+import { AppImage } from "@/components/ui/app-image";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { TierBadge } from "./tier-badge";
 import { type ActivityItem } from "@/data/mock";
@@ -35,7 +33,7 @@ const iconConfig: Record<
 function EntityLink({ name, id }: { name: string; id?: string }) {
   if (!id) return <strong className="text-[#111]">{name}</strong>;
   return (
-    <Link href={`/entity/${id}`} className="text-[#111] font-semibold hover:underline">
+    <Link to={`/entity/${id}`} className="text-[#111] font-semibold hover:underline">
       {name}
     </Link>
   );
@@ -117,7 +115,7 @@ export function ActivityFeed({ items, className }: ActivityFeedProps) {
           <div key={item.id} className="flex items-start gap-3 py-3.5">
             {hasAvatar ? (
               <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full">
-                <Image
+                <AppImage
                   src={item.userAvatar!}
                   alt={item.userName ?? ""}
                   fill

@@ -1,14 +1,12 @@
-"use client";
-
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ChevronLeft, ImageIcon, BookOpen, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLibraries } from "@/lib/libraries-store";
 
 export default function CreateLibraryPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { createLibrary } = useLibraries();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -35,14 +33,14 @@ export default function CreateLibraryPage() {
       location: isLocationBased ? location : undefined,
     });
 
-    router.push(`/library/${library.id}?new=1`);
+    navigate(`/library/${library.id}?new=1`);
   }
 
   return (
     <div className="w-full py-6">
       <div className="page-x pt-2">
         <Link
-          href="/libraries"
+          to="/libraries"
           className="mb-4 inline-flex items-center gap-1 text-[14px] font-medium text-neutral-500 hover:text-[#111]"
         >
           <ChevronLeft className="h-4 w-4" />
