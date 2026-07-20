@@ -32,11 +32,8 @@ import DashboardReviewRequestsPage from "@/app/(dashboard)/dashboard/review-requ
 import DashboardSettingsPage from "@/app/(dashboard)/dashboard/settings/page";
 import CreatePage from "@/app/(protected)/create/page";
 import EntityPage from "@/app/(protected)/entity/[id]/page";
-import LibrariesPage from "@/app/(protected)/libraries/page";
 import ProfilePage from "@/app/(protected)/profile/page";
 import StyleGuidePage from "@/app/(protected)/style-guide/page";
-import LibraryDetailPage from "@/app/library/[id]/page";
-import LibraryCreatePage from "@/app/libraries/create/page";
 import AdminPage from "@/app/(admin)/admin/page";
 import AdminUsersPage from "@/app/(admin)/admin/users/page";
 import AdminProfilesPage from "@/app/(admin)/admin/profiles/page";
@@ -122,11 +119,8 @@ export const router = createBrowserRouter([
         children: [
           { path: "create", element: <CreatePage /> },
           { path: "entity/:id", element: <EntityPage /> },
-          { path: "libraries", element: <LibrariesPage /> },
           { path: "profile", element: <ProfilePage /> },
           { path: "style-guide", element: <StyleGuidePage /> },
-          { path: "library/:id", element: <LibraryDetailPage /> },
-          { path: "libraries/create", element: <LibraryCreatePage /> },
         ],
       },
       {
