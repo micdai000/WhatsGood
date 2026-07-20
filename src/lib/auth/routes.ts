@@ -3,7 +3,6 @@ import { getSiteUrl as getPublicSiteUrl } from "@/lib/public-env";
 export const PUBLIC_ROUTES = [
   "/",
   "/about",
-  "/pricing",
   "/search",
   "/login",
   "/signup",
