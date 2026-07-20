@@ -12,7 +12,6 @@ import AuthCallbackPage, {
 
 import HomePage from "@/app/page";
 import AboutPage from "@/app/about/page";
-import PricingPage from "@/app/pricing/page";
 import SearchPage from "@/app/search/page";
 import LoginPage from "@/app/(auth)/login/page";
 import SignupPage from "@/app/(auth)/signup/page";
@@ -73,7 +72,6 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
-      { path: "pricing", element: <PricingPage /> },
       { path: "search", element: <SearchPage /> },
       { path: "auth/callback", element: <AuthCallbackPage /> },
       { path: "auth/login", element: <LegacyAuthRedirect to="/login" /> },

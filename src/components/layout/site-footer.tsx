@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 const footerLinks = [
   { href: "/search", label: "Discover" },
   { href: "/about", label: "About" },
-  { href: "/pricing", label: "Pricing" },
   { href: "/login", label: "Log in" },
 ] as const;
 

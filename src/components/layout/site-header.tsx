@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 const publicNavLinks = [
   { href: "/search", label: "Discover" },
   { href: "/about", label: "About" },
-  { href: "/pricing", label: "Pricing" },
 ] as const;
 
 export function SiteHeader({ className }: { className?: string }) {
