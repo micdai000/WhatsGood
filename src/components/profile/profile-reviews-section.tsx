@@ -1,26 +1,20 @@
+import { PenLine } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { BadgeHistoryStrip, TrustBadgeSummary } from "@/components/badges";
+import {
+  BadgeHistoryStrip,
+  TierHistoryBreakdown,
+  TrustBadgeSummary,
+} from "@/components/badges";
 import { SectionHeader } from "@/components/ui/section-header";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  EmptyReviews,
-  RatingBreakdown,
-  ReviewList,
-} from "@/components/reviews";
+import { EmptyReviews } from "@/components/reviews";
 import { buttonVariants } from "@/components/ui/button";
 import { badgeService } from "@/services/badges";
 import { profileService } from "@/services/profiles/profile.service";
-import { reviewService } from "@/services/reviews/review.service";
-import type {
-  BadgeSnapshot,
-  BadgeTier,
-  RatingBreakdown as RatingBreakdownType,
-  Review,
-} from "@/types";
+import type { BadgeSnapshot, BadgeSubTier, BadgeTier } from "@/types";
 import { isFailure } from "@/types";
 
-const RECENT_REVIEWS_LIMIT = 5;
 const BADGE_HISTORY_LIMIT = 12;
 
 interface ProfileReviewsSectionProps {
@@ -28,6 +22,7 @@ interface ProfileReviewsSectionProps {
   displayName: string;
   professionName: string | null;
   badgeTier: BadgeTier;
+  badgeSubTier?: BadgeSubTier | null;
   badgePeriod: string | null;
   totalReviews: number;
 }
@@ -37,13 +32,12 @@ export function ProfileReviewsSection({
   displayName,
   professionName,
   badgeTier,
+  badgeSubTier = null,
   badgePeriod,
   totalReviews,
 }: ProfileReviewsSectionProps) {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [breakdown, setBreakdown] = useState<RatingBreakdownType | null>(null);
   const [badgeHistory, setBadgeHistory] = useState<BadgeSnapshot[]>([]);
   const [latestSnapshot, setLatestSnapshot] = useState<BadgeSnapshot | null>(
     null,
@@ -68,19 +62,13 @@ export function ProfileReviewsSection({
       }
 
       const profileId = profileResult.data.id;
-      const [reviewsResult, breakdownResult, historyResult] = await Promise.all([
-        reviewService.getReviews(profileId, {
-          page: 1,
-          limit: RECENT_REVIEWS_LIMIT,
-        }),
-        reviewService.getRatingBreakdown(profileId),
-        badgeService.getBadgeHistory(profileId, BADGE_HISTORY_LIMIT),
-      ]);
+      const historyResult = await badgeService.getBadgeHistory(
+        profileId,
+        BADGE_HISTORY_LIMIT,
+      );
 
       if (cancelled) return;
 
-      setReviews(isFailure(reviewsResult) ? [] : reviewsResult.data.items);
-      setBreakdown(isFailure(breakdownResult) ? null : breakdownResult.data);
       const history = isFailure(historyResult) ? [] : historyResult.data;
       setBadgeHistory(history);
       setLatestSnapshot(history[0] ?? null);
@@ -127,34 +115,34 @@ export function ProfileReviewsSection({
         <Link
           to={leaveReviewHref}
           className={buttonVariants({
-            variant: "outline",
-            className: "w-full sm:w-auto",
+            size: "lg",
+            className:
+              "w-full gap-2 px-6 text-base font-semibold shadow-md ring-2 ring-primary/25 sm:w-auto",
           })}
         >
+          <PenLine className="size-5" aria-hidden />
           Leave a review
         </Link>
       </div>
 
-      <BadgeHistoryStrip history={badgeHistory} />
-
       {hasReviews ? (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,16rem)_1fr]">
-          <div className="space-y-6">
-            <TrustBadgeSummary
-              badgeTier={badgeTier}
-              badgePeriod={badgePeriod}
-              professionName={professionName}
-              reviewCountWindow={reviewCountWindow}
-              eligible={eligible}
-            />
-            {breakdown ? <RatingBreakdown breakdown={breakdown} /> : null}
-          </div>
-          <ReviewList reviews={reviews} />
+        <div className="space-y-6">
+          <TrustBadgeSummary
+            badgeTier={badgeTier}
+            badgeSubTier={badgeSubTier}
+            badgePeriod={badgePeriod}
+            professionName={professionName}
+            reviewCountWindow={reviewCountWindow}
+            eligible={eligible}
+          />
+          <BadgeHistoryStrip history={badgeHistory} />
+          <TierHistoryBreakdown history={badgeHistory} />
         </div>
       ) : (
         <div className="space-y-6">
           <TrustBadgeSummary
             badgeTier={badgeTier}
+            badgeSubTier={badgeSubTier}
             badgePeriod={badgePeriod}
             professionName={professionName}
             reviewCountWindow={reviewCountWindow}

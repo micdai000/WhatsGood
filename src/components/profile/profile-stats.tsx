@@ -37,7 +37,7 @@ export function ProfileStats({ profile, className }: ProfileStatsProps) {
     <Card className={cn("shadow-sm", className)}>
       <CardContent className="grid grid-cols-3 gap-4 py-5">
         <StatItem label="Trust badge">
-          <TrustBadge tier={profile.badgeTier} size="md" />
+          <TrustBadge tier={profile.badgeTier} subTier={profile.badgeSubTier} size="md" />
         </StatItem>
         <StatItem label="Reviews">
           <Paragraph className="text-lg font-semibold tabular-nums sm:text-xl">

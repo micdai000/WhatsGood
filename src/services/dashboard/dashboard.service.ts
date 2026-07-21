@@ -59,7 +59,13 @@ export class DashboardService {
   private async fetchSourceData(
     profileId: string,
   ): Promise<
-    ServiceResult<DashboardSourceData & { displayName: string; username: string }>
+    ServiceResult<
+      DashboardSourceData & {
+        displayName: string;
+        username: string;
+        badgeTier: DashboardData["profile"]["badgeTier"];
+      }
+    >
   > {
     const method = "DashboardService.fetchSourceData";
 
@@ -78,7 +84,9 @@ export class DashboardService {
       const [profileResult, reviewsResult, requestsResult] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, username, display_name, average_rating, total_reviews")
+          .select(
+            "id, username, display_name, average_rating, total_reviews, current_badge_tier",
+          )
           .eq("id", validatedProfileId)
           .maybeSingle(),
         supabase
@@ -123,6 +131,7 @@ export class DashboardService {
         ...source,
         displayName: profileResult.data.display_name,
         username: profileResult.data.username,
+        badgeTier: profileResult.data.current_badge_tier ?? "none",
       });
     } catch (error) {
       return handleServiceError(method, error);
@@ -219,7 +228,8 @@ export class DashboardService {
         return failure(sourceResult.error);
       }
 
-      const { displayName, username, reviews, requests } = sourceResult.data;
+      const { displayName, username, badgeTier, reviews, requests } =
+        sourceResult.data;
 
       const statistics = computeStatistics(sourceResult.data);
       const reviewTrend = computeReviewTrend(reviews);
@@ -238,6 +248,7 @@ export class DashboardService {
           displayName,
           username,
           publicProfileUrl: getPublicProfileUrl(username),
+          badgeTier,
         },
         statistics,
         recentReviews: reviews.slice(0, RECENT_REVIEWS_LIMIT),

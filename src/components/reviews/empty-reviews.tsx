@@ -1,4 +1,4 @@
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, PenLine } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { H3, Muted } from "@/components/typography/typography";
@@ -29,7 +29,15 @@ export function EmptyReviews({
           </Muted>
         </div>
         {leaveReviewHref ? (
-          <Link to={leaveReviewHref} className={buttonVariants()}>
+          <Link
+            to={leaveReviewHref}
+            className={buttonVariants({
+              size: "lg",
+              className:
+                "gap-2 px-6 text-base font-semibold shadow-md ring-2 ring-primary/25",
+            })}
+          >
+            <PenLine className="size-5" aria-hidden />
             Leave a review
           </Link>
         ) : null}

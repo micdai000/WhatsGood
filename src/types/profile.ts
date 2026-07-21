@@ -1,4 +1,4 @@
-import type { BadgeTier } from "./badge";
+import type { BadgeSubTier, BadgeTier } from "./badge";
 
 export interface Profile {
   id: string;
@@ -30,6 +30,7 @@ export interface PublicProfile {
   averageRating: number;
   totalReviews: number;
   badgeTier: BadgeTier;
+  badgeSubTier: BadgeSubTier | null;
   badgePeriod: string | null;
   memberSince: string;
   isComplete: boolean;

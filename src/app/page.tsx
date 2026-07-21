@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { PRO_SIGNUP_ROUTE } from "@/lib/auth/routes";
+import { PROFESSIONS_DISCOVERY_COPY } from "@/lib/professions/display";
 import { Search, UserRound } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { ResultsGrid } from "@/components/search";
@@ -31,7 +33,7 @@ export default function HomePage() {
               <Eyebrow>For independent professionals</Eyebrow>
               <H1>Meritt Pros</H1>
               <Muted className="text-base leading-relaxed">
-                Find tutors, coaches, consultants, and other professionals —
+                Find trusted professionals in {PROFESSIONS_DISCOVERY_COPY} —
                 backed by verified reviews from real clients.
               </Muted>
 
@@ -41,7 +43,7 @@ export default function HomePage() {
                   Browse professionals
                 </Link>
                 <Link
-                  to="/signup"
+                  to={PRO_SIGNUP_ROUTE}
                   className={buttonVariants({ variant: "outline", size: "lg" })}
                 >
                   <UserRound className="size-4" aria-hidden />
@@ -102,7 +104,7 @@ export default function HomePage() {
           ) : (
             <div className="meritt-panel text-center text-sm text-muted-foreground">
               No professionals to show yet.{" "}
-              <Link to="/signup" className="font-medium text-foreground underline">
+              <Link to={PRO_SIGNUP_ROUTE} className="font-medium text-foreground underline">
                 Be the first to join
               </Link>
               .

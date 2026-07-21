@@ -78,7 +78,7 @@ TrustLoop profession lookup for onboarding (migration `011`).
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | UUID PK | |
-| `name` | TEXT | Display name (e.g. Tutor) |
+| `name` | TEXT | Display name (e.g. Photography) |
 | `slug` | TEXT UNIQUE | URL-safe identifier |
 | `icon` | TEXT | Lucide icon name (optional) |
 | `created_at` | TIMESTAMPTZ | |

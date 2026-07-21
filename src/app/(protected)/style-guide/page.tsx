@@ -199,14 +199,16 @@ export default function StyleGuidePage() {
           </div>
           <div className="space-y-2">
             <Label>Profession</Label>
-            <Select defaultValue="tutor">
+            <Select defaultValue="photography">
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select profession" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="tutor">Tutor</SelectItem>
-                <SelectItem value="coach">Coach</SelectItem>
-                <SelectItem value="consultant">Consultant</SelectItem>
+                <SelectItem value="car-detailing">Car Detailing</SelectItem>
+                <SelectItem value="photography">Photography</SelectItem>
+                <SelectItem value="tutoring-coaching">Tutoring & Coaching</SelectItem>
+                <SelectItem value="home-services">Home Services</SelectItem>
+                <SelectItem value="tech-services">Tech Services</SelectItem>
               </SelectContent>
             </Select>
           </div>

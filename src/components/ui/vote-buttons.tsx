@@ -21,7 +21,7 @@ const voteOptions: {
     label: "Promote",
     helper: "Deserves higher",
     icon: ChevronUp,
-    activeClasses: "bg-emerald-50 border-emerald-200 text-emerald-700",
+    activeClasses: "bg-primary/10 border-primary/30 text-primary",
   },
   {
     type: "maintain",
@@ -66,7 +66,7 @@ export function VoteButtons({ entityId, currentVote, onVote }: VoteButtonsProps)
               "flex flex-1 flex-col items-center gap-2 rounded-2xl border py-5 transition-all duration-200 active:scale-[0.97]",
               isActive
                 ? activeClasses
-                : "border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50",
+                : "border-border text-muted-foreground hover:border-border hover:bg-muted",
             )}
           >
             <Icon className="h-7 w-7" />
@@ -74,7 +74,7 @@ export function VoteButtons({ entityId, currentVote, onVote }: VoteButtonsProps)
             <span
               className={cn(
                 "text-[11px]",
-                isActive ? "opacity-70" : "text-neutral-400",
+                isActive ? "opacity-70" : "text-muted-foreground",
               )}
             >
               {helper}

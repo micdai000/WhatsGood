@@ -109,7 +109,7 @@ export default function DashboardPage() {
             </h2>
             <Link
               to="/dashboard/review-requests"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+              className="text-sm font-medium text-muted-foreground hover:text-primary"
             >
               View all
             </Link>

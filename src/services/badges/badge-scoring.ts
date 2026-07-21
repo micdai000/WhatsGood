@@ -5,10 +5,11 @@ import {
   MIN_REVIEWS_FOR_ELIGIBILITY,
   PERCENTILE_CUTOFFS,
   RECENCY_HALF_LIFE_DAYS,
+  STARTER_BADGE,
   TRUST_SCORE_WEIGHTS,
   VERIFIED_MULTIPLIER,
 } from "@/lib/constants/badges";
-import type { BadgeTier, ComponentBreakdown } from "@/types/badge";
+import type { BadgeSubTier, BadgeTier, ComponentBreakdown } from "@/types/badge";
 
 const REVIEW_WINDOW_DAYS = 90;
 const WILSON_Z = 1.96;
@@ -37,8 +38,30 @@ export interface ProfileScoreInput {
 export interface ProfileTierResult {
   profileId: string;
   badgeTier: BadgeTier;
+  badgeSubTier: BadgeSubTier | null;
   percentile: number | null;
 }
+
+type EarnedBadgeTier = Exclude<BadgeTier, "none">;
+
+const RANK_PERCENTILE_BANDS: Record<
+  EarnedBadgeTier,
+  { min: number; max: number }
+> = {
+  elite: { min: 0, max: PERCENTILE_CUTOFFS.elite },
+  platinum: { min: PERCENTILE_CUTOFFS.elite, max: PERCENTILE_CUTOFFS.platinum },
+  gold: { min: PERCENTILE_CUTOFFS.platinum, max: PERCENTILE_CUTOFFS.gold },
+  silver: { min: PERCENTILE_CUTOFFS.gold, max: PERCENTILE_CUTOFFS.silver },
+  bronze: { min: PERCENTILE_CUTOFFS.silver, max: 100 },
+};
+
+const RANK_THRESHOLD_ORDER: EarnedBadgeTier[] = [
+  "elite",
+  "platinum",
+  "gold",
+  "silver",
+  "bronze",
+];
 
 export function computeRecencyWeight(daysOld: number): number {
   if (daysOld <= 0) {
@@ -201,6 +224,10 @@ export function tierFromPercentile(percentile: number): BadgeTier {
     return "elite";
   }
 
+  if (percentile <= PERCENTILE_CUTOFFS.platinum) {
+    return "platinum";
+  }
+
   if (percentile <= PERCENTILE_CUTOFFS.gold) {
     return "gold";
   }
@@ -212,9 +239,41 @@ export function tierFromPercentile(percentile: number): BadgeTier {
   return "bronze";
 }
 
+export function subTierFromPercentile(
+  percentile: number,
+  rank: BadgeTier,
+): BadgeSubTier | null {
+  if (rank === "none") {
+    return null;
+  }
+
+  const band = RANK_PERCENTILE_BANDS[rank];
+  const width = band.max - band.min;
+
+  if (width <= 0) {
+    return 2;
+  }
+
+  const position = (percentile - band.min) / width;
+
+  if (position <= 1 / 3) {
+    return 3;
+  }
+
+  if (position <= 2 / 3) {
+    return 2;
+  }
+
+  return 1;
+}
+
 export function tierFromFixedThreshold(trustScore: number): BadgeTier {
   if (trustScore >= FIXED_THRESHOLD_FALLBACK.elite) {
     return "elite";
+  }
+
+  if (trustScore >= FIXED_THRESHOLD_FALLBACK.platinum) {
+    return "platinum";
   }
 
   if (trustScore >= FIXED_THRESHOLD_FALLBACK.gold) {
@@ -232,6 +291,39 @@ export function tierFromFixedThreshold(trustScore: number): BadgeTier {
   return "none";
 }
 
+export function subTierFromFixedThreshold(
+  trustScore: number,
+  rank: BadgeTier,
+): BadgeSubTier | null {
+  if (rank === "none") {
+    return null;
+  }
+
+  const rankIndex = RANK_THRESHOLD_ORDER.indexOf(rank);
+  const upper = FIXED_THRESHOLD_FALLBACK[rank];
+  const lower =
+    rankIndex < RANK_THRESHOLD_ORDER.length - 1
+      ? FIXED_THRESHOLD_FALLBACK[RANK_THRESHOLD_ORDER[rankIndex + 1]]
+      : 0;
+  const width = upper - lower;
+
+  if (width <= 0) {
+    return 2;
+  }
+
+  const position = (upper - trustScore) / width;
+
+  if (position <= 1 / 3) {
+    return 3;
+  }
+
+  if (position <= 2 / 3) {
+    return 2;
+  }
+
+  return 1;
+}
+
 export function assignBadgeTiers(
   profiles: ProfileScoreInput[],
   minCohortSizeForPercentile = MIN_COHORT_SIZE_FOR_PERCENTILE,
@@ -240,7 +332,8 @@ export function assignBadgeTiers(
     .filter((profile) => !profile.eligible)
     .map((profile) => ({
       profileId: profile.profileId,
-      badgeTier: "none" as const,
+      badgeTier: STARTER_BADGE.tier,
+      badgeSubTier: STARTER_BADGE.subTier,
       percentile: null,
     }));
 
@@ -251,11 +344,16 @@ export function assignBadgeTiers(
   if (!usePercentileRanking) {
     return [
       ...ineligible,
-      ...eligible.map((profile) => ({
-        profileId: profile.profileId,
-        badgeTier: tierFromFixedThreshold(profile.trustScore),
-        percentile: null,
-      })),
+      ...eligible.map((profile) => {
+        const badgeTier = tierFromFixedThreshold(profile.trustScore);
+
+        return {
+          profileId: profile.profileId,
+          badgeTier,
+          badgeSubTier: subTierFromFixedThreshold(profile.trustScore, badgeTier),
+          percentile: null,
+        };
+      }),
     ];
   }
 
@@ -271,10 +369,12 @@ export function assignBadgeTiers(
   const ranked = sorted.map((profile, index) => {
     const rank = index + 1;
     const percentile = computePercentile(rank, cohortSize);
+    const badgeTier = tierFromPercentile(percentile);
 
     return {
       profileId: profile.profileId,
-      badgeTier: tierFromPercentile(percentile),
+      badgeTier,
+      badgeSubTier: subTierFromPercentile(percentile, badgeTier),
       percentile,
     };
   });

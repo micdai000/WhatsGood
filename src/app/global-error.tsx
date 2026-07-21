@@ -43,7 +43,7 @@ export default function GlobalError({
           <h1 style={{ fontSize: "1.5rem", fontWeight: 600 }}>
             Meritt is temporarily unavailable
           </h1>
-          <p style={{ marginTop: "0.75rem", color: "#6b7280" }}>
+          <p style={{ marginTop: "0.75rem", color: "#5C6B63" }}>
             A critical error occurred. Please try again in a moment.
           </p>
           <button
@@ -52,7 +52,7 @@ export default function GlobalError({
             style={{
               marginTop: "2rem",
               borderRadius: "0.375rem",
-              backgroundColor: "#111827",
+              backgroundColor: "#1B4332",
               color: "#ffffff",
               padding: "0.5rem 1rem",
               fontSize: "0.875rem",

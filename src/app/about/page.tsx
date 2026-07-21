@@ -1,4 +1,5 @@
 import { Container } from "@/components/layout/container";
+import { PROFESSIONS_DISCOVERY_COPY } from "@/lib/professions/display";
 import { MerittSection } from "@/components/ui/meritt-surface";
 import { PageHeader } from "@/components/layout/page-header";
 import { Paragraph } from "@/components/typography/typography";
@@ -12,9 +13,9 @@ export default function AboutPage() {
           description="Helping independent professionals build credibility through verified client reviews."
         />
         <Paragraph className="max-w-2xl text-muted-foreground">
-          Meritt Pros gives tutors, coaches, consultants, and other independent
-          experts a simple way to collect authentic feedback and showcase their
-          reputation.
+          Meritt Pros helps independent service professionals — in{" "}
+          {PROFESSIONS_DISCOVERY_COPY} — collect authentic feedback and showcase
+          their reputation.
         </Paragraph>
       </Container>
     </MerittSection>

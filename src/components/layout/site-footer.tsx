@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 const footerLinks = [
   { href: "/search", label: "Discover" },
   { href: "/about", label: "About" },
-  { href: "/pricing", label: "Pricing" },
   { href: "/login", label: "Log in" },
 ] as const;
 
@@ -30,7 +29,7 @@ export function SiteFooter({ className }: { className?: string }) {
               <Link
                 key={link.href}
                 to={link.href}
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                className="text-sm text-muted-foreground transition-colors hover:text-primary"
               >
                 {link.label}
               </Link>

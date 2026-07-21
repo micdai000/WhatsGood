@@ -1,4 +1,4 @@
-import type { RatingBreakdown, Review, ReviewRequest } from "@/types";
+import type { BadgeTier, RatingBreakdown, Review, ReviewRequest } from "@/types";
 
 export interface PlaceholderMetric {
   tracked: false;
@@ -55,6 +55,7 @@ export interface DashboardProfile {
   displayName: string;
   username: string;
   publicProfileUrl: string;
+  badgeTier: BadgeTier;
 }
 
 export interface DashboardData {

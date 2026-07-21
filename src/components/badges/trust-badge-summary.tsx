@@ -4,15 +4,16 @@ import { TrustBadge } from "@/components/badges/trust-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Muted, Paragraph } from "@/components/typography/typography";
 import {
-  BADGE_TIER_LABELS,
   describeTrustBadgeWhy,
+  formatBadgeLabel,
   formatBadgePeriod,
 } from "@/lib/badges/display";
-import type { BadgeTier } from "@/types/badge";
+import type { BadgeSubTier, BadgeTier } from "@/types/badge";
 import { cn } from "@/lib/utils";
 
 interface TrustBadgeSummaryProps {
   badgeTier: BadgeTier;
+  badgeSubTier?: BadgeSubTier | null;
   badgePeriod: string | null;
   professionName: string | null;
   reviewCountWindow: number;
@@ -22,6 +23,7 @@ interface TrustBadgeSummaryProps {
 
 export function TrustBadgeSummary({
   badgeTier,
+  badgeSubTier = null,
   badgePeriod,
   professionName,
   reviewCountWindow,
@@ -39,10 +41,10 @@ export function TrustBadgeSummary({
     <Card className={cn("shadow-sm", className)}>
       <CardContent className="space-y-4 py-6">
         <div className="flex flex-col items-center gap-3 text-center">
-          <TrustBadge tier={badgeTier} size="lg" />
+          <TrustBadge tier={badgeTier} subTier={badgeSubTier} size="lg" />
           <div className="space-y-1">
             <Paragraph className="font-semibold">
-              {BADGE_TIER_LABELS[badgeTier]}
+              {formatBadgeLabel(badgeTier, badgeSubTier)}
             </Paragraph>
             {badgePeriod ? (
               <Muted className="text-sm">

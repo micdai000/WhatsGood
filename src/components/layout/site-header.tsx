@@ -4,14 +4,13 @@ import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { UserMenu } from "@/components/layout/user-menu";
 import { useAuthContext } from "@/contexts/auth-context";
-import { isAuthRoute } from "@/lib/auth/routes";
+import { isAuthRoute, PRO_SIGNUP_ROUTE } from "@/lib/auth/routes";
 import { SITE_NAME } from "@/lib/seo/site";
 import { cn } from "@/lib/utils";
 
 const publicNavLinks = [
   { href: "/search", label: "Discover" },
   { href: "/about", label: "About" },
-  { href: "/pricing", label: "Pricing" },
 ] as const;
 
 export function SiteHeader({ className }: { className?: string }) {
@@ -38,7 +37,7 @@ export function SiteHeader({ className }: { className?: string }) {
       <Container className="flex h-16 items-center justify-between">
         <Link
           to="/"
-          className="text-[15px] font-semibold tracking-tight text-foreground transition-opacity hover:opacity-80"
+          className="text-[15px] font-semibold tracking-tight text-primary transition-opacity hover:opacity-80"
         >
           {SITE_NAME}
         </Link>
@@ -47,15 +46,26 @@ export function SiteHeader({ className }: { className?: string }) {
           className="hidden items-center gap-6 md:flex"
           aria-label="Main navigation"
         >
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive =
+              pathname === link.href ||
+              (link.href !== "/" && pathname.startsWith(`${link.href}/`));
+
+            return (
+              <Link
+                key={link.href}
+                to={link.href}
+                className={cn(
+                  "text-sm transition-colors",
+                  isActive
+                    ? "font-medium text-primary"
+                    : "text-muted-foreground hover:text-primary",
+                )}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {loading ? null : isAuthenticated ? (
@@ -71,7 +81,7 @@ export function SiteHeader({ className }: { className?: string }) {
             >
               Log in
             </Link>
-            <Link to="/signup" className={buttonVariants({ size: "sm" })}>
+            <Link to={PRO_SIGNUP_ROUTE} className={buttonVariants({ size: "sm" })}>
               Join as a pro
             </Link>
           </div>

@@ -60,9 +60,13 @@ export function ProfileActions({
       </Button>
       <Link
         to={leaveReviewHref}
-        className={buttonVariants({ variant: "outline", className: "w-full sm:w-auto" })}
+        className={buttonVariants({
+          size: "lg",
+          className:
+            "w-full gap-2 px-6 text-base font-semibold shadow-md ring-2 ring-primary/25 sm:w-auto",
+        })}
       >
-        <PenLine className="size-4" aria-hidden />
+        <PenLine className="size-5" aria-hidden />
         Leave a Review
       </Link>
     </div>

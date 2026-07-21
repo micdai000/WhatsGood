@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { useActionState } from "react";
+import { useEffect, useActionState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { PRO_SIGNUP_ROUTE } from "@/lib/auth/routes";
 import { signInAction, type AuthActionState } from "@/app/actions/auth.actions";
 import { AuthCard } from "@/components/auth/auth-card";
 import { AuthDivider } from "@/components/auth/auth-divider";
@@ -109,7 +109,7 @@ export function LoginForm() {
           <RememberMeCheckbox />
           <Link
             to="/forgot-password"
-            className="text-sm text-muted-foreground hover:text-foreground"
+            className="text-sm text-muted-foreground hover:text-primary"
           >
             Forgot password?
           </Link>
@@ -125,7 +125,7 @@ export function LoginForm() {
 
       <Muted className="mt-6 text-center">
         Don&apos;t have an account?{" "}
-        <Link to="/signup" className="font-medium text-foreground hover:underline">
+        <Link to={PRO_SIGNUP_ROUTE} className="font-medium text-foreground hover:underline">
           Sign up
         </Link>
       </Muted>

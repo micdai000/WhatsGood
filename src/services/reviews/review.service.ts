@@ -25,6 +25,10 @@ import type {
   ServiceResult,
 } from "@/types";
 import { isSuccess } from "@/types";
+import {
+  getVoteMonthStart,
+  MONTHLY_VOTE_LIMIT_MESSAGE,
+} from "@/lib/reviews/vote-limit";
 import { mapReviewRow, type ReviewRow } from "./review.mapper";
 
 export class ReviewService {
@@ -117,6 +121,27 @@ export class ReviewService {
       });
 
       const supabase = createClient();
+      const monthStart = getVoteMonthStart().toISOString();
+
+      const { data: existingVote, error: existingVoteError } = await supabase
+        .from("reviews")
+        .select("id")
+        .eq("profile_id", validated.profileId)
+        .eq("reviewer_email", validated.reviewerEmail)
+        .gte("created_at", monthStart)
+        .maybeSingle();
+
+      if (existingVoteError) {
+        logger.error(method, existingVoteError, {
+          profileId: validated.profileId,
+        });
+        return failure(DatabaseError.fromSource(existingVoteError));
+      }
+
+      if (existingVote) {
+        return failure(new ConflictError(MONTHLY_VOTE_LIMIT_MESSAGE));
+      }
+
       const { data, error } = await supabase
         .from("reviews")
         .insert({
@@ -138,11 +163,7 @@ export class ReviewService {
         logger.error(method, error, { profileId: validated.profileId });
 
         if (error.code === "23505") {
-          return failure(
-            new ConflictError(
-              "You have already submitted a review for this professional",
-            ),
-          );
+          return failure(new ConflictError(MONTHLY_VOTE_LIMIT_MESSAGE));
         }
 
         if (error.code === "23503") {

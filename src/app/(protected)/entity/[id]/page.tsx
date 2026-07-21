@@ -31,13 +31,13 @@ export default function EntityDetailPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
-          <h1 className="text-xl font-bold text-[#111]">Not found</h1>
-          <p className="mt-2 text-[14px] text-neutral-400">
+          <h1 className="text-xl font-bold text-foreground">Not found</h1>
+          <p className="mt-2 text-[14px] text-muted-foreground">
             This page doesn&apos;t exist.
           </p>
           <Link
             to="/"
-            className="mt-4 inline-block text-[14px] font-semibold text-[#D4A017]"
+            className="mt-4 inline-block text-[14px] font-semibold text-primary"
           >
             Go back
           </Link>
@@ -82,10 +82,10 @@ export default function EntityDetailPage() {
           to="/"
           className="absolute top-5 left-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm"
         >
-          <ChevronLeft className="h-5 w-5 text-[#111]" />
+          <ChevronLeft className="h-5 w-5 text-foreground" />
         </Link>
         <button className="absolute top-5 right-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm">
-          <Share2 className="h-5 w-5 text-[#111]" />
+          <Share2 className="h-5 w-5 text-foreground" />
         </button>
       </div>
 
@@ -93,7 +93,7 @@ export default function EntityDetailPage() {
       <div className="page-x pt-6">
         {/* Category + Tier */}
         <div className="flex items-center gap-2.5">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-[#D4A017]">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-primary">
             {categoryLabels[entity.category]}
           </span>
           {(!isFood || activeLocation) && (
@@ -102,12 +102,12 @@ export default function EntityDetailPage() {
         </div>
 
         {/* Name */}
-        <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-[#111] sm:text-3xl">
+        <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">
           {entity.name}
         </h1>
 
         {isFood && activeLocation && (
-          <p className="mt-2 text-[14px] text-neutral-500">
+          <p className="mt-2 text-[14px] text-muted-foreground">
             {formatFoodLocationLabel(activeLocation)}
           </p>
         )}
@@ -131,32 +131,32 @@ export default function EntityDetailPage() {
           )}
         >
           {isFood && !activeLocation ? (
-            <p className="text-[14px] text-neutral-400">
+            <p className="text-[14px] text-muted-foreground">
               Pick a location above to see local ratings
             </p>
           ) : (
             <>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold tabular-nums text-[#111]">
+                <span className="text-xl font-bold tabular-nums text-foreground">
                   {displayScore > 0 ? "+" : ""}
                   {displayScore}
                 </span>
                 {displayTrending === "up" && (
-                  <TrendingUp className="h-5 w-5 text-emerald-500" />
+                  <TrendingUp className="h-5 w-5 text-success" />
                 )}
                 {displayTrending === "down" && (
                   <TrendingDown className="h-5 w-5 text-red-400" />
                 )}
               </div>
-              <div className="h-5 w-px bg-neutral-200" />
-              <span className="text-[14px] text-neutral-400">
+              <div className="h-5 w-px bg-border" />
+              <span className="text-[14px] text-muted-foreground">
                 {formatCount(displayVotes)} votes
                 {isFood && activeLocation ? " at this spot" : ""}
               </span>
               {!isFood && (
                 <>
-                  <div className="h-5 w-px bg-neutral-200" />
-                  <span className="flex items-center gap-1.5 text-[14px] text-neutral-400">
+                  <div className="h-5 w-px bg-border" />
+                  <span className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
                     <Heart className="h-4 w-4" />
                     {formatCount(entity.followersCount)} likes
                   </span>
@@ -175,7 +175,7 @@ export default function EntityDetailPage() {
               "flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[15px] font-semibold transition-colors",
               liked
                 ? "bg-red-50 text-red-500 ring-1 ring-red-100"
-                : "bg-[#111] text-white hover:bg-neutral-800",
+                : "bg-primary text-white hover:bg-primary/90",
             )}
           >
             <Heart
@@ -199,7 +199,7 @@ export default function EntityDetailPage() {
             }
           />
           {isFood && !activeLocation ? (
-            <p className="rounded-xl bg-neutral-50 py-6 text-center text-[14px] text-neutral-400">
+            <p className="rounded-xl bg-muted py-6 text-center text-[14px] text-muted-foreground">
               Choose where you tried this before voting.
             </p>
           ) : (

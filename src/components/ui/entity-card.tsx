@@ -45,13 +45,13 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
             {entity.name}
           </h3>
           {entity.category === "food" && entity.foodLocations && (
-            <p className="text-[12px] text-neutral-400 mt-0.5 truncate">
+            <p className="text-[12px] text-muted-foreground mt-0.5 truncate">
               {entity.foodLocations.length > 1
                 ? `${entity.foodLocations.length} addresses`
                 : formatFoodLocationLabel(entity.foodLocations[0])}
             </p>
           )}
-          <div className="mt-0.5 flex items-center gap-1.5 text-sm tabular-nums text-neutral-400">
+          <div className="mt-0.5 flex items-center gap-1.5 text-sm tabular-nums text-muted-foreground">
             {singleFoodLocation ? (
               <>
                 <span>
@@ -59,12 +59,12 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
                   {singleFoodLocation.score}
                 </span>
                 {singleFoodLocation.trending === "up" && (
-                  <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                  <TrendingUp className="h-3.5 w-3.5 text-success" />
                 )}
                 {singleFoodLocation.trending === "down" && (
                   <TrendingDown className="h-3.5 w-3.5 text-red-400" />
                 )}
-                <span className="text-neutral-300">&middot;</span>
+                <span className="text-muted-foreground/50">&middot;</span>
                 <span>{formatCount(singleFoodLocation.totalVotes)} votes</span>
               </>
             ) : isFood ? (
@@ -73,12 +73,12 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
               <>
                 <span>{entity.score > 0 ? "+" : ""}{entity.score}</span>
                 {entity.trending === "up" && (
-                  <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                  <TrendingUp className="h-3.5 w-3.5 text-success" />
                 )}
                 {entity.trending === "down" && (
                   <TrendingDown className="h-3.5 w-3.5 text-red-400" />
                 )}
-                <span className="text-neutral-300">&middot;</span>
+                <span className="text-muted-foreground/50">&middot;</span>
                 <span>{formatCount(entity.totalVotes)} votes</span>
               </>
             )}
@@ -113,7 +113,7 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
           {entity.name}
         </h3>
         {entity.category === "food" && entity.foodLocations && (
-          <p className="text-[12px] text-neutral-400 mt-0.5 truncate">
+          <p className="text-[12px] text-muted-foreground mt-0.5 truncate">
             {entity.foodLocations.length > 1
               ? `${entity.foodLocations.length} addresses · tap to compare`
               : formatFoodLocationLabel(entity.foodLocations[0])}
@@ -123,29 +123,29 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
           {singleFoodLocation ? (
             <>
               <TierBadge tier={singleFoodLocation.tier} size="sm" />
-              <span className="text-sm tabular-nums text-neutral-400">
+              <span className="text-sm tabular-nums text-muted-foreground">
                 {singleFoodLocation.score > 0 ? "+" : ""}
                 {singleFoodLocation.score}
               </span>
               {singleFoodLocation.trending === "up" && (
-                <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                <TrendingUp className="h-3.5 w-3.5 text-success" />
               )}
               {singleFoodLocation.trending === "down" && (
                 <TrendingDown className="h-3.5 w-3.5 text-red-400" />
               )}
             </>
           ) : isFood ? (
-            <span className="text-[12px] font-medium text-[#D4A017]">
+            <span className="text-[12px] font-medium text-primary">
               Compare by location
             </span>
           ) : (
             <>
               <TierBadge tier={entity.tier} size="sm" />
-              <span className="text-sm tabular-nums text-neutral-400">
+              <span className="text-sm tabular-nums text-muted-foreground">
                 {entity.score > 0 ? "+" : ""}{entity.score}
               </span>
               {entity.trending === "up" && (
-                <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                <TrendingUp className="h-3.5 w-3.5 text-success" />
               )}
               {entity.trending === "down" && (
                 <TrendingDown className="h-3.5 w-3.5 text-red-400" />
@@ -154,7 +154,7 @@ export function EntityCard({ entity, size = "small", className }: EntityCardProp
           )}
         </div>
         {!isFood && (
-          <p className="text-[12px] text-neutral-400 mt-0.5">
+          <p className="text-[12px] text-muted-foreground mt-0.5">
             {formatCount(entity.followersCount)} followers
           </p>
         )}

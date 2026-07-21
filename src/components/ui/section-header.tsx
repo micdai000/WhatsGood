@@ -24,7 +24,7 @@ export function SectionHeader({
         {actionLabel && actionHref ? (
           <Link
             to={actionHref}
-            className="shrink-0 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="shrink-0 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             {actionLabel}
           </Link>

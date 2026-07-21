@@ -3,7 +3,6 @@ import { getSiteUrl as getPublicSiteUrl } from "@/lib/public-env";
 export const PUBLIC_ROUTES = [
   "/",
   "/about",
-  "/pricing",
   "/search",
   "/login",
   "/signup",
@@ -17,6 +16,9 @@ export const AUTH_ROUTES = [
   "/forgot-password",
   "/reset-password",
 ] as const;
+
+/** Where new professionals create a Meritt account. */
+export const PRO_SIGNUP_ROUTE = "/signup";
 
 export function isPublicRoute(pathname: string): boolean {
   if (PUBLIC_ROUTES.includes(pathname as (typeof PUBLIC_ROUTES)[number])) {

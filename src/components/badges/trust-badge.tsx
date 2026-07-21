@@ -1,13 +1,14 @@
 import { Award } from "lucide-react";
 import {
-  BADGE_TIER_LABELS,
   BADGE_TIER_STYLES,
+  formatBadgeLabel,
 } from "@/lib/badges/display";
-import type { BadgeTier } from "@/types/badge";
+import type { BadgeSubTier, BadgeTier } from "@/types/badge";
 import { cn } from "@/lib/utils";
 
 interface TrustBadgeProps {
   tier: BadgeTier;
+  subTier?: BadgeSubTier | null;
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
   className?: string;
@@ -30,6 +31,7 @@ const sizeClasses = {
 
 export function TrustBadge({
   tier,
+  subTier = null,
   size = "md",
   showLabel = true,
   className,
@@ -47,7 +49,7 @@ export function TrustBadge({
       )}
     >
       <Award className={cn(sizes.icon, styles.icon)} aria-hidden />
-      {showLabel ? <span>{BADGE_TIER_LABELS[tier]}</span> : null}
+      {showLabel ? <span>{formatBadgeLabel(tier, subTier)}</span> : null}
     </span>
   );
 }

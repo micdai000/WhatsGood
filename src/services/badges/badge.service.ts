@@ -87,7 +87,7 @@ export class BadgeService {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("profiles")
-        .select("current_badge_tier, current_badge_period")
+        .select("current_badge_tier, current_badge_sub_tier, current_badge_period")
         .eq("id", validatedProfileId)
         .maybeSingle();
 
@@ -102,6 +102,12 @@ export class BadgeService {
 
       return success({
         badgeTier: data.current_badge_tier ?? "none",
+        badgeSubTier:
+          data.current_badge_sub_tier === 1 ||
+          data.current_badge_sub_tier === 2 ||
+          data.current_badge_sub_tier === 3
+            ? data.current_badge_sub_tier
+            : null,
         badgePeriod: data.current_badge_period ?? null,
       });
     } catch (error) {
@@ -239,7 +245,11 @@ export class BadgeService {
 
       const tierByProfileId = new Map<
         string,
-        { badgeTier: BadgeSnapshot["badgeTier"]; percentile: number | null }
+        {
+          badgeTier: BadgeSnapshot["badgeTier"];
+          badgeSubTier: BadgeSnapshot["badgeSubTier"];
+          percentile: number | null;
+        }
       >();
 
       for (const [, cohortProfiles] of profilesByProfession) {
@@ -257,6 +267,7 @@ export class BadgeService {
         for (const tierResult of tierResults) {
           tierByProfileId.set(tierResult.profileId, {
             badgeTier: tierResult.badgeTier,
+            badgeSubTier: tierResult.badgeSubTier,
             percentile: tierResult.percentile,
           });
         }
@@ -266,6 +277,7 @@ export class BadgeService {
       const snapshotRows: BadgeSnapshotInsertRow[] = scoredProfiles.map((scored) => {
         const tier = tierByProfileId.get(scored.profile.id) ?? {
           badgeTier: "none" as const,
+          badgeSubTier: null,
           percentile: null,
         };
 
@@ -275,6 +287,7 @@ export class BadgeService {
           trust_score: scored.trustScore,
           percentile: tier.percentile,
           badge_tier: tier.badgeTier,
+          badge_sub_tier: tier.badgeSubTier,
           review_count_window: scored.reviewCountWindow,
           eligible: scored.eligible,
           component_breakdown: scored.componentBreakdown,
@@ -307,6 +320,7 @@ export class BadgeService {
       for (const scored of profilesToUpdate) {
         const tier = tierByProfileId.get(scored.profile.id) ?? {
           badgeTier: "none" as const,
+          badgeSubTier: null,
           percentile: null,
         };
 
@@ -314,6 +328,7 @@ export class BadgeService {
           .from("profiles")
           .update({
             current_badge_tier: tier.badgeTier,
+            current_badge_sub_tier: tier.badgeSubTier,
             current_badge_period: validatedPeriod,
           })
           .eq("id", scored.profile.id);

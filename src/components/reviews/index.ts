@@ -1,5 +1,5 @@
 export { StarRating } from "./star-rating";
-export { StarRatingInput } from "./star-rating-input";
+export { TrustSignalInput } from "./trust-signal-input";
 export { ReviewCard } from "./review-card";
 export { ReviewList } from "./review-list";
 export { ReviewSummary } from "./review-summary";

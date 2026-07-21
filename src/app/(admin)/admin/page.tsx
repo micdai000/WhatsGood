@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
       </DashboardCard>
 
       <Muted className="text-xs">
-        <Link to="/dashboard" className="underline hover:text-foreground">
+        <Link to="/dashboard" className="underline hover:text-primary">
           Return to professional dashboard
         </Link>
       </Muted>

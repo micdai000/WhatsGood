@@ -1,4 +1,4 @@
-import type { BadgeTier } from "@/types/badge";
+import type { BadgeSubTier, BadgeTier } from "@/types/badge";
 import type { Profile, PublicProfile } from "@/types";
 import { DEFAULTS } from "@/lib/constants";
 
@@ -14,6 +14,7 @@ export type PublicProfileRow = {
   average_rating: number | string | null;
   total_reviews: number | null;
   current_badge_tier: BadgeTier | null;
+  current_badge_sub_tier: number | null;
   current_badge_period: string | null;
   professions: { name: string } | { name: string }[] | null;
 };
@@ -26,6 +27,14 @@ function resolveProfessionName(
     return professions[0]?.name ?? null;
   }
   return professions.name;
+}
+
+function mapBadgeSubTier(value: number | null | undefined): BadgeSubTier | null {
+  if (value === 1 || value === 2 || value === 3) {
+    return value;
+  }
+
+  return null;
 }
 
 export function isPublicProfileComplete(row: PublicProfileRow): boolean {
@@ -52,6 +61,7 @@ export function mapPublicProfileRow(row: PublicProfileRow): PublicProfile {
     averageRating: Number(row.average_rating ?? DEFAULTS.AVERAGE_RATING),
     totalReviews: row.total_reviews ?? DEFAULTS.TOTAL_REVIEWS,
     badgeTier: row.current_badge_tier ?? "none",
+    badgeSubTier: mapBadgeSubTier(row.current_badge_sub_tier),
     badgePeriod: row.current_badge_period ?? null,
     memberSince: row.created_at,
     isComplete: isPublicProfileComplete(row),
@@ -65,6 +75,7 @@ export function mapProfileToPublicProfile(
     averageRating?: number;
     totalReviews?: number;
     badgeTier?: BadgeTier;
+    badgeSubTier?: BadgeSubTier | null;
     badgePeriod?: string | null;
   },
 ): PublicProfile {
@@ -81,6 +92,7 @@ export function mapProfileToPublicProfile(
     averageRating: options.averageRating ?? DEFAULTS.AVERAGE_RATING,
     totalReviews: options.totalReviews ?? DEFAULTS.TOTAL_REVIEWS,
     badgeTier: options.badgeTier ?? "none",
+    badgeSubTier: options.badgeSubTier ?? null,
     badgePeriod: options.badgePeriod ?? null,
     memberSince: profile.createdAt,
     isComplete: Boolean(

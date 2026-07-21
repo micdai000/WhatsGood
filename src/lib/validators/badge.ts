@@ -1,11 +1,14 @@
 import { z } from "zod";
-import { BADGE_TIERS } from "@/lib/constants/badges";
+import { BADGE_SUB_TIERS, BADGE_TIERS } from "@/lib/constants/badges";
 
 const periodSchema = z
   .string()
   .regex(/^\d{4}-\d{2}$/, "Period must be in YYYY-MM format");
 
 const badgeTierSchema = z.enum(BADGE_TIERS);
+const badgeSubTierSchema = z.enum(
+  BADGE_SUB_TIERS.map(String) as [string, ...string[]],
+);
 
 const componentBreakdownSchema = z.object({
   bayesian_avg: z.number(),
@@ -21,6 +24,7 @@ export const badgeSnapshotSchema = z.object({
   trust_score: z.number().min(0).max(100),
   percentile: z.number().min(0).max(100).nullable(),
   badge_tier: badgeTierSchema,
+  badge_sub_tier: badgeSubTierSchema.nullable(),
   review_count_window: z.number().int().min(0),
   eligible: z.boolean(),
   component_breakdown: componentBreakdownSchema,

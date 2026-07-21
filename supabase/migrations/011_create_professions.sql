@@ -24,12 +24,9 @@ CREATE POLICY "Professions are publicly readable"
   USING (true);
 
 INSERT INTO public.professions (name, slug, icon) VALUES
-  ('Tutor',            'tutor',            'graduation-cap'),
-  ('Therapist',        'therapist',        'heart-pulse'),
-  ('Life Coach',       'life-coach',       'compass'),
-  ('Consultant',       'consultant',       'briefcase'),
-  ('Personal Trainer', 'personal-trainer', 'dumbbell'),
-  ('Music Teacher',    'music-teacher',    'music'),
-  ('Photographer',     'photographer',     'camera'),
-  ('Accountant',       'accountant',       'calculator')
+  ('Car Detailing',       'car-detailing',     'car'),
+  ('Photography',         'photography',       'camera'),
+  ('Tutoring & Coaching', 'tutoring-coaching', 'graduation-cap'),
+  ('Home Services',       'home-services',     'home'),
+  ('Tech Services',       'tech-services',     'laptop')
 ON CONFLICT (slug) DO NOTHING;
