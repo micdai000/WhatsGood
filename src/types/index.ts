@@ -29,6 +29,7 @@ export type {
 export type { Profession } from "./profession";
 export type {
   BadgeSnapshot,
+  BadgeSubTier,
   BadgeTier,
   ComponentBreakdown,
   ProfileBadge,

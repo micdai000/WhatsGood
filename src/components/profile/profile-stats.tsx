@@ -1,7 +1,5 @@
-import type { ReactNode } from "react";
-import { TrustBadge } from "@/components/badges";
-import { Card, CardContent } from "@/components/ui/card";
-import { Muted, Paragraph } from "@/components/typography/typography";
+import { CalendarDays, MessageSquareText, Star } from "lucide-react";
+import { Muted } from "@/components/typography/typography";
 import { formatDate } from "@/lib/utils/format-date";
 import type { PublicProfile } from "@/types";
 import { cn } from "@/lib/utils";
@@ -11,45 +9,64 @@ interface ProfileStatsProps {
   className?: string;
 }
 
-interface StatItemProps {
+interface StatPillProps {
+  icon: React.ReactNode;
   label: string;
-  children: ReactNode;
-  hint?: string;
+  value: string;
 }
 
-function StatItem({ label, children, hint }: StatItemProps) {
+function StatPill({ icon, label, value }: StatPillProps) {
   return (
-    <div className="space-y-1 text-center">
-      <div className="flex justify-center">{children}</div>
-      <Muted className="text-xs">{label}</Muted>
-      {hint ? <Muted className="text-[10px]">{hint}</Muted> : null}
+    <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-border/80 bg-card px-4 py-3">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold tabular-nums text-foreground">
+          {value}
+        </p>
+        <Muted className="text-xs">{label}</Muted>
+      </div>
     </div>
   );
 }
 
 export function ProfileStats({ profile, className }: ProfileStatsProps) {
   const memberSince = formatDate(profile.memberSince, {
-    month: "long",
+    month: "short",
     year: "numeric",
   });
 
+  const reviewLabel =
+    profile.totalReviews === 1 ? "Client review" : "Client reviews";
+
+  const ratingValue =
+    profile.totalReviews > 0
+      ? profile.averageRating.toFixed(1)
+      : "—";
+
   return (
-    <Card className={cn("shadow-sm", className)}>
-      <CardContent className="grid grid-cols-3 gap-4 py-5">
-        <StatItem label="Trust badge">
-          <TrustBadge tier={profile.badgeTier} size="md" />
-        </StatItem>
-        <StatItem label="Reviews">
-          <Paragraph className="text-lg font-semibold tabular-nums sm:text-xl">
-            {profile.totalReviews}
-          </Paragraph>
-        </StatItem>
-        <StatItem label="Member since">
-          <Paragraph className="text-lg font-semibold sm:text-xl">
-            {memberSince}
-          </Paragraph>
-        </StatItem>
-      </CardContent>
-    </Card>
+    <div
+      className={cn(
+        "grid grid-cols-1 gap-3 sm:grid-cols-3",
+        className,
+      )}
+    >
+      <StatPill
+        icon={<MessageSquareText className="size-4" aria-hidden />}
+        label={reviewLabel}
+        value={String(profile.totalReviews)}
+      />
+      <StatPill
+        icon={<Star className="size-4" aria-hidden />}
+        label="Average trust"
+        value={ratingValue}
+      />
+      <StatPill
+        icon={<CalendarDays className="size-4" aria-hidden />}
+        label="Member since"
+        value={memberSince}
+      />
+    </div>
   );
 }

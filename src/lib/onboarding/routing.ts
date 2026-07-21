@@ -1,6 +1,5 @@
 import { profileService } from "@/services/profiles/profile.service";
 import { isFailure, isSuccess } from "@/types";
-import { ONBOARDING_ROUTES } from "./constants";
 
 export type OnboardingStatus = "no_profile" | "has_profile";
 
@@ -42,14 +41,6 @@ export async function getOnboardingStatus(
   };
 }
 
-export async function resolvePostAuthRedirect(userId: string): Promise<string> {
-  const status = await getOnboardingStatus(userId);
-
-  if (!status.ok) {
-    return ONBOARDING_ROUTES.welcome;
-  }
-
-  return status.status === "has_profile"
-    ? ONBOARDING_ROUTES.dashboard
-    : ONBOARDING_ROUTES.welcome;
+export async function resolvePostAuthRedirect(_userId: string): Promise<string> {
+  return "/";
 }

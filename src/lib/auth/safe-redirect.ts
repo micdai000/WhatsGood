@@ -4,7 +4,7 @@
  */
 export function getSafeRedirectPath(
   value: string | null | undefined,
-  fallback = "/dashboard",
+  fallback = "/",
 ): string {
   if (!value) return fallback;
 

@@ -12,6 +12,7 @@ export const PUBLIC_PROFILE_SELECT = `
   average_rating,
   total_reviews,
   current_badge_tier,
+  current_badge_sub_tier,
   current_badge_period,
   professions ( name )
 `;

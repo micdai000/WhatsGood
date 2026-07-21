@@ -4,7 +4,7 @@ TrustLoop's search helps users **find independent professionals** by name, profe
 
 ## Why search is essential
 
-A professional directory only creates value when people can **discover** the right expert. Without search, profiles are invisible unless you already have a direct link. Search connects clients with tutors, coaches, consultants, and other professionals based on what they need and where they are.
+A professional directory only creates value when people can **discover** the right expert. Without search, profiles are invisible unless you already have a direct link. Search connects clients with detailers, photographers, tutors, home service pros, tech specialists, and other professionals based on what they need and where they are.
 
 ## Why search logic belongs in ProfileService
 

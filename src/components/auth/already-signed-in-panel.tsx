@@ -20,7 +20,7 @@ interface AlreadySignedInPanelProps {
 export function AlreadySignedInPanel({
   email,
   continueHref,
-  continueLabel = "Continue to Dashboard",
+  continueLabel = "Go to home",
   mode,
 }: AlreadySignedInPanelProps) {
   const navigate = useNavigate();

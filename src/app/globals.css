@@ -6,15 +6,18 @@
 
 @theme {
   --color-meritt-surface: #F9F9F7;
-  --color-meritt-panel: #F8FAFC;
+  --color-meritt-panel: #F3F7F5;
   --color-meritt-ink: #0F172A;
+  --color-meritt-forest: #1B4332;
+  --color-meritt-forest-light: #2D6A4F;
+  --color-meritt-forest-muted: #E8F0EC;
   --color-gold: #D4A017;
   --color-gold-light: #E8C547;
   --color-gold-dark: #B8860B;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --radius-card: 2rem;
   --radius-panel: 1.5rem;
-  --shadow-meritt-card: 0 24px 80px -58px rgba(15, 23, 42, 0.75);
+  --shadow-meritt-card: 0 24px 70px -45px rgba(27, 67, 50, 0.75);
 }
 
 @layer base {
@@ -50,6 +53,15 @@
 
   input, textarea, select {
     font-size: 16px;
+  }
+
+  a:not([class]) {
+    color: var(--primary);
+    text-underline-offset: 3px;
+  }
+
+  a:not([class]):hover {
+    text-decoration: underline;
   }
 }
 
@@ -247,7 +259,7 @@
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--muted-foreground);
+    color: var(--color-meritt-forest-light);
   }
 
   .meritt-section {
@@ -270,7 +282,7 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background: linear-gradient(90deg, #E8F0EC 25%, #D4E4DB 50%, #E8F0EC 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 8px;
@@ -327,6 +339,9 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-forest: var(--color-meritt-forest);
+  --color-forest-light: var(--color-meritt-forest-light);
+  --color-forest-muted: var(--color-meritt-forest-muted);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -349,19 +364,19 @@
   --card-foreground: #0F172A;
   --popover: #FFFFFF;
   --popover-foreground: #0F172A;
-  --primary: #0F172A;
+  --primary: #1B4332;
   --primary-foreground: #FFFFFF;
-  --secondary: #F8FAFC;
-  --secondary-foreground: #0F172A;
-  --muted: #F8FAFC;
-  --muted-foreground: #64748B;
-  --accent: #F1F5F9;
-  --accent-foreground: #0F172A;
+  --secondary: #F3F7F5;
+  --secondary-foreground: #1B4332;
+  --muted: #F3F7F5;
+  --muted-foreground: #5C6B63;
+  --accent: #E8F0EC;
+  --accent-foreground: #1B4332;
   --destructive: #DC2626;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #94A3B8;
-  --success: #059669;
+  --border: #E2E8E6;
+  --input: #E2E8E6;
+  --ring: #6B9B82;
+  --success: #2D6A4F;
   --success-foreground: #FFFFFF;
   --warning: #D97706;
   --warning-foreground: #FFFFFF;
@@ -369,23 +384,23 @@
   --error-foreground: #FFFFFF;
   --slate: #334155;
   --slate-foreground: #FFFFFF;
-  --chart-1: #0F172A;
-  --chart-2: #475569;
-  --chart-3: #64748B;
-  --chart-4: #94A3B8;
-  --chart-5: #CBD5E1;
+  --chart-1: #1B4332;
+  --chart-2: #2D6A4F;
+  --chart-3: #40916C;
+  --chart-4: #6B9B82;
+  --chart-5: #A7C4B5;
   --radius: 0.75rem;
   --radius-card: 2rem;
   --radius-panel: 1.5rem;
-  --shadow-meritt-card: 0 24px 80px -58px rgba(15, 23, 42, 0.75);
+  --shadow-meritt-card: 0 24px 70px -45px rgba(27, 67, 50, 0.75);
   --sidebar: #FFFFFF;
   --sidebar-foreground: #0F172A;
-  --sidebar-primary: #0F172A;
+  --sidebar-primary: #1B4332;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F8FAFC;
-  --sidebar-accent-foreground: #0F172A;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #94A3B8;
+  --sidebar-accent: #F3F7F5;
+  --sidebar-accent-foreground: #1B4332;
+  --sidebar-border: #E2E8E6;
+  --sidebar-ring: #6B9B82;
 }
 
 .dark {
@@ -395,8 +410,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: #52B788;
+  --primary-foreground: #0F1F18;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -406,18 +421,18 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --ring: #6B9B82;
+  --chart-1: #52B788;
+  --chart-2: #40916C;
+  --chart-3: #2D6A4F;
+  --chart-4: #1B4332;
+  --chart-5: #95D5B2;
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #52B788;
+  --sidebar-primary-foreground: #0F1F18;
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: #6B9B82;
 }

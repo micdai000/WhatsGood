@@ -75,9 +75,9 @@ export function BelowFoldSections({
               <Link
                 key={entity.id}
                 to={`/entity/${entity.id}`}
-                className="flex items-center gap-4 py-3.5 border-b border-neutral-100 last:border-0"
+                className="flex items-center gap-4 py-3.5 border-b border-border last:border-0"
               >
-                <span className="text-2xl font-bold text-neutral-200 tabular-nums w-8 text-center shrink-0">
+                <span className="text-2xl font-bold text-border tabular-nums w-8 text-center shrink-0">
                   {i + 1}
                 </span>
                 <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden">
@@ -91,10 +91,10 @@ export function BelowFoldSections({
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[15px] font-semibold text-[#111] truncate">
+                  <h3 className="text-[15px] font-semibold text-foreground truncate">
                     {entity.name}
                   </h3>
-                  <p className="text-[12px] text-neutral-400">
+                  <p className="text-[12px] text-muted-foreground">
                     {categoryLabels[entity.category]}
                   </p>
                 </div>

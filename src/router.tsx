@@ -72,6 +72,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
+      { path: "pricing", element: <Navigate to="/" replace /> },
       { path: "search", element: <SearchPage /> },
       { path: "auth/callback", element: <AuthCallbackPage /> },
       { path: "auth/login", element: <LegacyAuthRedirect to="/login" /> },

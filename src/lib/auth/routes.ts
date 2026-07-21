@@ -17,6 +17,9 @@ export const AUTH_ROUTES = [
   "/reset-password",
 ] as const;
 
+/** Where new professionals create a Meritt account. */
+export const PRO_SIGNUP_ROUTE = "/signup";
+
 export function isPublicRoute(pathname: string): boolean {
   if (PUBLIC_ROUTES.includes(pathname as (typeof PUBLIC_ROUTES)[number])) {
     return true;

@@ -45,26 +45,31 @@ export function ProfileActions({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:flex-wrap",
+        "flex flex-col gap-2.5 sm:flex-row",
         className,
       )}
     >
-      <Button
-        type="button"
-        className="w-full sm:w-auto"
-        onClick={handleShare}
-        disabled={sharing}
-      >
-        <Share2 className="size-4" aria-hidden />
-        Share Profile
-      </Button>
       <Link
         to={leaveReviewHref}
-        className={buttonVariants({ variant: "outline", className: "w-full sm:w-auto" })}
+        className={buttonVariants({
+          size: "lg",
+          className: "w-full gap-2 sm:flex-1",
+        })}
       >
         <PenLine className="size-4" aria-hidden />
         Leave a Review
       </Link>
+      <Button
+        type="button"
+        variant="outline"
+        size="lg"
+        className="w-full gap-2 sm:w-auto"
+        onClick={handleShare}
+        disabled={sharing}
+      >
+        <Share2 className="size-4" aria-hidden />
+        Share
+      </Button>
     </div>
   );
 }

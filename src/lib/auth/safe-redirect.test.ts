@@ -7,15 +7,15 @@ describe("getSafeRedirectPath", () => {
   });
 
   it("rejects external URLs", () => {
-    expect(getSafeRedirectPath("https://evil.example/phish")).toBe("/dashboard");
+    expect(getSafeRedirectPath("https://evil.example/phish")).toBe("/");
   });
 
   it("rejects protocol-relative URLs", () => {
-    expect(getSafeRedirectPath("//evil.example/phish")).toBe("/dashboard");
+    expect(getSafeRedirectPath("//evil.example/phish")).toBe("/");
   });
 
   it("rejects auth loop redirects", () => {
-    expect(getSafeRedirectPath("/login?x=1")).toBe("/dashboard");
+    expect(getSafeRedirectPath("/login?x=1")).toBe("/");
   });
 
   it("uses custom fallback", () => {

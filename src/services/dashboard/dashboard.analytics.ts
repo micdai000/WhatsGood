@@ -1,3 +1,4 @@
+import { getTrustSignalLabel } from "@/lib/reviews/trust-signals";
 import type {
   DashboardActivityItem,
   DashboardStatistics,
@@ -146,7 +147,7 @@ export function computeRecentActivity(
       id: `review-${review.id}`,
       type: "review_received",
       title: `Review from ${review.reviewerName}`,
-      description: `${review.rating}-star rating · ${review.title}`,
+      description: `${getTrustSignalLabel(review.rating)} · ${review.title}`,
       timestamp: review.createdAt,
     });
   }

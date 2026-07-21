@@ -44,7 +44,7 @@ export default function ProfilePage() {
     <div className="w-full py-6">
       {/* Settings */}
       <div className="flex justify-end page-x">
-        <button type="button" className="text-neutral-400 hover:text-neutral-600 transition-colors">
+        <button type="button" className="text-muted-foreground hover:text-primary transition-colors">
           <Settings className="h-5 w-5" />
         </button>
       </div>
@@ -60,13 +60,13 @@ export default function ProfilePage() {
             sizes="88px"
           />
         </div>
-        <h1 className="mt-4 text-xl font-bold text-[#111] text-center">
+        <h1 className="mt-4 text-xl font-bold text-foreground text-center">
           {currentUser.displayName}
         </h1>
-        <p className="text-[14px] text-neutral-400 text-center">
+        <p className="text-[14px] text-muted-foreground text-center">
           @{currentUser.username}
         </p>
-        <p className="mt-2 max-w-md text-center text-[14px] leading-relaxed text-neutral-500">
+        <p className="mt-2 max-w-md text-center text-[14px] leading-relaxed text-muted-foreground">
           {currentUser.bio}
         </p>
       </div>
@@ -80,10 +80,10 @@ export default function ProfilePage() {
           { value: currentUser.followers, label: "Followers" },
         ].map((stat) => (
           <div key={stat.label} className="text-center">
-            <p className="text-lg font-bold text-[#111]">
+            <p className="text-lg font-bold text-foreground">
               {formatCount(stat.value)}
             </p>
-            <p className="mt-0.5 text-[12px] uppercase tracking-wider text-neutral-400">
+            <p className="mt-0.5 text-[12px] uppercase tracking-wider text-muted-foreground">
               {stat.label}
             </p>
           </div>
@@ -94,13 +94,13 @@ export default function ProfilePage() {
       <div className="mt-6 flex gap-3 page-x">
         <button
           type="button"
-          className="flex-1 rounded-xl bg-neutral-100 py-3 text-[14px] font-semibold text-[#111] hover:bg-neutral-200 transition-colors"
+          className="flex-1 rounded-xl bg-muted py-3 text-[14px] font-semibold text-foreground hover:bg-accent transition-colors"
         >
           Edit Profile
         </button>
         <button
           type="button"
-          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-neutral-100 py-3 text-[14px] font-semibold text-[#111] hover:bg-neutral-200 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-muted py-3 text-[14px] font-semibold text-foreground hover:bg-accent transition-colors"
         >
           <Share2 className="h-4 w-4" />
           Share Profile
@@ -108,7 +108,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="mt-8 flex gap-6 overflow-x-auto hide-scrollbar border-b border-neutral-100 page-x sm:gap-8">
+      <div className="mt-8 flex gap-6 overflow-x-auto hide-scrollbar border-b border-border page-x sm:gap-8">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -116,8 +116,8 @@ export default function ProfilePage() {
             onClick={() => setActiveTab(tab.key)}
             className={
               activeTab === tab.key
-                ? "shrink-0 border-b-2 border-[#111] pb-3 text-[14px] font-semibold text-[#111]"
-                : "shrink-0 pb-3 text-[14px] text-neutral-400 hover:text-neutral-600 transition-colors"
+                ? "shrink-0 border-b-2 border-primary pb-3 text-[14px] font-semibold text-foreground"
+                : "shrink-0 pb-3 text-[14px] text-muted-foreground hover:text-primary transition-colors"
             }
           >
             {tab.label}
@@ -142,7 +142,7 @@ export default function ProfilePage() {
                     className={
                       "flex items-center gap-3.5 py-3" +
                       (i < likedEntities.length - 1
-                        ? " border-b border-neutral-50"
+                        ? " border-b border-muted"
                         : "")
                     }
                   >
@@ -156,16 +156,16 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[14px] font-semibold text-[#111] truncate">
+                      <p className="text-[14px] font-semibold text-foreground truncate">
                         {entity.name}
                       </p>
-                      <p className="text-[12px] text-neutral-400">
+                      <p className="text-[12px] text-muted-foreground">
                         {categoryLabels[entity.category]}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <TierBadge tier={entity.tier} size="sm" />
-                      <span className="text-[13px] tabular-nums text-neutral-400">
+                      <span className="text-[13px] tabular-nums text-muted-foreground">
                         {entity.score > 0 ? "+" : ""}
                         {entity.score}
                       </span>
@@ -174,7 +174,7 @@ export default function ProfilePage() {
                 ))}
               </div>
             ) : (
-              <p className="py-12 text-center text-[14px] text-neutral-400">
+              <p className="py-12 text-center text-[14px] text-muted-foreground">
                 Like entities to save them here.
               </p>
             )}
@@ -190,7 +190,7 @@ export default function ProfilePage() {
                 ))}
               </div>
             ) : (
-              <p className="py-12 text-center text-[14px] text-neutral-400">
+              <p className="py-12 text-center text-[14px] text-muted-foreground">
                 Follow creators to see them here.
               </p>
             )}

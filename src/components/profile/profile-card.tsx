@@ -57,7 +57,7 @@ export function ProfileCard({ profile, className }: ProfileCardProps) {
                 {profile.professionName}
               </Badge>
             ) : null}
-            <TrustBadge tier={profile.badgeTier} size="sm" />
+            <TrustBadge tier={profile.badgeTier} subTier={profile.badgeSubTier} size="sm" />
             <Muted className="text-xs tabular-nums">
               {profile.totalReviews} reviews
             </Muted>

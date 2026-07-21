@@ -1,64 +1,43 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { SignUpForm } from "@/components/auth/signup-form";
-import { AlreadySignedInPanel } from "@/components/auth/already-signed-in-panel";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuthContext } from "@/contexts/auth-context";
-import { resolvePostAuthRedirect, getOnboardingStatus } from "@/lib/onboarding/routing";
+import { ONBOARDING_ROUTES } from "@/lib/onboarding/constants";
+import { getOnboardingStatus } from "@/lib/onboarding/routing";
 
 export default function SignUpPage() {
   const { user, loading } = useAuthContext();
-  const [signedInState, setSignedInState] = useState<{
-    continueHref: string;
-    continueLabel: string;
-  } | null>(null);
-  const [checkingRedirect, setCheckingRedirect] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (loading || !user) {
-      setSignedInState(null);
       return;
     }
 
     let cancelled = false;
-    setCheckingRedirect(true);
 
-    Promise.all([
-      resolvePostAuthRedirect(user.id),
-      getOnboardingStatus(user.id),
-    ])
-      .then(([continueHref, onboarding]) => {
-        if (cancelled) return;
-        const continueLabel =
-          onboarding.ok && onboarding.status === "has_profile"
-            ? "Continue to Dashboard"
-            : "Continue setup";
-        setSignedInState({ continueHref, continueLabel });
-      })
-      .finally(() => {
-        if (!cancelled) setCheckingRedirect(false);
-      });
+    getOnboardingStatus(user.id).then((status) => {
+      if (cancelled || !status.ok) {
+        return;
+      }
+
+      navigate(
+        status.status === "has_profile" ? "/" : ONBOARDING_ROUTES.welcome,
+        { replace: true },
+      );
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [user, loading]);
+  }, [user, loading, navigate]);
 
-  if (loading || (user && checkingRedirect)) {
+  if (loading || user) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner className="h-8 w-8" />
       </div>
-    );
-  }
-
-  if (user && signedInState) {
-    return (
-      <AlreadySignedInPanel
-        email={user.email}
-        continueHref={signedInState.continueHref}
-        continueLabel={signedInState.continueLabel}
-        mode="signup"
-      />
     );
   }
 

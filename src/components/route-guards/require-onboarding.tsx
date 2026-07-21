@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuthContext } from "@/contexts/auth-context";
+import { PRO_SIGNUP_ROUTE } from "@/lib/auth/routes";
 import { ONBOARDING_ROUTES } from "@/lib/onboarding/constants";
 import { getOnboardingStatus } from "@/lib/onboarding/routing";
 import { isSuccess } from "@/types";
 
 export function RequireOnboarding() {
   const { user, loading } = useAuthContext();
+  const location = useLocation();
   const [checking, setChecking] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
 
@@ -38,7 +40,12 @@ export function RequireOnboarding() {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    const redirect = encodeURIComponent(
+      `${location.pathname}${location.search}`,
+    );
+    return (
+      <Navigate to={`${PRO_SIGNUP_ROUTE}?redirect=${redirect}`} replace />
+    );
   }
 
   if (hasProfile) {

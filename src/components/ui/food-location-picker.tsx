@@ -33,27 +33,27 @@ export function FoodLocationPicker({
   const selected = locations.find((entry) => entry.id === selectedId) ?? null;
 
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+    <div className="rounded-2xl border border-border bg-muted p-4">
       <div className="flex items-start gap-2">
-        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#D4A017]" />
+        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
         <div>
-          <p className="text-[15px] font-semibold text-[#111]">
+          <p className="text-[15px] font-semibold text-foreground">
             Which exact location?
           </p>
-          <p className="mt-0.5 text-[13px] leading-relaxed text-neutral-500">
+          <p className="mt-0.5 text-[13px] leading-relaxed text-muted-foreground">
             Same chain can differ block to block — pick the address you mean.
           </p>
         </div>
       </div>
 
       <div className="relative mt-4">
-        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search street, city, or restaurant"
-          className="h-11 w-full rounded-xl border-0 bg-white pl-10 pr-4 text-[14px] text-[#111] placeholder:text-neutral-400 outline-none ring-1 ring-neutral-200 transition-all focus:ring-2 focus:ring-[#D4A017]/30"
+          className="h-11 w-full rounded-xl border-0 bg-white pl-10 pr-4 text-[14px] text-foreground placeholder:text-muted-foreground outline-none ring-1 ring-border transition-all focus:ring-2 focus:ring-primary/30"
         />
       </div>
 
@@ -65,8 +65,8 @@ export function FoodLocationPicker({
             className={cn(
               "shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors",
               activeRegion === "all"
-                ? "bg-[#111] text-white"
-                : "bg-white text-neutral-500 ring-1 ring-neutral-200",
+                ? "bg-primary text-white"
+                : "bg-white text-muted-foreground ring-1 ring-border",
             )}
           >
             Anywhere
@@ -79,8 +79,8 @@ export function FoodLocationPicker({
               className={cn(
                 "shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors",
                 activeRegion === region
-                  ? "bg-[#111] text-white"
-                  : "bg-white text-neutral-500 ring-1 ring-neutral-200",
+                  ? "bg-primary text-white"
+                  : "bg-white text-muted-foreground ring-1 ring-border",
               )}
             >
               {region}
@@ -101,15 +101,15 @@ export function FoodLocationPicker({
                 className={cn(
                   "flex w-full items-center justify-between gap-3 rounded-xl px-3.5 py-3 text-left transition-colors",
                   isSelected
-                    ? "bg-[#111] text-white"
-                    : "bg-white ring-1 ring-neutral-200 hover:bg-neutral-50",
+                    ? "bg-primary text-white"
+                    : "bg-white ring-1 ring-border hover:bg-muted",
                 )}
               >
                 <div className="min-w-0">
                   <p
                     className={cn(
                       "truncate text-[14px] font-semibold",
-                      isSelected ? "text-white" : "text-[#111]",
+                      isSelected ? "text-white" : "text-foreground",
                     )}
                   >
                     {entry.restaurant}
@@ -117,7 +117,7 @@ export function FoodLocationPicker({
                   <p
                     className={cn(
                       "mt-0.5 truncate text-[12px] font-medium",
-                      isSelected ? "text-white/90" : "text-neutral-600",
+                      isSelected ? "text-white/90" : "text-muted-foreground",
                     )}
                   >
                     {entry.address}
@@ -125,7 +125,7 @@ export function FoodLocationPicker({
                   <p
                     className={cn(
                       "mt-0.5 truncate text-[12px]",
-                      isSelected ? "text-white/70" : "text-neutral-400",
+                      isSelected ? "text-white/70" : "text-muted-foreground",
                     )}
                   >
                     {entry.city}
@@ -136,7 +136,7 @@ export function FoodLocationPicker({
                   <span
                     className={cn(
                       "text-[13px] font-semibold tabular-nums",
-                      isSelected ? "text-white" : "text-[#111]",
+                      isSelected ? "text-white" : "text-foreground",
                     )}
                   >
                     {entry.score > 0 ? "+" : ""}
@@ -147,16 +147,16 @@ export function FoodLocationPicker({
             );
           })
         ) : (
-          <p className="py-4 text-center text-[13px] text-neutral-400">
+          <p className="py-4 text-center text-[13px] text-muted-foreground">
             No locations match. Try a street name or city.
           </p>
         )}
       </div>
 
       {selected && (
-        <p className="mt-3 text-[12px] text-neutral-500">
+        <p className="mt-3 text-[12px] text-muted-foreground">
           Showing ratings for{" "}
-          <span className="font-medium text-[#111]">
+          <span className="font-medium text-foreground">
             {formatFoodLocationLabel(selected)}
           </span>
         </p>

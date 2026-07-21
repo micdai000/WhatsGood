@@ -2,13 +2,13 @@ import { Link } from "react-router-dom";
 import { Home, LayoutDashboard, Search, UserRound } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/auth-context";
-import { isAuthRoute } from "@/lib/auth/routes";
+import { isAuthRoute, PRO_SIGNUP_ROUTE } from "@/lib/auth/routes";
 import { cn } from "@/lib/utils";
 
 const publicTabs = [
   { href: "/", icon: Home, label: "Home" },
   { href: "/search", icon: Search, label: "Search" },
-  { href: "/signup", icon: UserRound, label: "Join" },
+  { href: PRO_SIGNUP_ROUTE, icon: UserRound, label: "Join" },
   { href: "/login", icon: LayoutDashboard, label: "Log in" },
 ] as const;
 
@@ -56,13 +56,13 @@ export function BottomNav() {
                 strokeWidth={isActive ? 2 : 1.5}
                 className={cn(
                   "transition-colors",
-                  isActive ? "text-foreground" : "text-muted-foreground",
+                  isActive ? "text-primary" : "text-muted-foreground",
                 )}
               />
               <span
                 className={cn(
                   "text-[10px] font-medium",
-                  isActive ? "text-foreground" : "text-muted-foreground",
+                  isActive ? "text-primary" : "text-muted-foreground",
                 )}
               >
                 {label}

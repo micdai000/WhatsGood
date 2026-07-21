@@ -146,7 +146,8 @@ describe("badge scoring", () => {
   describe("tierFromPercentile", () => {
     it("maps cutoff boundaries exactly", () => {
       expect(tierFromPercentile(5)).toBe("elite");
-      expect(tierFromPercentile(20)).toBe("gold");
+      expect(tierFromPercentile(12)).toBe("platinum");
+      expect(tierFromPercentile(25)).toBe("gold");
       expect(tierFromPercentile(50)).toBe("silver");
       expect(tierFromPercentile(51)).toBe("bronze");
     });
@@ -163,10 +164,11 @@ describe("badge scoring", () => {
   describe("tierFromFixedThreshold", () => {
     it("maps fixed trust score thresholds", () => {
       expect(tierFromFixedThreshold(90)).toBe("elite");
-      expect(tierFromFixedThreshold(75)).toBe("gold");
-      expect(tierFromFixedThreshold(55)).toBe("silver");
-      expect(tierFromFixedThreshold(35)).toBe("bronze");
-      expect(tierFromFixedThreshold(34.9)).toBe("none");
+      expect(tierFromFixedThreshold(80)).toBe("platinum");
+      expect(tierFromFixedThreshold(65)).toBe("gold");
+      expect(tierFromFixedThreshold(45)).toBe("silver");
+      expect(tierFromFixedThreshold(30)).toBe("bronze");
+      expect(tierFromFixedThreshold(29.9)).toBe("none");
     });
   });
 
@@ -195,10 +197,10 @@ describe("badge scoring", () => {
 
       expect(tiers).toEqual(
         expect.arrayContaining([
-          { profileId: "a", badgeTier: "elite", percentile: null },
-          { profileId: "d", badgeTier: "elite", percentile: null },
-          { profileId: "b", badgeTier: "bronze", percentile: null },
-          { profileId: "c", badgeTier: "none", percentile: null },
+          { profileId: "a", badgeTier: "elite", badgeSubTier: expect.any(Number), percentile: null },
+          { profileId: "d", badgeTier: "elite", badgeSubTier: expect.any(Number), percentile: null },
+          { profileId: "b", badgeTier: "bronze", badgeSubTier: expect.any(Number), percentile: null },
+          { profileId: "c", badgeTier: "none", badgeSubTier: null, percentile: null },
         ]),
       );
     });
@@ -209,7 +211,7 @@ describe("badge scoring", () => {
       ]);
 
       expect(tiers).toEqual([
-        { profileId: "ineligible", badgeTier: "none", percentile: null },
+        { profileId: "ineligible", badgeTier: "gold", badgeSubTier: 1, percentile: null },
       ]);
     });
   });

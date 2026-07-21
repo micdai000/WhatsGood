@@ -13,7 +13,7 @@ export function ProfessionStep() {
   return (
     <OnboardingWizardShell
       title="What do you do?"
-      description="Choose the profession that best describes your work."
+      description="Select the service category that best describes what you offer."
       continueDisabled={!state.professionId}
       onContinue={() => {
         const parsed = onboardingProfessionSchema.safeParse({

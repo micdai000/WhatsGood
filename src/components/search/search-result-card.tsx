@@ -82,7 +82,7 @@ export function SearchResultCard({ profile, className }: SearchResultCardProps) 
           ) : null}
 
           <div className="mt-auto flex flex-wrap items-center gap-2">
-            <TrustBadge tier={profile.badgeTier} size="sm" />
+            <TrustBadge tier={profile.badgeTier} subTier={profile.badgeSubTier} size="sm" />
             <Muted className="text-xs">
               {profile.totalReviews}{" "}
               {profile.totalReviews === 1 ? "review" : "reviews"}

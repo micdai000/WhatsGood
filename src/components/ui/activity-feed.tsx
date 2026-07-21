@@ -20,7 +20,7 @@ const iconConfig: Record<
   ActivityItem["type"],
   { icon: typeof ChevronUp; bg: string; text: string }
 > = {
-  promote: { icon: ChevronUp, bg: "bg-emerald-500/10", text: "text-emerald-600" },
+  promote: { icon: ChevronUp, bg: "bg-primary/10", text: "text-primary" },
   demote: { icon: ChevronDown, bg: "bg-red-500/10", text: "text-red-500" },
   tier_up: { icon: ArrowUpRight, bg: "bg-violet-500/10", text: "text-violet-600" },
   tier_down: { icon: ChevronDown, bg: "bg-orange-500/10", text: "text-orange-500" },
@@ -29,9 +29,9 @@ const iconConfig: Record<
 };
 
 function EntityLink({ name, id }: { name: string; id?: string }) {
-  if (!id) return <strong className="text-[#111]">{name}</strong>;
+  if (!id) return <strong className="text-foreground">{name}</strong>;
   return (
-    <Link to={`/entity/${id}`} className="text-[#111] font-semibold hover:underline">
+    <Link to={`/entity/${id}`} className="font-semibold text-primary hover:underline">
       {name}
     </Link>
   );
@@ -42,21 +42,21 @@ function ActivityDescription({ item }: { item: ActivityItem }) {
     case "promote":
       return (
         <>
-          <strong className="text-[#111]">{item.userName}</strong> promoted{" "}
+          <strong className="text-foreground">{item.userName}</strong> promoted{" "}
           <EntityLink name={item.entityName!} id={item.entityId} />
         </>
       );
     case "demote":
       return (
         <>
-          <strong className="text-[#111]">{item.userName}</strong> demoted{" "}
+          <strong className="text-foreground">{item.userName}</strong> demoted{" "}
           <EntityLink name={item.entityName!} id={item.entityId} />
         </>
       );
     case "maintain":
       return (
         <>
-          <strong className="text-[#111]">{item.userName}</strong> maintained{" "}
+          <strong className="text-foreground">{item.userName}</strong> maintained{" "}
           <EntityLink name={item.entityName!} id={item.entityId} />
         </>
       );
@@ -77,7 +77,7 @@ function ActivityDescription({ item }: { item: ActivityItem }) {
     case "follow":
       return (
         <>
-          <strong className="text-[#111]">{item.userName}</strong> followed{" "}
+          <strong className="text-foreground">{item.userName}</strong> followed{" "}
           <EntityLink name={item.entityName!} id={item.entityId} />
         </>
       );
@@ -89,14 +89,14 @@ function ActivityDescription({ item }: { item: ActivityItem }) {
 export function ActivityFeed({ items, className }: ActivityFeedProps) {
   if (items.length === 0) {
     return (
-      <p className="py-12 text-center text-[15px] text-neutral-300 font-medium">
+      <p className="py-12 text-center text-[15px] text-muted-foreground/50 font-medium">
         No activity yet
       </p>
     );
   }
 
   return (
-    <div className={cn("divide-y divide-neutral-100", className)}>
+    <div className={cn("divide-y divide-border", className)}>
       {items.map((item) => {
         const hasAvatar = !!item.userAvatar;
         const config = iconConfig[item.type];
@@ -125,10 +125,10 @@ export function ActivityFeed({ items, className }: ActivityFeedProps) {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-[14px] leading-relaxed text-neutral-600">
+              <p className="text-[14px] leading-relaxed text-muted-foreground">
                 <ActivityDescription item={item} />
               </p>
-              <p className="text-[12px] text-neutral-300 mt-0.5">
+              <p className="text-[12px] text-muted-foreground/50 mt-0.5">
                 {item.timestamp}
               </p>
             </div>

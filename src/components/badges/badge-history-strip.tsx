@@ -25,7 +25,11 @@ export function BadgeHistoryStrip({ history, className }: BadgeHistoryStripProps
             key={snapshot.id}
             className="flex flex-col items-start gap-1 rounded-lg border border-border bg-card px-2.5 py-2"
           >
-            <TrustBadge tier={snapshot.badgeTier} size="sm" />
+            <TrustBadge
+              tier={snapshot.badgeTier}
+              subTier={snapshot.badgeSubTier}
+              size="sm"
+            />
             <Muted className="text-[10px]">
               {formatBadgePeriod(snapshot.period)}
             </Muted>

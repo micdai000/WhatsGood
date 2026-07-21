@@ -7,7 +7,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "@/lib/errors";
-import { LIMITS } from "@/lib/constants";
+import { LIMITS, STARTER_BADGE } from "@/lib/constants";
 import { logger } from "@/lib/logger";
 import {
   createProfileSchema,
@@ -19,6 +19,7 @@ import {
 } from "@/lib/validators";
 import { extractAvatarStoragePath } from "@/lib/profile/avatar-storage";
 import { failure, handleServiceError, success } from "@/services/shared";
+import { currentPeriod } from "@/services/badges";
 import type {
   CreateProfileInput,
   PaginatedResult,
@@ -128,6 +129,7 @@ export class ProfileService {
           average_rating,
           total_reviews,
           current_badge_tier,
+          current_badge_sub_tier,
           current_badge_period,
           professions ( name )
         `,
@@ -390,6 +392,9 @@ export class ProfileService {
           profession_id: validated.professionId,
           city: validated.city,
           state: validated.state,
+          current_badge_tier: STARTER_BADGE.tier,
+          current_badge_sub_tier: STARTER_BADGE.subTier,
+          current_badge_period: currentPeriod(),
         })
         .select("*")
         .single();

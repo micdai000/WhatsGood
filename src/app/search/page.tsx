@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { PROFESSIONS_DISCOVERY_COPY } from "@/lib/professions/display";
 import { useSearchParams } from "react-router-dom";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
@@ -61,7 +62,7 @@ export default function SearchPage() {
         <Container className="space-y-6">
           <PageHeader
             title="Find professionals"
-            description="Discover trusted tutors, coaches, consultants, and more on Meritt Pros."
+            description={`Discover trusted professionals in ${PROFESSIONS_DISCOVERY_COPY} on Meritt Pros.`}
           />
           <div className="flex justify-center py-12">
             <Spinner className="h-8 w-8" />
@@ -87,7 +88,7 @@ export default function SearchPage() {
       <Container className="space-y-6">
         <PageHeader
           title="Find professionals"
-          description="Discover trusted tutors, coaches, consultants, and more on Meritt Pros."
+          description={`Discover trusted professionals in ${PROFESSIONS_DISCOVERY_COPY} on Meritt Pros.`}
         />
 
         <SearchForm params={params} />

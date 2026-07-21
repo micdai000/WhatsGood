@@ -1,6 +1,8 @@
-import type { BADGE_TIERS } from "@/lib/constants/badges";
+import type { BADGE_SUB_TIERS, BADGE_TIERS } from "@/lib/constants/badges";
 
 export type BadgeTier = (typeof BADGE_TIERS)[number];
+
+export type BadgeSubTier = (typeof BADGE_SUB_TIERS)[number];
 
 export interface ComponentBreakdown {
   bayesian_avg: number;
@@ -16,6 +18,7 @@ export interface BadgeSnapshot {
   trustScore: number;
   percentile: number | null;
   badgeTier: BadgeTier;
+  badgeSubTier: BadgeSubTier | null;
   reviewCountWindow: number;
   eligible: boolean;
   componentBreakdown: ComponentBreakdown;
@@ -24,5 +27,6 @@ export interface BadgeSnapshot {
 
 export interface ProfileBadge {
   badgeTier: BadgeTier;
+  badgeSubTier: BadgeSubTier | null;
   badgePeriod: string | null;
 }

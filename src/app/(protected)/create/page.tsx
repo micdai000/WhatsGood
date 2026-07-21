@@ -74,10 +74,10 @@ export default function CreatePage() {
   return (
     <div className="w-full py-6">
       <div className="page-x pt-2">
-        <h1 className="text-2xl font-bold tracking-tight text-[#111]">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Add something
         </h1>
-        <p className="mt-1 text-[14px] text-neutral-400">
+        <p className="mt-1 text-[14px] text-muted-foreground">
           {selectedCategory
             ? categoryHints[selectedCategory]
             : "Pick a category to get started. It begins at Silver."}
@@ -90,7 +90,7 @@ export default function CreatePage() {
       >
         {/* Category */}
         <div>
-          <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#111] mb-2.5">
+          <label className="block text-[13px] font-semibold uppercase tracking-wider text-foreground mb-2.5">
             Category
           </label>
           <div className="grid grid-cols-2 gap-2.5">
@@ -102,8 +102,8 @@ export default function CreatePage() {
                 className={cn(
                   "rounded-xl py-5 text-center text-[15px] font-semibold transition-colors",
                   selectedCategory === cat
-                    ? "bg-[#111] text-white"
-                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200",
+                    ? "bg-primary text-white"
+                    : "bg-muted text-muted-foreground hover:bg-accent",
                 )}
               >
                 {categoryLabels[cat]}
@@ -116,7 +116,7 @@ export default function CreatePage() {
           <>
             {/* Name */}
             <div>
-              <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#111] mb-2">
+              <label className="block text-[13px] font-semibold uppercase tracking-wider text-foreground mb-2">
                 {nameLabels[selectedCategory]}
               </label>
               <input
@@ -124,7 +124,7 @@ export default function CreatePage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={namePlaceholders[selectedCategory]}
-                className="h-12 w-full rounded-xl bg-neutral-100 border-0 px-4 text-[15px] text-[#111] placeholder:text-neutral-400 outline-none transition-all focus:ring-2 focus:ring-[#D4A017]/30 focus:bg-white"
+                className="h-12 w-full rounded-xl bg-muted border-0 px-4 text-[15px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:bg-white"
               />
             </div>
 
@@ -132,47 +132,47 @@ export default function CreatePage() {
             {selectedCategory === "food" && (
               <>
                 <div>
-                  <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#111] mb-2">
+                  <label className="block text-[13px] font-semibold uppercase tracking-wider text-foreground mb-2">
                     Restaurant
                   </label>
                   <div className="relative">
-                    <UtensilsCrossed className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                    <UtensilsCrossed className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                       type="text"
                       value={restaurant}
                       onChange={(e) => setRestaurant(e.target.value)}
                       placeholder="e.g. Chick-fil-A"
-                      className="h-12 w-full rounded-xl bg-neutral-100 border-0 pl-11 pr-4 text-[15px] text-[#111] placeholder:text-neutral-400 outline-none transition-all focus:ring-2 focus:ring-[#D4A017]/30 focus:bg-white"
+                      className="h-12 w-full rounded-xl bg-muted border-0 pl-11 pr-4 text-[15px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:bg-white"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#111] mb-2">
+                  <label className="block text-[13px] font-semibold uppercase tracking-wider text-foreground mb-2">
                     Street address
                   </label>
                   <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                    <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                       type="text"
                       value={streetAddress}
                       onChange={(e) => setStreetAddress(e.target.value)}
                       placeholder="e.g. 1345 N Freedom Blvd"
-                      className="h-12 w-full rounded-xl bg-neutral-100 border-0 pl-11 pr-4 text-[15px] text-[#111] placeholder:text-neutral-400 outline-none transition-all focus:ring-2 focus:ring-[#D4A017]/30 focus:bg-white"
+                      className="h-12 w-full rounded-xl bg-muted border-0 pl-11 pr-4 text-[15px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:bg-white"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#111] mb-2">
+                  <label className="block text-[13px] font-semibold uppercase tracking-wider text-foreground mb-2">
                     City & state
                   </label>
                   <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                    <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                       type="text"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="e.g. Provo, UT"
-                      className="h-12 w-full rounded-xl bg-neutral-100 border-0 pl-11 pr-4 text-[15px] text-[#111] placeholder:text-neutral-400 outline-none transition-all focus:ring-2 focus:ring-[#D4A017]/30 focus:bg-white"
+                      className="h-12 w-full rounded-xl bg-muted border-0 pl-11 pr-4 text-[15px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:bg-white"
                     />
                   </div>
                 </div>
@@ -182,17 +182,17 @@ export default function CreatePage() {
             {/* Entertainment — venue */}
             {selectedCategory === "entertainment" && (
               <div>
-                <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#111] mb-2">
+                <label className="block text-[13px] font-semibold uppercase tracking-wider text-foreground mb-2">
                   Venue
                 </label>
                 <div className="relative">
-                  <Sparkles className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                  <Sparkles className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="text"
                     value={venue}
                     onChange={(e) => setVenue(e.target.value)}
                     placeholder="e.g. The McKittrick Hotel"
-                    className="h-12 w-full rounded-xl bg-neutral-100 border-0 pl-11 pr-4 text-[15px] text-[#111] placeholder:text-neutral-400 outline-none transition-all focus:ring-2 focus:ring-[#D4A017]/30 focus:bg-white"
+                    className="h-12 w-full rounded-xl bg-muted border-0 pl-11 pr-4 text-[15px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:bg-white"
                   />
                 </div>
               </div>
@@ -201,7 +201,7 @@ export default function CreatePage() {
             {/* Movies / Shows — format */}
             {selectedCategory === "movies-shows" && (
               <div>
-                <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#111] mb-2.5">
+                <label className="block text-[13px] font-semibold uppercase tracking-wider text-foreground mb-2.5">
                   Format
                 </label>
                 <div className="grid grid-cols-2 gap-2.5">
@@ -218,8 +218,8 @@ export default function CreatePage() {
                       className={cn(
                         "rounded-xl py-4 text-center text-[15px] font-semibold transition-colors",
                         mediaType === key
-                          ? "bg-[#111] text-white"
-                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200",
+                          ? "bg-primary text-white"
+                          : "bg-muted text-muted-foreground hover:bg-accent",
                       )}
                     >
                       {label}
@@ -232,14 +232,14 @@ export default function CreatePage() {
             {/* Location — food, places, entertainment */}
             {selectedCategory !== "movies-shows" && selectedCategory !== "food" && (
               <div>
-                <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#111] mb-2">
+                <label className="block text-[13px] font-semibold uppercase tracking-wider text-foreground mb-2">
                   {selectedCategory === "places" ? "Where is it?" : "Location"}
                 </label>
                 <div className="relative">
                   {selectedCategory === "places" ? (
-                    <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                    <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   ) : (
-                    <Building2 className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                    <Building2 className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   )}
                   <input
                     type="text"
@@ -250,7 +250,7 @@ export default function CreatePage() {
                         ? "City, country, or region — e.g. Kyoto, Japan"
                         : "City where it takes place"
                     }
-                    className="h-12 w-full rounded-xl bg-neutral-100 border-0 pl-11 pr-4 text-[15px] text-[#111] placeholder:text-neutral-400 outline-none transition-all focus:ring-2 focus:ring-[#D4A017]/30 focus:bg-white"
+                    className="h-12 w-full rounded-xl bg-muted border-0 pl-11 pr-4 text-[15px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:bg-white"
                   />
                 </div>
               </div>
@@ -258,26 +258,26 @@ export default function CreatePage() {
 
             {/* Image URL */}
             <div>
-              <label className="block text-[13px] font-semibold uppercase tracking-wider text-[#111] mb-2">
+              <label className="block text-[13px] font-semibold uppercase tracking-wider text-foreground mb-2">
                 Image URL
                 {selectedCategory === "movies-shows" && (
-                  <span className="ml-1 text-neutral-400 normal-case tracking-normal font-normal">
+                  <span className="ml-1 text-muted-foreground normal-case tracking-normal font-normal">
                     (optional)
                   </span>
                 )}
               </label>
               <div className="relative">
                 {selectedCategory === "movies-shows" ? (
-                  <Clapperboard className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                  <Clapperboard className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 ) : (
-                  <ImageIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                  <ImageIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 )}
                 <input
                   type="url"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://..."
-                  className="h-12 w-full rounded-xl bg-neutral-100 border-0 pl-11 pr-4 text-[15px] text-[#111] placeholder:text-neutral-400 outline-none transition-all focus:ring-2 focus:ring-[#D4A017]/30 focus:bg-white"
+                  className="h-12 w-full rounded-xl bg-muted border-0 pl-11 pr-4 text-[15px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:bg-white"
                 />
               </div>
             </div>
@@ -291,8 +291,8 @@ export default function CreatePage() {
           className={cn(
             "mt-2 w-full rounded-xl py-4 text-[15px] font-semibold text-white transition active:scale-[0.99]",
             canSubmit
-              ? "bg-[#111] hover:bg-neutral-800"
-              : "cursor-not-allowed bg-neutral-300",
+              ? "bg-primary hover:bg-primary/90"
+              : "cursor-not-allowed bg-muted-foreground/30",
           )}
         >
           Submit
