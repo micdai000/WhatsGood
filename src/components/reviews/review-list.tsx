@@ -16,14 +16,14 @@ export function ReviewList({
 }: ReviewListProps) {
   if (variant === "compact") {
     return (
-      <aside className={cn("space-y-3", className)} aria-label="Recent votes">
-        <div className="flex items-center justify-between gap-2">
+      <div className={cn("space-y-3", className)}>
+        <div className="flex items-center justify-between gap-2 px-0.5">
           <Muted className="text-xs font-medium uppercase tracking-wide">
             Recent votes
           </Muted>
           <Muted className="text-[10px] tabular-nums">{reviews.length}</Muted>
         </div>
-        <div className="rounded-xl border border-border/80 bg-card px-3 py-1 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card px-3 py-1 shadow-sm">
           <ul>
             {reviews.map((review) => (
               <li key={review.id}>
@@ -32,7 +32,7 @@ export function ReviewList({
             ))}
           </ul>
         </div>
-      </aside>
+      </div>
     );
   }
 

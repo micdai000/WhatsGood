@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ReviewList } from "@/components/reviews";
+import { Muted } from "@/components/typography/typography";
 import { Spinner } from "@/components/ui/spinner";
 import { profileService } from "@/services/profiles/profile.service";
 import { reviewService } from "@/services/reviews/review.service";
@@ -9,17 +10,19 @@ import { cn } from "@/lib/utils";
 
 const RECENT_REVIEWS_LIMIT = 5;
 
-interface ProfileVotesSidebarProps {
+interface ProfileRecentVotesProps {
   slug: string;
+  displayName: string;
   totalReviews: number;
   className?: string;
 }
 
-export function ProfileVotesSidebar({
+export function ProfileRecentVotes({
   slug,
+  displayName,
   totalReviews,
   className,
-}: ProfileVotesSidebarProps) {
+}: ProfileRecentVotesProps) {
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]);
 
@@ -61,27 +64,24 @@ export function ProfileVotesSidebar({
     };
   }, [slug, totalReviews]);
 
-  if (totalReviews === 0) {
-    return null;
-  }
-
-  if (loading) {
-    return (
-      <aside className={cn("flex justify-center py-8", className)}>
-        <Spinner className="h-6 w-6" />
-      </aside>
-    );
-  }
-
-  if (reviews.length === 0) {
-    return null;
-  }
-
   return (
-    <ReviewList
-      reviews={reviews}
-      variant="compact"
-      className={className}
-    />
+    <aside
+      className={cn("min-w-0", className)}
+      aria-label="Recent votes"
+    >
+      {totalReviews === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-5 text-center">
+          <Muted className="text-xs leading-relaxed">
+            Be the first to leave a review for {displayName}.
+          </Muted>
+        </div>
+      ) : loading ? (
+        <div className="flex justify-center py-10">
+          <Spinner className="h-5 w-5" />
+        </div>
+      ) : reviews.length > 0 ? (
+        <ReviewList reviews={reviews} variant="compact" />
+      ) : null}
+    </aside>
   );
 }

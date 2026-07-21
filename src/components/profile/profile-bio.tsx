@@ -1,5 +1,4 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { SectionTitle, Muted } from "@/components/typography/typography";
+import { SectionEyebrow } from "@/components/typography/typography";
 import type { PublicProfile } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -14,13 +13,13 @@ export function ProfileBio({ profile, className }: ProfileBioProps) {
   }
 
   return (
-    <Card className={cn("shadow-sm", className)}>
-      <CardHeader className="pb-2">
-        <SectionTitle as="h2">About</SectionTitle>
-      </CardHeader>
-      <CardContent>
-        <Muted className="whitespace-pre-wrap leading-relaxed">{profile.bio}</Muted>
-      </CardContent>
-    </Card>
+    <section className={cn("space-y-3", className)} aria-labelledby="about-heading">
+      <SectionEyebrow id="about-heading">About</SectionEyebrow>
+      <div className="meritt-panel border-l-4 border-l-primary/40">
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground sm:text-base">
+          {profile.bio}
+        </p>
+      </div>
+    </section>
   );
 }

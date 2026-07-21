@@ -4,6 +4,8 @@ export { ProfileBio } from "./profile-bio";
 export { ProfileActions } from "./profile-actions";
 export { ProfileCard } from "./profile-card";
 export { ProfileReviewsSection } from "./profile-reviews-section";
+export { ProfileRecentVotes } from "./profile-recent-votes";
+export { ProfileTrustCard } from "./profile-trust-card";
 export { PublicProfileView } from "./public-profile-view";
 export { PublicProfilePreview } from "./public-profile-preview";
 export { EditProfileForm } from "./edit-profile-form";
