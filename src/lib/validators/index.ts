@@ -1,6 +1,7 @@
 export {
   createProfileSchema,
   updateProfileSchema,
+  socialLinksSchema,
   profileIdSchema,
   profileSlugSchema,
   onboardingProfessionSchema,

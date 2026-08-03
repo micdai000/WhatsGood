@@ -1,4 +1,5 @@
 export { ProfileHeader } from "./profile-header";
+export { ProfileSocialLinks } from "./profile-social-links";
 export { ProfileStats } from "./profile-stats";
 export { ProfileBio } from "./profile-bio";
 export { ProfileActions } from "./profile-actions";
@@ -9,3 +10,4 @@ export { ProfileTrustCard } from "./profile-trust-card";
 export { PublicProfileView } from "./public-profile-view";
 export { PublicProfilePreview } from "./public-profile-preview";
 export { EditProfileForm } from "./edit-profile-form";
+export { ProfessionalLinksSection } from "./professional-links-section";

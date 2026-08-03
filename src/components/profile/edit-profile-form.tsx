@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { updateProfileAction } from "@/app/actions/profile.actions";
 import { checkSlugAvailabilityAction } from "@/app/actions/onboarding.actions";
@@ -12,14 +11,25 @@ import {
   ProfessionField,
   ProfilePhotoField,
 } from "@/components/profile-fields";
+import { ProfessionalLinksSection } from "@/components/profile/professional-links-section";
 import { PublicProfilePreview } from "@/components/profile/public-profile-preview";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { StatusAlert } from "@/components/ui/status-alert";
 import { Muted } from "@/components/typography/typography";
 import { mapProfileToPublicProfile } from "@/services/profiles/public-profile.mapper";
+import {
+  normalizeSocialLinksForSave,
+  socialLinksToFormValues,
+  toSocialInputValue,
+  type SocialLinkPlatform,
+  validateSocialLinksFormValues,
+  validateSocialUsernameInput,
+  validateWebsiteInput,
+} from "@/lib/profile/social-links";
 import { createProfileSchema } from "@/lib/validators";
-import type { Profile, Profession } from "@/types";
-import type { BadgeTier } from "@/types/badge";
+import type { Profile, Profession, SocialLinks } from "@/types";
+import { DEFAULT_SOCIAL_LINKS } from "@/types/profile";
+import type { BadgeSubTier, BadgeTier } from "@/types/badge";
 import { cn } from "@/lib/utils";
 
 interface EditProfileFormState {
@@ -30,6 +40,7 @@ interface EditProfileFormState {
   city: string;
   state: string;
   profilePhoto: string | null;
+  socialLinks: SocialLinks;
 }
 
 interface EditProfileFormProps {
@@ -38,6 +49,7 @@ interface EditProfileFormProps {
   stats: {
     totalReviews: number;
     badgeTier: BadgeTier;
+    badgeSubTier?: BadgeSubTier | null;
     badgePeriod: string | null;
   };
 }
@@ -51,6 +63,7 @@ function toFormState(profile: Profile): EditProfileFormState {
     city: profile.city ?? "",
     state: profile.state ?? "",
     profilePhoto: profile.avatar,
+    socialLinks: socialLinksToFormValues(profile.socialLinks ?? DEFAULT_SOCIAL_LINKS),
   };
 }
 
@@ -63,7 +76,6 @@ export function EditProfileForm({
   professions,
   stats,
 }: EditProfileFormProps) {
-  const navigate = useNavigate();
   const [baseline, setBaseline] = useState<EditProfileFormState>(() =>
     toFormState(profile),
   );
@@ -108,6 +120,70 @@ export function EditProfileForm({
     [],
   );
 
+  const updateSocialLink = useCallback((platform: SocialLinkPlatform, value: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      socialLinks: {
+        ...prev.socialLinks,
+        [platform]: value,
+      },
+    }));
+    setSuccessMessage(null);
+    setFormError(null);
+    setFieldErrors((prev) => {
+      if (!prev[platform]) return prev;
+      const next = { ...prev };
+      delete next[platform];
+      return next;
+    });
+  }, []);
+
+  const handleSocialBlur = useCallback(
+    (platform: SocialLinkPlatform, rawValue: string) => {
+      const error =
+        platform === "website"
+          ? validateWebsiteInput(rawValue)
+          : validateSocialUsernameInput(platform, rawValue);
+
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        if (error) {
+          next[platform] = error;
+        } else {
+          delete next[platform];
+        }
+        return next;
+      });
+
+      if (error || !rawValue.trim()) return;
+
+      // Keep social fields as usernames in the UI; website can show the cleaned URL.
+      if (platform === "website") {
+        const normalized = normalizeSocialLinksForSave({
+          ...DEFAULT_SOCIAL_LINKS,
+          website: rawValue,
+        }).website;
+        if (normalized && normalized !== rawValue) {
+          updateSocialLink("website", normalized);
+        }
+        return;
+      }
+
+      const username = toSocialInputValue(
+        platform,
+        normalizeSocialLinksForSave({
+          ...DEFAULT_SOCIAL_LINKS,
+          [platform]: rawValue,
+        })[platform],
+      );
+
+      if (username && username !== rawValue.trim()) {
+        updateSocialLink(platform, username);
+      }
+    },
+    [updateSocialLink],
+  );
+
   const professionName =
     professions.find((profession) => profession.id === formState.professionId)
       ?.name ?? null;
@@ -122,11 +198,13 @@ export function EditProfileForm({
       professionId: formState.professionId || null,
       city: formState.city || null,
       state: formState.state || null,
+      socialLinks: normalizeSocialLinksForSave(formState.socialLinks),
     },
     {
       professionName,
       totalReviews: stats.totalReviews,
       badgeTier: stats.badgeTier,
+      badgeSubTier: stats.badgeSubTier ?? null,
       badgePeriod: stats.badgePeriod,
     },
   );
@@ -148,12 +226,16 @@ export function EditProfileForm({
       profilePhoto: formState.profilePhoto,
     });
 
-    if (!parsed.success) {
-      const errors: Record<string, string> = {};
-      for (const issue of parsed.error.issues) {
-        const field = String(issue.path[0] ?? "form");
-        if (!errors[field]) {
-          errors[field] = issue.message;
+    const socialErrors = validateSocialLinksFormValues(formState.socialLinks);
+
+    if (!parsed.success || Object.keys(socialErrors).length > 0) {
+      const errors: Record<string, string> = { ...socialErrors };
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          const field = String(issue.path[0] ?? "form");
+          if (!errors[field]) {
+            errors[field] = issue.message;
+          }
         }
       }
       setFieldErrors(errors);
@@ -177,7 +259,11 @@ export function EditProfileForm({
       }
     }
 
-    const result = await updateProfileAction(parsed.data);
+    const socialLinks = normalizeSocialLinksForSave(formState.socialLinks);
+    const result = await updateProfileAction({
+      ...parsed.data,
+      socialLinks,
+    });
 
     setSubmitting(false);
 
@@ -193,10 +279,22 @@ export function EditProfileForm({
       return;
     }
 
-    setBaseline({ ...formState });
+    const nextState: EditProfileFormState = {
+      ...formState,
+      socialLinks: socialLinksToFormValues(socialLinks),
+    };
+    setFormState(nextState);
+    setBaseline(nextState);
     setSuccessMessage("Profile updated successfully.");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+
+  const socialFieldErrors: Partial<Record<SocialLinkPlatform, string>> = {
+    instagram: fieldErrors.instagram,
+    facebook: fieldErrors.facebook,
+    x: fieldErrors.x,
+    website: fieldErrors.website,
+  };
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start">
@@ -294,6 +392,13 @@ export function EditProfileForm({
             }}
           />
         </section>
+
+        <ProfessionalLinksSection
+          values={formState.socialLinks}
+          errors={socialFieldErrors}
+          onChange={updateSocialLink}
+          onBlur={handleSocialBlur}
+        />
 
         <div className="flex flex-wrap gap-3">
           <Button type="submit" disabled={submitting || !isDirty}>

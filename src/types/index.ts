@@ -1,7 +1,14 @@
 export type { ServiceResult, SuccessResult, FailureResult } from "./service-result";
 export { success, failure, isSuccess, isFailure } from "./service-result";
 
-export type { Profile, PublicProfile, CreateProfileInput, UpdateProfileInput } from "./profile";
+export type {
+  Profile,
+  PublicProfile,
+  CreateProfileInput,
+  UpdateProfileInput,
+  SocialLinks,
+} from "./profile";
+export { DEFAULT_SOCIAL_LINKS } from "./profile";
 export type {
   ProfileSearchParams,
   ProfileSearchResult,

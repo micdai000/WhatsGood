@@ -34,6 +34,23 @@ const locationFieldSchema = z
     `Must be ${LIMITS.LOCATION_MAX_LENGTH} characters or fewer`,
   );
 
+const socialLinkValueSchema = z
+  .string()
+  .max(
+    LIMITS.SOCIAL_LINK_MAX_LENGTH,
+    `Link must be ${LIMITS.SOCIAL_LINK_MAX_LENGTH} characters or fewer`,
+  );
+
+/** Known platforms today; .catchall allows future platform keys as strings. */
+export const socialLinksSchema = z
+  .object({
+    instagram: socialLinkValueSchema,
+    facebook: socialLinkValueSchema,
+    x: socialLinkValueSchema,
+    website: socialLinkValueSchema,
+  })
+  .catchall(socialLinkValueSchema);
+
 export const createProfileSchema = z.object({
   slug: slugSchema,
   fullName: fullNameSchema,
@@ -52,7 +69,9 @@ export const createProfileSchema = z.object({
     ),
 });
 
-export const updateProfileSchema = createProfileSchema.partial();
+export const updateProfileSchema = createProfileSchema.partial().extend({
+  socialLinks: socialLinksSchema.optional(),
+});
 
 export const profileIdSchema = z.object({
   id: z.string().uuid("Invalid profile ID"),

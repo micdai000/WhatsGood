@@ -1,5 +1,6 @@
 import { AppImage } from "@/components/ui/app-image";
 import { TrustBadge } from "@/components/badges";
+import { ProfileSocialLinks } from "@/components/profile/profile-social-links";
 import { Badge } from "@/components/ui/badge";
 import { MapPin } from "lucide-react";
 import { Muted } from "@/components/typography/typography";
@@ -31,8 +32,8 @@ export function ProfileHeader({ profile, className }: ProfileHeaderProps) {
       <div className="h-16 bg-primary sm:h-20" aria-hidden />
 
       <div className="px-5 pb-6 pt-0 sm:px-8 sm:pb-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
+        <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+          <div className="flex min-w-0 flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
             <div className="relative -mt-10 size-24 shrink-0 overflow-hidden rounded-2xl border-4 border-card bg-muted shadow-md ring-1 ring-border sm:-mt-12 sm:size-28">
               {profile.avatar ? (
                 <AppImage
@@ -77,7 +78,12 @@ export function ProfileHeader({ profile, className }: ProfileHeaderProps) {
             </div>
           </div>
 
-          <div className="flex justify-center sm:justify-end sm:pt-3">
+          <ProfileSocialLinks
+            links={profile.socialLinks}
+            className="w-full min-w-0 sm:mt-3 sm:w-auto sm:max-w-56 sm:flex-1 sm:self-center"
+          />
+
+          <div className="flex shrink-0 justify-center sm:self-center sm:justify-end">
             <TrustBadge
               tier={profile.badgeTier}
               subTier={profile.badgeSubTier}

@@ -7,6 +7,7 @@ export const PUBLIC_PROFILE_SELECT = `
   bio,
   city,
   state,
+  social_links,
   created_at,
   profession_id,
   average_rating,

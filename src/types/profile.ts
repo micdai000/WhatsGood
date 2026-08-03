@@ -1,5 +1,25 @@
 import type { BadgeSubTier, BadgeTier } from "./badge";
 
+/**
+ * External professional profile links.
+ * Known platforms are required keys; additional platforms can be stored as
+ * extra string keys on the same JSONB object (no new DB columns).
+ */
+export interface SocialLinks {
+  instagram: string;
+  facebook: string;
+  x: string;
+  website: string;
+  [platform: string]: string;
+}
+
+export const DEFAULT_SOCIAL_LINKS: SocialLinks = {
+  instagram: "",
+  facebook: "",
+  x: "",
+  website: "",
+};
+
 export interface Profile {
   id: string;
   username: string;
@@ -9,6 +29,7 @@ export interface Profile {
   professionId: string | null;
   city: string | null;
   state: string | null;
+  socialLinks: SocialLinks;
   followersCount: number;
   followingCount: number;
   totalVotesCast: number;
@@ -27,6 +48,7 @@ export interface PublicProfile {
   professionName: string | null;
   city: string | null;
   state: string | null;
+  socialLinks: SocialLinks;
   averageRating: number;
   totalReviews: number;
   badgeTier: BadgeTier;
@@ -55,4 +77,5 @@ export interface UpdateProfileInput {
   city?: string | null;
   state?: string | null;
   profilePhoto?: string | null;
+  socialLinks?: SocialLinks;
 }

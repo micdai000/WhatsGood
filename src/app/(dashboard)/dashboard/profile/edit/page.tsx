@@ -77,6 +77,7 @@ export default function EditProfilePage() {
           stats={{
             totalReviews: publicProfile?.totalReviews ?? 0,
             badgeTier: publicProfile?.badgeTier ?? "none",
+            badgeSubTier: publicProfile?.badgeSubTier ?? null,
             badgePeriod: publicProfile?.badgePeriod ?? null,
           }}
         />

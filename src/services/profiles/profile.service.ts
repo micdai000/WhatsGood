@@ -116,24 +116,7 @@ export class ProfileService {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select(
-          `
-          username,
-          display_name,
-          avatar,
-          bio,
-          city,
-          state,
-          created_at,
-          profession_id,
-          average_rating,
-          total_reviews,
-          current_badge_tier,
-          current_badge_sub_tier,
-          current_badge_period,
-          professions ( name )
-        `,
-        )
+        .select(PUBLIC_PROFILE_SELECT)
         .eq("username", username)
         .maybeSingle();
 
@@ -550,6 +533,9 @@ export class ProfileService {
       }
       if (validated.profilePhoto !== undefined) {
         updates.avatar = validated.profilePhoto;
+      }
+      if (validated.socialLinks !== undefined) {
+        updates.social_links = validated.socialLinks;
       }
 
       const supabase = createClient();

@@ -1,6 +1,7 @@
 import type { BadgeSubTier, BadgeTier } from "@/types/badge";
-import type { Profile, PublicProfile } from "@/types";
+import type { Profile, PublicProfile, SocialLinks } from "@/types";
 import { DEFAULTS } from "@/lib/constants";
+import { normalizeSocialLinks } from "./profile.mapper";
 
 export type PublicProfileRow = {
   username: string;
@@ -9,6 +10,7 @@ export type PublicProfileRow = {
   bio: string | null;
   city: string | null;
   state: string | null;
+  social_links?: SocialLinks | Record<string, unknown> | null;
   created_at: string;
   profession_id: string | null;
   average_rating: number | string | null;
@@ -58,6 +60,7 @@ export function mapPublicProfileRow(row: PublicProfileRow): PublicProfile {
     professionName,
     city: row.city,
     state: row.state,
+    socialLinks: normalizeSocialLinks(row.social_links),
     averageRating: Number(row.average_rating ?? DEFAULTS.AVERAGE_RATING),
     totalReviews: row.total_reviews ?? DEFAULTS.TOTAL_REVIEWS,
     badgeTier: row.current_badge_tier ?? "none",
@@ -89,6 +92,7 @@ export function mapProfileToPublicProfile(
     professionName,
     city: profile.city,
     state: profile.state,
+    socialLinks: profile.socialLinks,
     averageRating: options.averageRating ?? DEFAULTS.AVERAGE_RATING,
     totalReviews: options.totalReviews ?? DEFAULTS.TOTAL_REVIEWS,
     badgeTier: options.badgeTier ?? "none",

@@ -1,6 +1,6 @@
 import { authService } from "@/services/auth/auth.service";
 import { profileService } from "@/services/profiles/profile.service";
-import { createProfileSchema, validate } from "@/lib/validators";
+import { updateProfileSchema, validate } from "@/lib/validators";
 import { ValidationError } from "@/lib/errors";
 import type { UpdateProfileInput } from "@/types";
 import { isFailure } from "@/types";
@@ -49,7 +49,7 @@ export async function updateProfileAction(
     }
 
     const previousUsername = existingResult.data.username;
-    const validated = validate(createProfileSchema, input);
+    const validated = validate(updateProfileSchema, input);
     const result = await profileService.updateProfile(userId, validated);
 
     if (isFailure(result)) {
