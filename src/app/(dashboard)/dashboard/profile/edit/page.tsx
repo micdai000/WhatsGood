@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useServiceQuery } from "@/hooks/use-service-query";
+import { brandCopy } from "@/lib/brand";
 import { profileService } from "@/services/profiles/profile.service";
 import { professionService } from "@/services/professions/profession.service";
 import { cn } from "@/lib/utils";
@@ -59,7 +60,7 @@ export default function EditProfilePage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <PageHeader
             title="Edit profile"
-            description="Update how you appear on your public Meritt profile."
+            description={brandCopy.editProfileDescription}
           />
           <Link
             to={`/u/${profile.username}`}

@@ -7,6 +7,7 @@ import { AppImage } from "@/components/ui/app-image";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusAlert } from "@/components/ui/status-alert";
 import { Eyebrow, Muted, Paragraph } from "@/components/typography/typography";
+import { resolveInAppProfileBackPath } from "@/lib/profile/public-url";
 import type { BadgeSubTier, BadgeTier } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +22,10 @@ interface LeaveReviewShellProps {
     badgeSubTier?: BadgeSubTier | null;
     meta?: string;
   };
+  /** Router path (preferred) or same-origin absolute URL */
   backHref?: string;
+  /** Used if backHref is missing or resolves to a bare `/u/` path */
+  backUsername?: string;
   backLabel?: string;
   warning?: {
     title: string;
@@ -36,11 +40,18 @@ export function LeaveReviewShell({
   description,
   profile,
   backHref,
+  backUsername,
   backLabel = "Back to profile",
   warning,
   children,
   className,
 }: LeaveReviewShellProps) {
+  const backPath = backHref
+    ? resolveInAppProfileBackPath(backHref, backUsername)
+    : backUsername
+      ? resolveInAppProfileBackPath("", backUsername)
+      : null;
+
   return (
     <PageWrapper variant="muted">
       <Container
@@ -49,9 +60,9 @@ export function LeaveReviewShell({
           className,
         )}
       >
-        {backHref ? (
+        {backPath ? (
           <Link
-            to={backHref}
+            to={backPath}
             className={buttonVariants({
               variant: "ghost",
               size: "sm",
@@ -67,7 +78,7 @@ export function LeaveReviewShell({
           <div className="border-b border-border/80 bg-gradient-to-b from-muted/50 to-card px-6 py-6 sm:px-8 sm:py-7">
             <div className="space-y-5">
               <div className="space-y-2">
-                <Eyebrow>Trust vote</Eyebrow>
+                <Eyebrow>Client feedback</Eyebrow>
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                   {title}
                 </h1>

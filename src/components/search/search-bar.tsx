@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { SEARCH_NAME_PLACEHOLDER } from "@/lib/search/discovery-copy";
 import { cn } from "@/lib/utils";
 
 interface SearchBarProps {
@@ -26,9 +27,9 @@ export function SearchBar({
         name="q"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Search by name or username…"
+        placeholder={SEARCH_NAME_PLACEHOLDER}
         className="h-11 pl-10"
-        aria-label="Search professionals"
+        aria-label="Search by name or username"
         disabled={disabled}
       />
     </div>

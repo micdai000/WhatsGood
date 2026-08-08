@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { brandCopy } from "@/lib/brand";
 import { reportError } from "@/lib/monitoring";
 
 export default function GlobalError({
@@ -41,7 +42,7 @@ export default function GlobalError({
           }}
         >
           <h1 style={{ fontSize: "1.5rem", fontWeight: 600 }}>
-            Meritt is temporarily unavailable
+            {brandCopy.unavailable}
           </h1>
           <p style={{ marginTop: "0.75rem", color: "#5C6B63" }}>
             A critical error occurred. Please try again in a moment.

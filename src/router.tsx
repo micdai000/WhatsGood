@@ -29,9 +29,6 @@ import DashboardPage from "@/app/(dashboard)/dashboard/page";
 import DashboardProfileEditPage from "@/app/(dashboard)/dashboard/profile/edit/page";
 import DashboardReviewRequestsPage from "@/app/(dashboard)/dashboard/review-requests/page";
 import DashboardSettingsPage from "@/app/(dashboard)/dashboard/settings/page";
-import CreatePage from "@/app/(protected)/create/page";
-import EntityPage from "@/app/(protected)/entity/[id]/page";
-import ProfilePage from "@/app/(protected)/profile/page";
 import StyleGuidePage from "@/app/(protected)/style-guide/page";
 import AdminPage from "@/app/(admin)/admin/page";
 import AdminUsersPage from "@/app/(admin)/admin/users/page";
@@ -116,9 +113,9 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
-          { path: "create", element: <CreatePage /> },
-          { path: "entity/:id", element: <EntityPage /> },
-          { path: "profile", element: <ProfilePage /> },
+          { path: "create", element: <Navigate to="/dashboard/review-requests" replace /> },
+          { path: "entity/:id", element: <Navigate to="/search" replace /> },
+          { path: "profile", element: <Navigate to="/dashboard" replace /> },
           { path: "style-guide", element: <StyleGuidePage /> },
         ],
       },

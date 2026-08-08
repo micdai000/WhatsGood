@@ -17,6 +17,7 @@ import {
   useOnboardingWizard,
 } from "@/hooks/use-onboarding-wizard";
 import { getSiteUrl } from "@/lib/auth/routes";
+import { ONBOARDING_CONFIRM_PROFILE_TITLE } from "@/lib/copy/vocabulary";
 import { cn } from "@/lib/utils";
 
 const EDIT_LINKS = [
@@ -67,7 +68,7 @@ export function ReviewStep() {
 
   return (
     <OnboardingWizardShell
-      title="Review your profile"
+      title={ONBOARDING_CONFIRM_PROFILE_TITLE}
       description="Make sure everything looks right before publishing."
       continueLabel="Create My Profile"
       continueDisabled={submitting}

@@ -26,7 +26,7 @@ export function EmptyReviews({
         <MessageSquare className="size-6 text-primary" aria-hidden />
       </div>
       <div className="max-w-sm space-y-1">
-        <H3 className="text-lg">No reviews yet</H3>
+        <H3 className="text-lg">No client feedback yet</H3>
         <Muted className="text-sm">
           Be the first to share your experience working with {displayName}.
         </Muted>
@@ -37,7 +37,7 @@ export function EmptyReviews({
           className={buttonVariants({ size: "lg", className: "gap-2" })}
         >
           <PenLine className="size-4" aria-hidden />
-          Leave a review
+          Share your experience
         </Link>
       ) : null}
     </div>

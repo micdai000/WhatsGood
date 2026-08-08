@@ -13,6 +13,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useServiceQuery } from "@/hooks/use-service-query";
 import { reviewRequestService } from "@/services/reviewRequests/review-request.service";
+import {
+  FEEDBACK_REQUESTS_TITLE,
+  FIRST_FEEDBACK_LINK_EMPTY,
+} from "@/lib/copy/vocabulary";
 
 export default function ReviewRequestsPage() {
   const { user } = useAuthContext();
@@ -55,7 +59,7 @@ export default function ReviewRequestsPage() {
             Back to dashboard
           </Link>
           <PageHeader
-            title="Review requests"
+            title={FEEDBACK_REQUESTS_TITLE}
             description="Generate unique links for clients. Copy and share them manually — no email is sent yet."
           />
         </div>
@@ -77,8 +81,8 @@ export default function ReviewRequestsPage() {
             </ul>
           ) : (
             <EmptyDashboard
-              title="No requests yet"
-              description="Enter a client email above to generate your first review link."
+              title="No links yet"
+              description={FIRST_FEEDBACK_LINK_EMPTY}
             />
           )}
         </section>

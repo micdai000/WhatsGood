@@ -1,5 +1,5 @@
 export const MONTHLY_VOTE_LIMIT_MESSAGE =
-  "You have already submitted a trust vote for this professional this month. You can vote again next month.";
+  "You have already shared feedback for this professional this month. You can submit again next month.";
 
 export function getVoteMonthStart(date: Date = new Date()): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));

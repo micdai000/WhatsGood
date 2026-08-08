@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { H3, Muted } from "@/components/typography/typography";
+import { brandCopy } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 interface EmptyResultsProps {
@@ -19,8 +20,8 @@ export function EmptyResults({ hasFilters = false, className }: EmptyResultsProp
           <H3 className="text-lg">No professionals found</H3>
           <Muted className="max-w-sm text-sm">
             {hasFilters
-              ? "Try changing your filters or search terms."
-              : "Check back soon as more professionals join Meritt."}
+              ? "Try a different profession or location, or clear your filters."
+              : brandCopy.joiningMessage}
           </Muted>
         </div>
       </CardContent>

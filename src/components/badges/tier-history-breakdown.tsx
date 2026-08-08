@@ -1,5 +1,6 @@
 import { Muted, Paragraph } from "@/components/typography/typography";
-import { BADGE_TIER_LABELS } from "@/lib/badges/display";
+import { BADGE_TIER_BAR, BADGE_TIER_LABELS } from "@/lib/badges/display";
+import { REPUTATION_HISTORY_LABEL } from "@/lib/badges/reputation-copy";
 import type { BadgeSnapshot, BadgeTier } from "@/types/badge";
 import { cn } from "@/lib/utils";
 
@@ -16,14 +17,7 @@ const TIER_DISPLAY_ORDER: BadgeTier[] = [
   "bronze",
 ];
 
-const TIER_BAR_COLORS: Record<BadgeTier, string> = {
-  none: "bg-muted-foreground/30",
-  bronze: "bg-amber-500",
-  silver: "bg-slate-400",
-  gold: "bg-yellow-500",
-  platinum: "bg-sky-500",
-  elite: "bg-violet-500",
-};
+const TIER_BAR_COLORS = BADGE_TIER_BAR;
 
 export function TierHistoryBreakdown({
   history,
@@ -45,7 +39,9 @@ export function TierHistoryBreakdown({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <Paragraph className="text-sm font-medium">Badge history</Paragraph>
+      <Paragraph className="text-sm font-medium">
+        Current tier mix ({REPUTATION_HISTORY_LABEL.toLowerCase()})
+      </Paragraph>
       <ul className="space-y-2">
         {TIER_DISPLAY_ORDER.map((tier) => {
           const count = counts[tier];

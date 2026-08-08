@@ -55,16 +55,6 @@ export default function PublicProfilePage() {
           addressRegion: profile.state ?? undefined,
         }
       : undefined,
-    aggregateRating:
-      profile.totalReviews > 0
-        ? {
-            "@type": "AggregateRating",
-            ratingValue: profile.averageRating,
-            reviewCount: profile.totalReviews,
-            bestRating: 5,
-            worstRating: 1,
-          }
-        : undefined,
   };
 
   return (

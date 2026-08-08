@@ -1,5 +1,7 @@
 export { ProfileHeader } from "./profile-header";
 export { ProfileSocialLinks } from "./profile-social-links";
+export { ProfileReputationWhy } from "./profile-reputation-why";
+export { ProfileReputationHero } from "./profile-reputation-hero";
 export { ProfileStats } from "./profile-stats";
 export { ProfileBio } from "./profile-bio";
 export { ProfileActions } from "./profile-actions";

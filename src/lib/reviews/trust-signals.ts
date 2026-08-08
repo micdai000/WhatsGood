@@ -9,32 +9,35 @@ export interface TrustSignalOption {
   wouldRecommend: boolean;
 }
 
+export const EXPERIENCE_FEEDBACK_HEADING = "How was your experience?";
+
+export const EXPERIENCE_FEEDBACK_SUBMIT_LABEL = "Submit feedback";
+
 /**
- * Three-way trust vote used on the review form.
+ * Customer-facing experience options on the review form.
  *
- * Ratings are stored as 5 / 3 / 1 so promote and demote pull the Bayesian
- * average clearly apart while maintain sits at the profession mean anchor.
+ * Ratings are stored as 5 / 3 / 1 internally for the reputation algorithm.
  */
 export const TRUST_SIGNALS: readonly TrustSignalOption[] = [
   {
     signal: "promote",
     value: 5,
-    label: "Promote",
-    description: "Great experience — helps them move toward a higher badge",
+    label: "Great",
+    description: "I'd recommend them.",
     wouldRecommend: true,
   },
   {
     signal: "maintain",
     value: 3,
-    label: "Maintain",
-    description: "Solid experience — supports their current badge standing",
+    label: "Good",
+    description: "I'd hire them again.",
     wouldRecommend: true,
   },
   {
     signal: "demote",
     value: 1,
-    label: "Demote",
-    description: "Below expectations — pulls their badge standing down",
+    label: "Poor",
+    description: "I wouldn't recommend them.",
     wouldRecommend: false,
   },
 ] as const;
@@ -43,11 +46,17 @@ export const TRUST_SIGNAL_BY_VALUE: Record<number, TrustSignalOption> =
   Object.fromEntries(TRUST_SIGNALS.map((option) => [option.value, option]));
 
 export const TRUST_SIGNAL_LABELS: Record<number, string> = {
-  1: "Demote",
-  2: "Demote",
-  3: "Maintain",
-  4: "Promote",
-  5: "Promote",
+  1: "Poor",
+  2: "Poor",
+  3: "Good",
+  4: "Great",
+  5: "Great",
+};
+
+const LEGACY_TRUST_SIGNAL_LABELS: Record<TrustSignal, string> = {
+  promote: "Promote",
+  maintain: "Maintain",
+  demote: "Demote",
 };
 
 export function getTrustSignalLabel(rating: number): string {
@@ -70,9 +79,21 @@ export function buildTrustVoteReviewContent(
 ): { title: string; body: string } {
   const label = getTrustSignalLabel(rating);
   return {
-    title: `${label} trust vote`,
-    body: `${label} trust vote for ${professionalName}.`,
+    title: `${label} experience`,
+    body: `${label} experience with ${professionalName}.`,
   };
+}
+
+function isLegacyTrustVotePlaceholder(
+  review: { title: string; body: string; rating: number },
+  option: TrustSignalOption,
+): boolean {
+  const legacyLabel = LEGACY_TRUST_SIGNAL_LABELS[option.signal];
+  return (
+    review.title === `${legacyLabel} trust vote` &&
+    review.body.startsWith(`${legacyLabel} trust vote for `) &&
+    review.body.endsWith(".")
+  );
 }
 
 export function isTrustVotePlaceholder(review: {
@@ -80,22 +101,28 @@ export function isTrustVotePlaceholder(review: {
   body: string;
   rating: number;
 }): boolean {
-  const label = getTrustSignalLabel(review.rating);
-  if (label === "Review") {
+  const option = getTrustSignalOption(review.rating);
+  if (!option) {
     return false;
   }
 
-  return (
-    review.title === `${label} trust vote` &&
-    review.body.startsWith(`${label} trust vote for `) &&
+  const label = option.label;
+
+  if (
+    review.title === `${label} experience` &&
+    review.body.startsWith(`${label} experience with `) &&
     review.body.endsWith(".")
-  );
+  ) {
+    return true;
+  }
+
+  return isLegacyTrustVotePlaceholder(review, option);
 }
 
 export const TRUST_VOTE_PAST_LABELS: Record<TrustSignal, string> = {
-  promote: "Promoted",
-  maintain: "Maintained",
-  demote: "Demoted",
+  promote: "Recommended them",
+  maintain: "Would hire again",
+  demote: "Wouldn't recommend",
 };
 
 export function getTrustVotePastLabel(rating: number): string | null {

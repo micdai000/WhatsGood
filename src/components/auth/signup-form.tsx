@@ -27,7 +27,7 @@ export function SignUpForm() {
   return (
     <AuthCard
       title="Create your account"
-      description="Start building trust with verified reviews"
+      description="Start building a current reputation with verified client feedback"
     >
       {state.success ? (
         <AuthFormSuccess message={state.message} />

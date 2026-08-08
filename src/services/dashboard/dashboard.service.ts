@@ -32,10 +32,16 @@ import {
   mapDashboardSourceData,
   type DashboardSourceData,
 } from "./dashboard.analytics";
+import { buildDashboardReputationSummary } from "@/lib/badges/dashboard-reputation";
+import {
+  mapBadgeSnapshotRow,
+  type BadgeSnapshotRow,
+} from "@/services/badges/badge.mapper";
 
 const RECENT_REVIEWS_LIMIT = 5;
 const RECENT_REQUESTS_LIMIT = 5;
 const ACTIVITY_LIMIT = 10;
+const BADGE_HISTORY_LIMIT = 12;
 
 export class DashboardService {
   private async assertProfileAccess(
@@ -64,6 +70,8 @@ export class DashboardService {
         displayName: string;
         username: string;
         badgeTier: DashboardData["profile"]["badgeTier"];
+        badgeSubTier: DashboardData["profile"]["badgeSubTier"];
+        badgePeriod: DashboardData["profile"]["badgePeriod"];
       }
     >
   > {
@@ -85,7 +93,7 @@ export class DashboardService {
         supabase
           .from("profiles")
           .select(
-            "id, username, display_name, average_rating, total_reviews, current_badge_tier",
+            "id, username, display_name, average_rating, total_reviews, current_badge_tier, current_badge_sub_tier, current_badge_period",
           )
           .eq("id", validatedProfileId)
           .maybeSingle(),
@@ -132,6 +140,13 @@ export class DashboardService {
         displayName: profileResult.data.display_name,
         username: profileResult.data.username,
         badgeTier: profileResult.data.current_badge_tier ?? "none",
+        badgeSubTier:
+          profileResult.data.current_badge_sub_tier === 1 ||
+          profileResult.data.current_badge_sub_tier === 2 ||
+          profileResult.data.current_badge_sub_tier === 3
+            ? profileResult.data.current_badge_sub_tier
+            : null,
+        badgePeriod: profileResult.data.current_badge_period ?? null,
       });
     } catch (error) {
       return handleServiceError(method, error);
@@ -228,8 +243,26 @@ export class DashboardService {
         return failure(sourceResult.error);
       }
 
-      const { displayName, username, badgeTier, reviews, requests } =
+      const { displayName, username, badgeTier, badgeSubTier, badgePeriod, reviews, requests } =
         sourceResult.data;
+
+      const supabase = createClient();
+      const { data: badgeRows, error: badgeError } = await supabase
+        .from("badge_snapshots")
+        .select("*")
+        .eq("profile_id", profileId)
+        .order("period", { ascending: false })
+        .limit(BADGE_HISTORY_LIMIT);
+
+      if (badgeError) {
+        logger.error(method, badgeError, { profileId });
+        return failure(DatabaseError.fromSource(badgeError));
+      }
+
+      const badgeHistory = (badgeRows ?? []).map((row) =>
+        mapBadgeSnapshotRow(row as BadgeSnapshotRow),
+      );
+      const reputation = buildDashboardReputationSummary(badgeTier, badgeHistory);
 
       const statistics = computeStatistics(sourceResult.data);
       const reviewTrend = computeReviewTrend(reviews);
@@ -249,7 +282,10 @@ export class DashboardService {
           username,
           publicProfileUrl: getPublicProfileUrl(username),
           badgeTier,
+          badgeSubTier,
+          badgePeriod,
         },
+        reputation,
         statistics,
         recentReviews: reviews.slice(0, RECENT_REVIEWS_LIMIT),
         recentReviewRequests: requests.slice(0, RECENT_REQUESTS_LIMIT),

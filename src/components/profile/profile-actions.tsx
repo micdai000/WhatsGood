@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Share2, PenLine } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "sonner";
+import { brandCopy } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 interface ProfileActionsProps {
@@ -26,8 +27,8 @@ export function ProfileActions({
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
         await navigator.share({
-          title: `${displayName} on Meritt`,
-          text: `Check out ${displayName}'s professional profile on Meritt.`,
+          title: brandCopy.shareTitle(displayName),
+          text: brandCopy.shareText(displayName),
           url: profileUrl,
         });
         return;
@@ -57,7 +58,7 @@ export function ProfileActions({
         })}
       >
         <PenLine className="size-4" aria-hidden />
-        Leave a Review
+        Share your experience
       </Link>
       <Button
         type="button"

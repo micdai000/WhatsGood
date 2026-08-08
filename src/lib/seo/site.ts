@@ -3,7 +3,7 @@ import { getSiteUrl } from "@/lib/auth/routes";
 export const SITE_NAME = "Meritt Pros";
 
 export const SITE_DESCRIPTION =
-  "Build trust through verified reviews. Professional reputation for independent experts.";
+  "Live reputation for independent professionals — current tiers updated monthly from verified client feedback.";
 
 export function getCanonicalUrl(path = "/"): string {
   const base = getSiteUrl();

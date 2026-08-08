@@ -1,5 +1,8 @@
 import { AnalyticsCard } from "@/components/dashboard/analytics-card";
-import { formatRating } from "@/lib/utils/format-rating";
+import {
+  ADMIN_TOTAL_VERIFIED_FEEDBACK,
+  FEEDBACK_REQUESTS_SHORT,
+} from "@/lib/copy/vocabulary";
 import type { AdminDashboardStats } from "@/types";
 
 interface AdminStatGridProps {
@@ -15,14 +18,13 @@ export function AdminStatGrid({ statistics }: AdminStatGridProps) {
     >
       <AnalyticsCard label="Total users" value={String(statistics.totalUsers)} />
       <AnalyticsCard label="Total profiles" value={String(statistics.totalProfiles)} />
-      <AnalyticsCard label="Total reviews" value={String(statistics.totalReviews)} />
       <AnalyticsCard
-        label="Pending requests"
-        value={String(statistics.pendingReviewRequests)}
+        label={ADMIN_TOTAL_VERIFIED_FEEDBACK}
+        value={String(statistics.totalReviews)}
       />
       <AnalyticsCard
-        label="Average platform rating"
-        value={formatRating(statistics.averagePlatformRating)}
+        label={`Pending ${FEEDBACK_REQUESTS_SHORT.toLowerCase()}`}
+        value={String(statistics.pendingReviewRequests)}
       />
     </div>
   );

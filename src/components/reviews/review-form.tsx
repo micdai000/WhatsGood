@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StatusAlert } from "@/components/ui/status-alert";
-import { getPublicProfileUrl } from "@/lib/profile/public-url";
+import { getPublicProfilePath } from "@/lib/profile/public-url";
+import { UNABLE_TO_SUBMIT_FEEDBACK } from "@/lib/copy/vocabulary";
 import {
   buildTrustVoteReviewContent,
+  EXPERIENCE_FEEDBACK_HEADING,
+  EXPERIENCE_FEEDBACK_SUBMIT_LABEL,
   getWouldRecommendForRating,
 } from "@/lib/reviews/trust-signals";
 import { toast } from "sonner";
@@ -99,7 +102,7 @@ export function ReviewForm({
 
     if (form.rating < 1) {
       setFieldErrors({
-        rating: ["Choose Promote, Maintain, or Demote"],
+        rating: ["Choose how your experience went"],
       });
       return;
     }
@@ -126,8 +129,8 @@ export function ReviewForm({
         return;
       }
 
-      toast.success("Thank you! Your trust vote has been submitted.");
-      navigate(getPublicProfileUrl(slug));
+      toast.success("Thank you! Your feedback has been submitted.");
+      navigate(getPublicProfilePath(slug));
     });
   }
 
@@ -138,12 +141,12 @@ export function ReviewForm({
       noValidate
     >
       {formError ? (
-        <StatusAlert status="error" title="Unable to submit review" description={formError} />
+        <StatusAlert status="error" title={UNABLE_TO_SUBMIT_FEEDBACK} description={formError} />
       ) : null}
 
       <FormSection
         title="About you"
-        description="Only your name is shown publicly. You can submit one trust vote per month per professional."
+        description="Only your name is shown publicly. You can share feedback once per month per professional."
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-1">
@@ -191,8 +194,8 @@ export function ReviewForm({
 
       <div className="border-t border-border/80 pt-8">
         <FormSection
-          title={`Your vote for ${displayName}`}
-          description="Choose whether their trust badge should move up, hold steady, or move down this month."
+          title={EXPERIENCE_FEEDBACK_HEADING}
+          description="Share an honest snapshot of your recent experience. This helps others understand their current reputation."
         >
           <TrustSignalInput
             value={form.rating}
@@ -210,7 +213,7 @@ export function ReviewForm({
           className="w-full gap-2 text-base font-semibold shadow-md sm:w-auto sm:min-w-[12rem]"
           disabled={isPending}
         >
-          {isPending ? "Submitting…" : "Submit trust vote"}
+          {isPending ? "Submitting…" : EXPERIENCE_FEEDBACK_SUBMIT_LABEL}
         </Button>
       </div>
     </form>

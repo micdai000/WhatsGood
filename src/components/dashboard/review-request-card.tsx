@@ -7,6 +7,7 @@ import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { formatDate } from "@/lib/utils/format-date";
 import { getReviewRequestUrl } from "@/lib/review-request/public-url";
 import type { ReviewRequest } from "@/types";
+import { COPY_FEEDBACK_LINK, FEEDBACK_LINK_COPIED } from "@/lib/copy/vocabulary";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -35,7 +36,7 @@ export function ReviewRequestCard({ request, className }: ReviewRequestCardProps
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success("Review link copied");
+      toast.success(FEEDBACK_LINK_COPIED);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Unable to copy link");
@@ -85,7 +86,7 @@ export function ReviewRequestCard({ request, className }: ReviewRequestCardProps
             ) : (
               <Copy className="size-4" aria-hidden />
             )}
-            Copy review link
+            {COPY_FEEDBACK_LINK}
           </Button>
         ) : null}
       </div>

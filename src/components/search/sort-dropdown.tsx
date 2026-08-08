@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 
 const SORT_LABELS: Record<(typeof PROFILE_SORT_ORDERS)[number], string> = {
   newest: "Newest",
-  rating: "Highest rated",
-  reviews: "Most reviews",
+  rating: "Strongest reputation",
+  reviews: "Most verified feedback",
   name: "Name (A–Z)",
 };
 

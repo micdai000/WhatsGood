@@ -6,6 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StatusAlert } from "@/components/ui/status-alert";
 import { Paragraph } from "@/components/typography/typography";
+import {
+  COPY_FEEDBACK_LINK,
+  GENERATE_FEEDBACK_LINK,
+  SHARE_FEEDBACK_LINK,
+  UNABLE_TO_CREATE_FEEDBACK_LINK,
+} from "@/lib/copy/vocabulary";
 import { cn } from "@/lib/utils";
 
 interface CreateReviewRequestFormProps {
@@ -57,19 +63,19 @@ export function CreateReviewRequestForm({ className }: CreateReviewRequestFormPr
         </div>
 
         {error ? (
-          <StatusAlert status="error" title="Unable to create request" description={error} />
+          <StatusAlert status="error" title={UNABLE_TO_CREATE_FEEDBACK_LINK} description={error} />
         ) : null}
 
         <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
-          {isPending ? "Creating…" : "Generate review link"}
+          {isPending ? "Creating…" : GENERATE_FEEDBACK_LINK}
         </Button>
       </form>
 
       {shareUrl ? (
         <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
-          <Paragraph className="text-sm font-medium">Share this link with your client</Paragraph>
+          <Paragraph className="text-sm font-medium">{SHARE_FEEDBACK_LINK}</Paragraph>
           <Paragraph className="break-all text-sm text-muted-foreground">{shareUrl}</Paragraph>
-          <CopyLinkButton url={shareUrl} label="Copy review link" />
+          <CopyLinkButton url={shareUrl} label={COPY_FEEDBACK_LINK} />
         </div>
       ) : null}
     </div>

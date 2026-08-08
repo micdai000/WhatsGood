@@ -1,4 +1,10 @@
 import { getTrustSignalLabel } from "@/lib/reviews/trust-signals";
+import {
+  ACTIVITY_FEEDBACK_LINK_EXPIRED,
+  ACTIVITY_FEEDBACK_LINK_SENT,
+  ACTIVITY_FEEDBACK_RECEIVED,
+  ACTIVITY_FEEDBACK_SUBMITTED,
+} from "@/lib/copy/vocabulary";
 import type {
   DashboardActivityItem,
   DashboardStatistics,
@@ -146,8 +152,8 @@ export function computeRecentActivity(
     items.push({
       id: `review-${review.id}`,
       type: "review_received",
-      title: `Review from ${review.reviewerName}`,
-      description: `${getTrustSignalLabel(review.rating)} · ${review.title}`,
+      title: ACTIVITY_FEEDBACK_RECEIVED,
+      description: `${review.reviewerName} · ${getTrustSignalLabel(review.rating)} · ${review.title}`,
       timestamp: review.createdAt,
     });
   }
@@ -156,7 +162,7 @@ export function computeRecentActivity(
     items.push({
       id: `request-created-${request.id}`,
       type: "review_request_created",
-      title: "Review request sent",
+      title: ACTIVITY_FEEDBACK_LINK_SENT,
       description: `Invitation sent to ${request.email}`,
       timestamp: request.createdAt,
     });
@@ -165,8 +171,8 @@ export function computeRecentActivity(
       items.push({
         id: `request-completed-${request.id}`,
         type: "review_request_completed",
-        title: "Review request completed",
-        description: `${request.email} submitted a review`,
+        title: ACTIVITY_FEEDBACK_SUBMITTED,
+        description: `${request.email} shared verified client feedback`,
         timestamp: request.completedAt,
       });
     }
@@ -175,7 +181,7 @@ export function computeRecentActivity(
       items.push({
         id: `request-expired-${request.id}`,
         type: "review_request_expired",
-        title: "Review request expired",
+        title: ACTIVITY_FEEDBACK_LINK_EXPIRED,
         description: `Link for ${request.email} is no longer active`,
         timestamp: request.expiresAt,
       });

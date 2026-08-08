@@ -8,6 +8,12 @@ import { Spinner } from "@/components/ui/spinner";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { reviewRequestService } from "@/services/reviewRequests/review-request.service";
+import { getPublicProfilePath } from "@/lib/profile/public-url";
+import {
+  FEEDBACK_ALREADY_SUBMITTED,
+  FEEDBACK_LINK_UNAVAILABLE,
+  INVALID_FEEDBACK_LINK,
+} from "@/lib/copy/vocabulary";
 import { isFailure } from "@/types";
 import type { ReviewRequest } from "@/types";
 
@@ -70,15 +76,15 @@ export default function ReviewRequestPage() {
     return (
       <Section spacing="default">
         <Container size="narrow" className="space-y-6">
-          <PageTitle>Review link unavailable</PageTitle>
+          <PageTitle>{FEEDBACK_LINK_UNAVAILABLE}</PageTitle>
           <StatusAlert
             status="error"
             title={
               code === "EXPIRED"
                 ? "This link has expired"
                 : code === "ALREADY_COMPLETED"
-                  ? "Review already submitted"
-                  : "Invalid review link"
+                  ? FEEDBACK_ALREADY_SUBMITTED
+                  : INVALID_FEEDBACK_LINK
             }
             description={message}
           />
@@ -91,8 +97,10 @@ export default function ReviewRequestPage() {
 
   return (
     <LeaveReviewShell
-      title="Share your trust vote"
-      description={`You were invited to weigh in on ${request.profileDisplayName}'s monthly badge standing.`}
+      backHref={getPublicProfilePath(request.profileUsername)}
+      backUsername={request.profileUsername}
+      title="Share your experience"
+      description={`You were invited to share feedback about your experience with ${request.profileDisplayName}.`}
       profile={{
         displayName: request.profileDisplayName,
         avatar: null,

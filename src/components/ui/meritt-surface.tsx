@@ -4,7 +4,7 @@ interface MerittCardProps extends React.ComponentProps<"div"> {
   padding?: "none" | "sm" | "md";
 }
 
-/** Outer card shell — matches themeritt.com preview containers */
+/** Outer card shell — shared layout primitive */
 export function MerittCard({
   className,
   padding = "md",
@@ -24,7 +24,7 @@ export function MerittCard({
   );
 }
 
-/** Inner panel — matches themeritt.com live-preview panels */
+/** Inner panel — nested surface within cards */
 export function MerittPanel({
   className,
   ...props

@@ -1,5 +1,6 @@
-import { Award } from "lucide-react";
 import {
+  BADGE_TIER_MONOGRAM,
+  BADGE_TIER_SEAL,
   BADGE_TIER_STYLES,
   formatBadgeLabel,
 } from "@/lib/badges/display";
@@ -16,16 +17,19 @@ interface TrustBadgeProps {
 
 const sizeClasses = {
   sm: {
-    wrap: "gap-1 px-2 py-0.5 text-[10px]",
-    icon: "size-3",
+    wrap: "gap-1.5 px-2 py-1",
+    seal: "size-5 text-[9px]",
+    label: "text-[10px]",
   },
   md: {
-    wrap: "gap-1.5 px-2.5 py-1 text-xs",
-    icon: "size-3.5",
+    wrap: "gap-2 px-2.5 py-1.5",
+    seal: "size-6 text-[10px]",
+    label: "text-xs",
   },
   lg: {
-    wrap: "gap-2 px-3 py-1.5 text-sm",
-    icon: "size-4",
+    wrap: "gap-2.5 px-3 py-2",
+    seal: "size-8 text-xs",
+    label: "text-sm",
   },
 } as const;
 
@@ -38,18 +42,33 @@ export function TrustBadge({
 }: TrustBadgeProps) {
   const styles = BADGE_TIER_STYLES[tier];
   const sizes = sizeClasses[size];
+  const label = formatBadgeLabel(tier, subTier);
 
   return (
     <span
       className={cn(
-        "inline-flex w-fit items-center rounded-full border font-medium",
+        "inline-flex w-fit max-w-full items-center rounded-lg border font-medium",
         styles.badge,
         sizes.wrap,
         className,
       )}
+      title={label}
     >
-      <Award className={cn(sizes.icon, styles.icon)} aria-hidden />
-      {showLabel ? <span>{formatBadgeLabel(tier, subTier)}</span> : null}
+      <span
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded border font-semibold tabular-nums tracking-tight",
+          BADGE_TIER_SEAL[tier],
+          sizes.seal,
+        )}
+        aria-hidden
+      >
+        {BADGE_TIER_MONOGRAM[tier]}
+      </span>
+      {showLabel ? (
+        <span className={cn("min-w-0 truncate font-semibold tracking-tight", sizes.label)}>
+          {label}
+        </span>
+      ) : null}
     </span>
   );
 }

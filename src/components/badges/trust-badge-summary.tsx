@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
 import { TrustBadge } from "@/components/badges/trust-badge";
+import { HowBadgeWorks } from "@/components/badges/how-badge-works";
 import { Muted, Paragraph } from "@/components/typography/typography";
+import { formatBadgeLabel } from "@/lib/badges/display";
 import {
-  describeTrustBadgeWhy,
-  formatBadgeLabel,
-  formatBadgePeriod,
-} from "@/lib/badges/display";
+  CURRENT_REPUTATION_LABEL,
+  formatReputationUpdatedLabel,
+  formatVerifiedExperienceCount,
+} from "@/lib/badges/reputation-copy";
 import type { BadgeSubTier, BadgeTier } from "@/types/badge";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,7 @@ interface TrustBadgeSummaryProps {
   reviewCountWindow: number;
   eligible: boolean;
   className?: string;
+  reputationHistoryHref?: string | null;
 }
 
 export function TrustBadgeSummary({
@@ -28,14 +29,8 @@ export function TrustBadgeSummary({
   reviewCountWindow,
   eligible,
   className,
+  reputationHistoryHref,
 }: TrustBadgeSummaryProps) {
-  const [expanded, setExpanded] = useState(false);
-  const whyText = describeTrustBadgeWhy({
-    reviewCount: reviewCountWindow,
-    professionName,
-    eligible,
-  });
-
   return (
     <div
       className={cn(
@@ -46,39 +41,29 @@ export function TrustBadgeSummary({
       <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:text-left">
         <TrustBadge tier={badgeTier} subTier={badgeSubTier} size="lg" />
         <div className="min-w-0 flex-1 space-y-0.5">
+          <Muted className="text-xs font-medium uppercase tracking-wide">
+            {CURRENT_REPUTATION_LABEL}
+          </Muted>
           <Paragraph className="font-semibold">
             {formatBadgeLabel(badgeTier, badgeSubTier)}
           </Paragraph>
-          {badgePeriod ? (
-            <Muted className="text-sm">
-              Earned {formatBadgePeriod(badgePeriod)}
-            </Muted>
-          ) : (
-            <Muted className="text-sm">No monthly badge yet</Muted>
-          )}
+          <Muted className="text-sm">
+            {formatReputationUpdatedLabel(badgePeriod)}
+          </Muted>
+          <Muted className="text-sm">
+            {formatVerifiedExperienceCount(reviewCountWindow)}
+          </Muted>
         </div>
       </div>
 
-      <div className="mt-4 border-t border-border pt-4">
-        <button
-          type="button"
-          onClick={() => setExpanded((value) => !value)}
-          className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium text-foreground"
-          aria-expanded={expanded}
-        >
-          <span>How this badge works</span>
-          <ChevronDown
-            className={cn(
-              "size-4 shrink-0 text-muted-foreground transition-transform",
-              expanded && "rotate-180",
-            )}
-            aria-hidden
-          />
-        </button>
-        {expanded ? (
-          <Muted className="mt-3 text-sm leading-relaxed">{whyText}</Muted>
-        ) : null}
-      </div>
+      <HowBadgeWorks
+        reviewCount={reviewCountWindow}
+        badgePeriod={badgePeriod}
+        professionName={professionName}
+        eligible={eligible}
+        reputationHistoryHref={reputationHistoryHref}
+        borderClassName="border-t border-border"
+      />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+export { DashboardReputationPanel } from "./dashboard-reputation-panel";
 export { DashboardCard } from "./dashboard-card";
 export { StatCard } from "./stat-card";
 export { QuickActionCard } from "./quick-action-card";

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LIMITS } from "@/lib/constants";
+import { brandCopy } from "@/lib/brand";
 import { isAllowedProfilePhotoUrl } from "./profile-photo";
 
 const slugSchema = z
@@ -65,7 +66,7 @@ export const createProfileSchema = z.object({
     .optional()
     .refine(
       (url) => url == null || isAllowedProfilePhotoUrl(url),
-      "Profile photo must be uploaded through Meritt",
+      brandCopy.profilePhotoUpload,
     ),
 });
 

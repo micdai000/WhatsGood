@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Muted } from "@/components/typography/typography";
+import { SITE_NAME } from "@/lib/seo/site";
 import { useAuthContext } from "@/contexts/auth-context";
 
 const initialState: AuthActionState = { success: false };
@@ -52,7 +53,7 @@ export function LoginForm() {
   return (
     <AuthCard
       title="Welcome back"
-      description="Sign in to your Meritt Pros account"
+      description={`Sign in to your ${SITE_NAME} account`}
     >
       {verified ? (
         <AuthFormSuccess message="Email verified. You can now sign in." />

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Muted } from "@/components/typography/typography";
+import { DELETE_ACCOUNT_DATA_SUMMARY } from "@/lib/copy/vocabulary";
 
 const CONFIRMATION_TEXT = "DELETE";
 
@@ -69,8 +70,7 @@ export function DeleteAccountDialog() {
         <AlertDialogHeader>
           <AlertDialogTitle>Delete your account?</AlertDialogTitle>
           <AlertDialogDescription>
-            This permanently removes your profile, reviews, and review requests.
-            This action cannot be undone.
+            {DELETE_ACCOUNT_DATA_SUMMARY} This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
 

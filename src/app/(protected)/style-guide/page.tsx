@@ -55,6 +55,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { brandCopy } from "@/lib/brand";
+import { SITE_NAME } from "@/lib/seo/site";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { PageWrapper } from "@/components/layout/page-wrapper";
@@ -131,7 +133,7 @@ export default function StyleGuidePage() {
 
           <PageHeader
             title="Design System"
-            description="Visual reference for Meritt UI components, tokens, and layout patterns."
+            description={`Visual reference for ${SITE_NAME} UI components, tokens, and layout patterns.`}
           />
         </Container>
       </Section>
@@ -144,7 +146,7 @@ export default function StyleGuidePage() {
           <PageTitle>Page Title</PageTitle>
           <SectionTitle>Section Title</SectionTitle>
           <Paragraph>
-            Paragraph — Meritt helps professionals build credibility through
+            Paragraph — {SITE_NAME} helps professionals build credibility through
             verified client reviews.
           </Paragraph>
           <Muted>Muted text for secondary information and descriptions.</Muted>
@@ -324,7 +326,7 @@ export default function StyleGuidePage() {
               <DialogHeader>
                 <DialogTitle>Share your profile</DialogTitle>
                 <DialogDescription>
-                  Copy your Meritt link and send it to clients.
+                  {brandCopy.styleGuideShareLink}
                 </DialogDescription>
               </DialogHeader>
             </DialogContent>

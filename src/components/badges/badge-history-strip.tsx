@@ -1,6 +1,7 @@
 import { TrustBadge } from "@/components/badges/trust-badge";
 import { Muted } from "@/components/typography/typography";
 import { formatBadgePeriod } from "@/lib/badges/display";
+import { REPUTATION_HISTORY_LABEL } from "@/lib/badges/reputation-copy";
 import type { BadgeSnapshot } from "@/types/badge";
 import { cn } from "@/lib/utils";
 
@@ -15,9 +16,9 @@ export function BadgeHistoryStrip({ history, className }: BadgeHistoryStripProps
   }
 
   return (
-    <section className={cn("space-y-3", className)} aria-label="Badge history">
+    <section className={cn("space-y-3", className)} aria-label={REPUTATION_HISTORY_LABEL}>
       <Muted className="text-xs font-medium uppercase tracking-wide">
-        Recent badges
+        {REPUTATION_HISTORY_LABEL}
       </Muted>
       <div className="flex flex-wrap gap-2">
         {history.map((snapshot) => (
