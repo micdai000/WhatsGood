@@ -1,4 +1,13 @@
-import type { BadgeTier, RatingBreakdown, Review, ReviewRequest } from "@/types";
+import type { BadgeSubTier, BadgeTier, RatingBreakdown, Review, ReviewRequest } from "@/types";
+
+export interface DashboardReputationSummary {
+  movementMessage: string;
+  verifiedExperiencesWindow: number;
+  recommendationRatePercent: number | null;
+  consecutiveActiveMonths: number;
+  nextTier: BadgeTier | null;
+  nextTierGuidance: string;
+}
 
 export interface PlaceholderMetric {
   tracked: false;
@@ -56,10 +65,13 @@ export interface DashboardProfile {
   username: string;
   publicProfileUrl: string;
   badgeTier: BadgeTier;
+  badgeSubTier: BadgeSubTier | null;
+  badgePeriod: string | null;
 }
 
 export interface DashboardData {
   profile: DashboardProfile;
+  reputation: DashboardReputationSummary;
   statistics: DashboardStatistics;
   recentReviews: Review[];
   recentReviewRequests: ReviewRequest[];

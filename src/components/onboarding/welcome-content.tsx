@@ -6,6 +6,7 @@ import { ProgressFooter } from "@/components/onboarding/progress-footer";
 import { ProgressHeader } from "@/components/onboarding/progress-header";
 import { Paragraph } from "@/components/typography/typography";
 import { ONBOARDING } from "@/lib/constants";
+import { SITE_NAME } from "@/lib/seo/site";
 import { ONBOARDING_ROUTES } from "@/lib/onboarding/constants";
 
 export function WelcomeContent() {
@@ -13,7 +14,7 @@ export function WelcomeContent() {
     <OnboardingLayout>
       <div className="space-y-8 rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
         <ProgressHeader
-          title="Welcome to Meritt Pros"
+          title={`Welcome to ${SITE_NAME}`}
           description="Let's set up your professional presence."
           currentStep={1}
           totalSteps={ONBOARDING.TOTAL_STEPS}
@@ -21,7 +22,7 @@ export function WelcomeContent() {
 
         <Paragraph className="text-muted-foreground">
           You&apos;re about to create your professional profile — the page where
-          clients can discover you, read verified reviews, and build trust in
+          clients can discover you, see verified client feedback, and build trust in
           your work.
         </Paragraph>
 

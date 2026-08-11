@@ -11,7 +11,9 @@ import {
 import { StatusAlert } from "@/components/ui/status-alert";
 import { Muted, Paragraph } from "@/components/typography/typography";
 import { buttonVariants } from "@/components/ui/button";
+import { brandCopy } from "@/lib/brand";
 import { useAuthContext } from "@/contexts/auth-context";
+import { DELETE_ACCOUNT_DATA_SUMMARY } from "@/lib/copy/vocabulary";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
@@ -67,7 +69,7 @@ export default function SettingsPage() {
         <DashboardCard title="Session">
           <div className="space-y-3">
             <Muted className="text-sm">
-              Sign out of Meritt on this device.
+              {brandCopy.signOutDevice}
             </Muted>
             <SignOutButton />
           </div>
@@ -76,7 +78,7 @@ export default function SettingsPage() {
         <DashboardCard title="Delete account" className="border-destructive/30">
           <div className="space-y-3">
             <Muted className="text-sm">
-              Permanently delete your account, profile, reviews, and review requests.
+              {DELETE_ACCOUNT_DATA_SUMMARY}
             </Muted>
             <DeleteAccountDialog />
           </div>

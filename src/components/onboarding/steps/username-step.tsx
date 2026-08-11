@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { brandCopy } from "@/lib/brand";
 import { OnboardingWizardShell } from "@/components/onboarding/onboarding-wizard-shell";
 import { UsernameField } from "@/components/onboarding/username-field";
 import { useOnboardingWizard } from "@/hooks/use-onboarding-wizard";
@@ -14,7 +15,7 @@ export function UsernameStep() {
   return (
     <OnboardingWizardShell
       title="Choose your username"
-      description="Pick a unique handle for your public Meritt profile."
+      description={brandCopy.usernameHandle}
       continueDisabled={!state.slug.trim()}
       onContinue={async () => {
         const parsed = onboardingUsernameSchema.safeParse({ slug: state.slug });

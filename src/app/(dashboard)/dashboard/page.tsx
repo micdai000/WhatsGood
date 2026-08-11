@@ -2,16 +2,21 @@ import { Link, Navigate } from "react-router-dom";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import {
-  ActivityFeed,
   DashboardHeader,
+  DashboardReputationPanel,
   EmptyDashboard,
   QuickActions,
-  RatingDistribution,
   ReviewRequestCard,
-  StatisticsGrid,
-  TrendChart,
 } from "@/components/dashboard";
 import { ReviewList } from "@/components/reviews/review-list";
+import {
+  COLLECT_FEEDBACK_EMPTY,
+  CREATE_FEEDBACK_REQUEST_EMPTY,
+  FEEDBACK_REQUESTS_SHORT,
+  NO_CLIENT_FEEDBACK_YET,
+  NO_FEEDBACK_REQUESTS_YET,
+  RECENT_CLIENT_FEEDBACK,
+} from "@/lib/copy/vocabulary";
 import { Muted } from "@/components/typography/typography";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuthContext } from "@/contexts/auth-context";
@@ -41,41 +46,25 @@ export default function DashboardPage() {
 
   const {
     profile,
+    reputation,
     statistics,
     recentReviews,
     recentReviewRequests,
-    recentActivity,
-    reviewTrend,
-    ratingDistribution,
   } = dashboardResult.data;
 
   return (
     <Section>
-      <Container className="space-y-8">
-        {/* 1. Welcome Header */}
+      <Container className="max-w-3xl space-y-8">
         <DashboardHeader profile={profile} />
 
-        {/* 2. Key Statistics */}
-        <StatisticsGrid statistics={statistics} />
+        <DashboardReputationPanel profile={profile} reputation={reputation} />
 
-        {/* 3. Quick Actions — primary navigation hub */}
         <QuickActions profile={profile} />
 
-        {/* 4. Recent Activity */}
-        {recentActivity.length > 0 ? (
-          <ActivityFeed items={recentActivity} />
-        ) : (
-          <EmptyDashboard
-            title="No activity yet"
-            description="Activity will appear here as you receive reviews and send requests."
-          />
-        )}
-
-        {/* 5. Recent Reviews */}
         <section className="space-y-4" aria-labelledby="recent-reviews-heading">
           <div className="flex items-center justify-between gap-4">
             <h2 id="recent-reviews-heading" className="text-lg font-semibold">
-              Recent reviews
+              {RECENT_CLIENT_FEEDBACK}
             </h2>
             {statistics.totalReviews > RECENT_LIMIT ? (
               <Muted className="text-sm">Showing latest {RECENT_LIMIT}</Muted>
@@ -83,40 +72,30 @@ export default function DashboardPage() {
           </div>
 
           {recentReviews.length > 0 ? (
-            <ReviewList reviews={recentReviews} />
+            <ReviewList reviews={recentReviews} variant="compact" />
           ) : (
             <EmptyDashboard
-              title="No reviews yet"
-              description="Share your profile or send a review request to start collecting feedback."
+              title={NO_CLIENT_FEEDBACK_YET}
+              description={COLLECT_FEEDBACK_EMPTY}
             />
           )}
         </section>
 
-        {/* Analytics — deeper insights */}
-        <section
-          className="grid gap-4 lg:grid-cols-2"
-          aria-label="Analytics charts"
-        >
-          <TrendChart trend={reviewTrend} />
-          <RatingDistribution distribution={ratingDistribution} />
-        </section>
-
-        {/* Review Requests */}
         <section className="space-y-4" aria-labelledby="recent-requests-heading">
           <div className="flex items-center justify-between gap-4">
             <h2 id="recent-requests-heading" className="text-lg font-semibold">
-              Recent review requests
+              {FEEDBACK_REQUESTS_SHORT}
             </h2>
             <Link
               to="/dashboard/review-requests"
               className="text-sm font-medium text-muted-foreground hover:text-primary"
             >
-              View all
+              Manage requests
             </Link>
           </div>
 
           {recentReviewRequests.length > 0 ? (
-            <ul className="grid gap-4 sm:grid-cols-2">
+            <ul className="grid gap-4">
               {recentReviewRequests.map((request) => (
                 <li key={request.id}>
                   <ReviewRequestCard request={request} />
@@ -125,8 +104,8 @@ export default function DashboardPage() {
             </ul>
           ) : (
             <EmptyDashboard
-              title="No review requests yet"
-              description="Create a review request to get a shareable link for your client."
+              title={NO_FEEDBACK_REQUESTS_YET}
+              description={CREATE_FEEDBACK_REQUEST_EMPTY}
             />
           )}
         </section>

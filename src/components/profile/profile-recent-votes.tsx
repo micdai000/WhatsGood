@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { ReviewList } from "@/components/reviews";
-import { Muted } from "@/components/typography/typography";
+import { Muted, SectionEyebrow } from "@/components/typography/typography";
+import { RECENT_CLIENT_FEEDBACK } from "@/lib/copy/vocabulary";
+import { REPUTATION_RECENCY_WINDOW } from "@/lib/badges/reputation-copy";
 import { Spinner } from "@/components/ui/spinner";
 import { profileService } from "@/services/profiles/profile.service";
 import { reviewService } from "@/services/reviews/review.service";
@@ -66,13 +68,19 @@ export function ProfileRecentVotes({
 
   return (
     <aside
-      className={cn("min-w-0", className)}
-      aria-label="Recent votes"
+      className={cn("min-w-0 space-y-3", className)}
+      aria-labelledby="recent-feedback-heading"
     >
+      <SectionEyebrow id="recent-feedback-heading">
+        {RECENT_CLIENT_FEEDBACK}
+      </SectionEyebrow>
+      <Muted className="text-xs leading-relaxed">
+        Recent verified experiences from the {REPUTATION_RECENCY_WINDOW}
+      </Muted>
       {totalReviews === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-5 text-center">
           <Muted className="text-xs leading-relaxed">
-            Be the first to leave a review for {displayName}.
+            Be the first to share verified client feedback for {displayName}.
           </Muted>
         </div>
       ) : loading ? (

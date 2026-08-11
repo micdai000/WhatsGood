@@ -1,4 +1,4 @@
-import { TRUST_SIGNALS } from "@/lib/reviews/trust-signals";
+import { TRUST_SIGNALS, EXPERIENCE_FEEDBACK_HEADING } from "@/lib/reviews/trust-signals";
 import { cn } from "@/lib/utils";
 
 interface TrustSignalInputProps {
@@ -36,7 +36,7 @@ export function TrustSignalInput({
       <div
         className="grid grid-cols-1 gap-3 sm:grid-cols-3"
         role="radiogroup"
-        aria-label="Trust signal"
+        aria-label={EXPERIENCE_FEEDBACK_HEADING}
         aria-invalid={Boolean(error)}
       >
         {TRUST_SIGNALS.map((option) => {

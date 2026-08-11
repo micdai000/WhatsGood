@@ -3,7 +3,7 @@ import { LeaveReviewShell } from "@/components/reviews/leave-review-shell";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { Spinner } from "@/components/ui/spinner";
 import { useServiceQuery } from "@/hooks/use-service-query";
-import { getPublicProfileUrl } from "@/lib/profile/public-url";
+import { getPublicProfilePath } from "@/lib/profile/public-url";
 import { profileService } from "@/services/profiles/profile.service";
 
 export default function LeaveReviewPage() {
@@ -26,13 +26,14 @@ export default function LeaveReviewPage() {
   }
 
   const profile = result.data;
-  const profileUrl = getPublicProfileUrl(profile.username);
+  const profileSlug = profile.username || slug!;
 
   return (
     <LeaveReviewShell
-      backHref={profileUrl}
-      title="Leave a trust vote"
-      description="Promote, maintain, or demote their monthly badge in under a minute. Your vote helps others see who earns trust."
+      backHref={getPublicProfilePath(profileSlug)}
+      backUsername={profileSlug}
+      title="Share your experience"
+      description="Tell us how it went in under a minute. Your feedback helps others understand this professional's current reputation."
       profile={{
         displayName: profile.displayName,
         avatar: profile.avatar,
@@ -45,12 +46,12 @@ export default function LeaveReviewPage() {
           ? {
               title: "Profile still being set up",
               description:
-                "This professional hasn't finished their profile yet, but you can still submit a trust vote.",
+                "This professional hasn't finished their profile yet, but you can still share your experience.",
             }
           : undefined
       }
     >
-      <ReviewForm slug={profile.username} displayName={profile.displayName} />
+      <ReviewForm slug={profileSlug} displayName={profile.displayName} />
     </LeaveReviewShell>
   );
 }

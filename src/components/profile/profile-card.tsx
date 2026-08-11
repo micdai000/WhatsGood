@@ -5,6 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Paragraph, Muted } from "@/components/typography/typography";
 import { getPublicProfilePath } from "@/lib/profile/public-url";
+import {
+  formatReputationUpdatedLabel,
+  formatVerifiedExperienceCount,
+} from "@/lib/badges/reputation-copy";
 import type { PublicProfile } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -58,8 +62,11 @@ export function ProfileCard({ profile, className }: ProfileCardProps) {
               </Badge>
             ) : null}
             <TrustBadge tier={profile.badgeTier} subTier={profile.badgeSubTier} size="sm" />
+            <Muted className="text-xs">
+              {formatReputationUpdatedLabel(profile.badgePeriod)}
+            </Muted>
             <Muted className="text-xs tabular-nums">
-              {profile.totalReviews} reviews
+              {formatVerifiedExperienceCount(profile.totalReviews)}
             </Muted>
           </div>
         </div>

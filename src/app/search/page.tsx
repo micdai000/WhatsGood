@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { PROFESSIONS_DISCOVERY_COPY } from "@/lib/professions/display";
 import { useSearchParams } from "react-router-dom";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { PageHeader } from "@/components/layout/page-header";
+import { Muted } from "@/components/typography/typography";
 import {
   EmptyResults,
   FilterPanel,
@@ -15,6 +15,10 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useServiceQuery } from "@/hooks/use-service-query";
 import { parseProfileSearchParams } from "@/lib/search/params";
+import {
+  SEARCH_PAGE_SUBTITLE,
+  SEARCH_PAGE_TITLE,
+} from "@/lib/search/discovery-copy";
 import { profileService } from "@/services/profiles/profile.service";
 import { professionService } from "@/services/professions/profession.service";
 
@@ -53,6 +57,10 @@ export default function SearchPage() {
     [],
   );
 
+  const pageHeader = (
+    <PageHeader title={SEARCH_PAGE_TITLE} description={SEARCH_PAGE_SUBTITLE} />
+  );
+
   if (
     searchResult.status === "loading" ||
     professionsResult.status === "loading"
@@ -60,10 +68,7 @@ export default function SearchPage() {
     return (
       <Section spacing="default">
         <Container className="space-y-6">
-          <PageHeader
-            title="Find professionals"
-            description={`Discover trusted professionals in ${PROFESSIONS_DISCOVERY_COPY} on Meritt Pros.`}
-          />
+          {pageHeader}
           <div className="flex justify-center py-12">
             <Spinner className="h-8 w-8" />
           </div>
@@ -86,20 +91,23 @@ export default function SearchPage() {
   return (
     <Section spacing="default">
       <Container className="space-y-6">
-        <PageHeader
-          title="Find professionals"
-          description={`Discover trusted professionals in ${PROFESSIONS_DISCOVERY_COPY} on Meritt Pros.`}
-        />
-
-        <SearchForm params={params} />
+        {pageHeader}
 
         <FilterPanel params={params} professions={professions} />
 
+        <SearchForm params={params} />
+
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            {results.total === 0
-              ? "No results"
-              : `${results.total} professional${results.total === 1 ? "" : "s"} found`}
+            {results.total === 0 ? (
+              "No results"
+            ) : (
+              <>
+                <span className="font-medium text-foreground">{results.total}</span>{" "}
+                professional{results.total === 1 ? "" : "s"} with current reputation
+                data
+              </>
+            )}
           </p>
           <SortDropdown params={params} />
         </div>
@@ -112,6 +120,10 @@ export default function SearchPage() {
         ) : (
           <EmptyResults hasFilters={hasActiveFilters} />
         )}
+
+        <Muted className="text-center text-xs">
+          Results show current tier first — updated monthly from recent client feedback.
+        </Muted>
       </Container>
     </Section>
   );

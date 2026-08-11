@@ -1,5 +1,7 @@
-import { CalendarDays, MessageSquareText, Star } from "lucide-react";
+import { Award, CalendarDays, MessageSquareText } from "lucide-react";
 import { Muted } from "@/components/typography/typography";
+import { formatBadgeLabel } from "@/lib/badges/display";
+import { CURRENT_TIER_LABEL } from "@/lib/badges/reputation-copy";
 import { formatDate } from "@/lib/utils/format-date";
 import type { PublicProfile } from "@/types";
 import { cn } from "@/lib/utils";
@@ -22,7 +24,7 @@ function StatPill({ icon, label, value }: StatPillProps) {
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold tabular-nums text-foreground">
+        <p className="truncate text-sm font-semibold text-foreground">
           {value}
         </p>
         <Muted className="text-xs">{label}</Muted>
@@ -37,13 +39,15 @@ export function ProfileStats({ profile, className }: ProfileStatsProps) {
     year: "numeric",
   });
 
-  const reviewLabel =
-    profile.totalReviews === 1 ? "Client review" : "Client reviews";
+  const experienceLabel =
+    profile.totalReviews === 1
+      ? "Verified client experience"
+      : "Verified client experiences";
 
-  const ratingValue =
-    profile.totalReviews > 0
-      ? profile.averageRating.toFixed(1)
-      : "—";
+  const currentTierLabel = formatBadgeLabel(
+    profile.badgeTier,
+    profile.badgeSubTier,
+  );
 
   return (
     <div
@@ -54,13 +58,13 @@ export function ProfileStats({ profile, className }: ProfileStatsProps) {
     >
       <StatPill
         icon={<MessageSquareText className="size-4" aria-hidden />}
-        label={reviewLabel}
+        label={experienceLabel}
         value={String(profile.totalReviews)}
       />
       <StatPill
-        icon={<Star className="size-4" aria-hidden />}
-        label="Average trust"
-        value={ratingValue}
+        icon={<Award className="size-4" aria-hidden />}
+        label={CURRENT_TIER_LABEL}
+        value={currentTierLabel}
       />
       <StatPill
         icon={<CalendarDays className="size-4" aria-hidden />}

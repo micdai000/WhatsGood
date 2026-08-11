@@ -21,6 +21,7 @@ export type {
   DashboardActivityType,
   DashboardData,
   DashboardProfile,
+  DashboardReputationSummary,
   DashboardStatistics,
   PlaceholderMetric,
   ReviewGrowth,

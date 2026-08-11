@@ -1,10 +1,13 @@
 import { TrustBadge } from "@/components/badges";
+import { HowBadgeWorks } from "@/components/badges/how-badge-works";
 import { Muted, Paragraph } from "@/components/typography/typography";
+import { formatBadgeLabel } from "@/lib/badges/display";
 import {
-  describeTrustBadgeWhy,
-  formatBadgeLabel,
-  formatBadgePeriod,
-} from "@/lib/badges/display";
+  CURRENT_REPUTATION_LABEL,
+  formatReputationUpdatedLabel,
+  formatVerifiedExperienceCount,
+} from "@/lib/badges/reputation-copy";
+import { MIN_REVIEWS_FOR_ELIGIBILITY } from "@/lib/constants/badges";
 import type { BadgeSubTier, BadgeTier } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -25,11 +28,7 @@ export function ProfileTrustCard({
   reviewCount,
   className,
 }: ProfileTrustCardProps) {
-  const whyText = describeTrustBadgeWhy({
-    reviewCount,
-    professionName,
-    eligible: reviewCount > 0,
-  });
+  const eligible = reviewCount >= MIN_REVIEWS_FOR_ELIGIBILITY;
 
   return (
     <div
@@ -39,7 +38,7 @@ export function ProfileTrustCard({
       )}
     >
       <Muted className="text-xs font-medium uppercase tracking-wide">
-        Current trust badge
+        {CURRENT_REPUTATION_LABEL}
       </Muted>
 
       <div className="mt-4 flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:text-left">
@@ -48,19 +47,23 @@ export function ProfileTrustCard({
           <Paragraph className="text-sm font-semibold">
             {formatBadgeLabel(badgeTier, badgeSubTier)}
           </Paragraph>
-          {badgePeriod ? (
-            <Muted className="text-xs">
-              Earned {formatBadgePeriod(badgePeriod)}
-            </Muted>
-          ) : (
-            <Muted className="text-xs">No monthly badge yet</Muted>
-          )}
+          <Muted className="text-xs">
+            {formatReputationUpdatedLabel(badgePeriod)}
+          </Muted>
+          <Muted className="text-xs">
+            {formatVerifiedExperienceCount(reviewCount)}
+          </Muted>
         </div>
       </div>
 
-      <p className="mt-4 border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
-        {whyText}
-      </p>
+      <HowBadgeWorks
+        reviewCount={reviewCount}
+        badgePeriod={badgePeriod}
+        professionName={professionName}
+        eligible={eligible}
+        reputationHistoryHref={null}
+        borderClassName="border-t border-border"
+      />
     </div>
   );
 }

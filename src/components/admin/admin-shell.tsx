@@ -11,6 +11,7 @@ import {
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { Badge } from "@/components/ui/badge";
+import { brandCopy } from "@/lib/brand";
 import type { AdminRole } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +45,7 @@ export function AdminShell({ role, children }: AdminShellProps) {
               <Shield className="size-5" aria-hidden />
             </div>
             <div>
-              <h1 className="text-lg font-semibold">Meritt Admin</h1>
+              <h1 className="text-lg font-semibold">{brandCopy.adminTitle}</h1>
               <p className="text-sm text-muted-foreground">Internal moderation tools</p>
             </div>
           </div>

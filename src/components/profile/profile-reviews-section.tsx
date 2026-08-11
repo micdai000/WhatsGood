@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import {
-  BadgeHistoryStrip,
-  TierHistoryBreakdown,
-} from "@/components/badges";
+import { ReputationTimeline } from "@/components/badges";
 import { SectionEyebrow } from "@/components/typography/typography";
+import {
+  REPUTATION_HISTORY_LABEL,
+  REPUTATION_RECENCY_WINDOW,
+} from "@/lib/badges/reputation-copy";
 import { Spinner } from "@/components/ui/spinner";
 import { badgeService } from "@/services/badges";
 import { profileService } from "@/services/profiles/profile.service";
@@ -77,19 +78,20 @@ export function ProfileReviewsSection({
   return (
     <section
       className={cn("space-y-5", className)}
+      id="reputation-history"
       aria-labelledby="reputation-heading"
     >
       <div className="space-y-1">
-        <SectionEyebrow id="reputation-heading">Trust & reputation</SectionEyebrow>
+        <SectionEyebrow id="reputation-heading">Reputation history</SectionEyebrow>
         <p className="text-sm text-muted-foreground">
-          Monthly trust badge based on verified client feedback
+          {REPUTATION_HISTORY_LABEL} — monthly tiers from client feedback in the{" "}
+          {REPUTATION_RECENCY_WINDOW}
         </p>
       </div>
 
       {badgeHistory.length > 0 ? (
-        <div className="space-y-6 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
-          <BadgeHistoryStrip history={badgeHistory} />
-          <TierHistoryBreakdown history={badgeHistory} />
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+          <ReputationTimeline history={badgeHistory} showSectionHeader={false} />
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">

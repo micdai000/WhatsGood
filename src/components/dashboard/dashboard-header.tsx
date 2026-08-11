@@ -11,7 +11,7 @@ export function DashboardHeader({ profile }: DashboardHeaderProps) {
   return (
     <PageHeader
       title={`Welcome back, ${firstName}`}
-      description="Your analytics hub — track reviews, requests, and what to do next."
+      description="What is your reputation right now — and what will move it next?"
     />
   );
 }

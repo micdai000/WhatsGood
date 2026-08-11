@@ -2,6 +2,7 @@ import { Container } from "@/components/layout/container";
 import { PROFESSIONS_DISCOVERY_COPY } from "@/lib/professions/display";
 import { Section } from "@/components/layout/section";
 import { PageHeader } from "@/components/layout/page-header";
+import { SITE_NAME } from "@/lib/seo/site";
 import { LoadingResults } from "@/components/search";
 
 export default function SearchLoading() {
@@ -10,7 +11,7 @@ export default function SearchLoading() {
       <Container className="space-y-6">
         <PageHeader
           title="Find professionals"
-          description={`Discover trusted professionals in ${PROFESSIONS_DISCOVERY_COPY} on Meritt Pros.`}
+          description={`Discover trusted professionals in ${PROFESSIONS_DISCOVERY_COPY} on ${SITE_NAME}.`}
         />
         <LoadingResults />
       </Container>

@@ -18,6 +18,7 @@ interface ProfileSocialLinksProps {
    * Set false for compact reuse (cards, search results, etc.).
    */
   showHeading?: boolean;
+  align?: "center" | "start";
 }
 
 type PlatformIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: string | number }>;
@@ -83,6 +84,7 @@ export function ProfileSocialLinks({
   links,
   className,
   showHeading = true,
+  align = "center",
 }: ProfileSocialLinksProps) {
   const headingId = useId();
   const items = getDisplayableSocialLinks(links);
@@ -94,7 +96,8 @@ export function ProfileSocialLinks({
   const list = (
     <ul
       className={cn(
-        "m-0 flex list-none flex-wrap items-center justify-center gap-1 p-0",
+        "m-0 flex list-none flex-wrap items-center gap-1 p-0",
+        align === "start" ? "justify-start" : "justify-center",
         !showHeading && "inline-flex",
       )}
       aria-label={showHeading ? undefined : "Professional links"}
@@ -111,7 +114,11 @@ export function ProfileSocialLinks({
 
   return (
     <section
-      className={cn("flex flex-col items-center gap-2.5 text-center", className)}
+      className={cn(
+        "flex flex-col gap-2.5",
+        align === "start" ? "items-start text-left" : "items-center text-center",
+        className,
+      )}
       aria-labelledby={headingId}
     >
       <Eyebrow id={headingId} className="mb-0">

@@ -1,8 +1,8 @@
-# TrustLoop Development Summary
+# Meritt Pros — Development Summary
 
 ## Overview
 
-TrustLoop is a SaaS platform that helps independent professionals build credibility by collecting and displaying verified client reviews. The application follows a clean architecture with a separation between the frontend, business logic, and database.
+Meritt Pros is a trust platform that helps independent professionals build and showcase **current reputation** through verified client feedback and monthly tiers. The application follows a clean architecture with separation between the frontend, business logic, and database.
 
 ---
 

@@ -1,5 +1,6 @@
 import { AdminConfirmDelete } from "@/components/admin/admin-confirm-delete";
 import { adminDeleteProfileAction } from "@/app/actions/admin.actions";
+import { DELETE_PROFILE_DATA_SUMMARY } from "@/lib/copy/vocabulary";
 
 interface AdminDeleteProfileButtonProps {
   profileId: string;
@@ -14,7 +15,7 @@ export function AdminDeleteProfileButton({
     <AdminConfirmDelete
       label="Delete"
       title="Delete this profile?"
-      description={`This permanently removes ${displayName}'s profile, reviews, and review requests.`}
+      description={DELETE_PROFILE_DATA_SUMMARY(displayName)}
       onConfirm={async () => {
         const result = await adminDeleteProfileAction(profileId);
         return {

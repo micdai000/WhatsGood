@@ -4,6 +4,8 @@ import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { QuickActionCard } from "@/components/dashboard/quick-action-card";
 import { Paragraph } from "@/components/typography/typography";
 import { buttonVariants } from "@/components/ui/button";
+import { brandCopy } from "@/lib/brand";
+import { REQUEST_CLIENT_FEEDBACK } from "@/lib/copy/vocabulary";
 import type { DashboardProfile } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +45,7 @@ export function QuickActions({ profile, className }: QuickActionsProps) {
           icon={Pencil}
         />
         <QuickActionCard
-          title="Request a review"
+          title={REQUEST_CLIENT_FEEDBACK}
           description="Generate a unique link to share with a client."
           href="/dashboard/review-requests"
           icon={MessageSquarePlus}
@@ -56,7 +58,7 @@ export function QuickActions({ profile, className }: QuickActionsProps) {
         />
         <QuickActionCard
           title="Discover professionals"
-          description="See how others appear in Meritt search."
+          description={brandCopy.searchDiscovery}
           href="/search"
           icon={Search}
         />

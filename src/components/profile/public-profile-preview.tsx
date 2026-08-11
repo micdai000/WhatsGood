@@ -1,6 +1,7 @@
 import { ProfileBio } from "@/components/profile/profile-bio";
 import { ProfileHeader } from "@/components/profile/profile-header";
-import { ProfileStats } from "@/components/profile/profile-stats";
+import { ProfileReputationHero } from "@/components/profile/profile-reputation-hero";
+import { ProfileReputationWhy } from "@/components/profile/profile-reputation-why";
 import { Muted } from "@/components/typography/typography";
 import type { PublicProfile } from "@/types";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,17 @@ export function PublicProfilePreview({
         Live preview
       </Muted>
       <ProfileHeader profile={profile} />
-      <ProfileStats profile={profile} />
+      <ProfileReputationHero
+        badgeTier={profile.badgeTier}
+        badgeSubTier={profile.badgeSubTier}
+        badgePeriod={profile.badgePeriod}
+        reviewCount={profile.totalReviews}
+      />
+      <ProfileReputationWhy
+        badgePeriod={profile.badgePeriod}
+        professionName={profile.professionName}
+        reviewCount={profile.totalReviews}
+      />
       <ProfileBio profile={profile} />
       {!profile.bio?.trim() ? (
         <Muted className="text-center text-xs">

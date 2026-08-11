@@ -6,6 +6,12 @@ import { Muted, Paragraph } from "@/components/typography/typography";
 import { Spinner } from "@/components/ui/spinner";
 import { useServiceQuery } from "@/hooks/use-service-query";
 import { adminService } from "@/services/admin";
+import {
+  ADMIN_MODERATE_FEEDBACK,
+  ADMIN_MODERATE_FEEDBACK_DESC,
+  ADMIN_TOTAL_VERIFIED_FEEDBACK,
+} from "@/lib/copy/vocabulary";
+import { SITE_NAME } from "@/lib/seo/site";
 import { Briefcase, MessageSquare, UserCircle, Users } from "lucide-react";
 
 export default function AdminDashboardPage() {
@@ -33,7 +39,7 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       <div>
         <h2 className="text-xl font-semibold">Platform overview</h2>
-        <Muted className="text-sm">Internal metrics for Meritt operations.</Muted>
+        <Muted className="text-sm">Internal metrics for {SITE_NAME} operations.</Muted>
       </div>
 
       <AdminStatGrid statistics={statistics} />
@@ -56,8 +62,8 @@ export default function AdminDashboardPage() {
             icon={UserCircle}
           />
           <QuickActionCard
-            title="Moderate reviews"
-            description="Search and remove inappropriate reviews."
+            title={ADMIN_MODERATE_FEEDBACK}
+            description={ADMIN_MODERATE_FEEDBACK_DESC}
             href="/admin/reviews"
             icon={MessageSquare}
           />

@@ -239,7 +239,7 @@
     }
   }
 
-  /* Meritt / themeritt.com design primitives */
+  /* Meritt Pros design primitives (cards, panels, sections) */
   .meritt-card {
     border-radius: var(--radius-card);
     border: 1px solid var(--border);
