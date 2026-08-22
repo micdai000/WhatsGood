@@ -1,7 +1,11 @@
 import { useEffect, useActionState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PRO_SIGNUP_ROUTE } from "@/lib/auth/routes";
-import { signInAction, type AuthActionState } from "@/app/actions/auth.actions";
+import {
+  resendSignupEmailAction,
+  signInAction,
+  type AuthActionState,
+} from "@/app/actions/auth.actions";
 import { AuthCard } from "@/components/auth/auth-card";
 import { AuthDivider } from "@/components/auth/auth-divider";
 import {
@@ -29,6 +33,10 @@ export function LoginForm() {
   const errorCode = searchParams.get("error");
   const redirectTo = searchParams.get("redirect");
   const [state, formAction, pending] = useActionState(signInAction, initialState);
+  const [resendState, resendAction, resendPending] = useActionState(
+    resendSignupEmailAction,
+    initialState,
+  );
 
   useEffect(() => {
     if (state.redirect) {
@@ -40,7 +48,7 @@ export function LoginForm() {
 
   const expiredMessage =
     errorCode === "EXPIRED_TOKEN"
-      ? "This link has expired. Please request a new one."
+      ? "This verification link is invalid or has expired. Sign in if you already verified, or resend a new link below."
       : undefined;
 
   const describedBy = [
@@ -65,6 +73,14 @@ export function LoginForm() {
           code="EXPIRED_TOKEN"
         />
       ) : null}
+      {resendState.success ? (
+        <AuthFormSuccess message={resendState.message} />
+      ) : (
+        <AuthFormError
+          message={resendState.message}
+          code={resendState.code}
+        />
+      )}
       {!state.success ? (
         <AuthFormError
           id={FORM_ERROR_ID}
@@ -120,6 +136,30 @@ export function LoginForm() {
           {pending ? "Signing in…" : "Sign in"}
         </Button>
       </form>
+
+      {errorCode === "EXPIRED_TOKEN" ? (
+        <form action={resendAction} className="space-y-3">
+          <Muted>
+            Need a new verification email? Enter the same address you used to sign up.
+          </Muted>
+          <Input
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            placeholder="you@example.com"
+            aria-label="Email for verification link"
+          />
+          <Button
+            type="submit"
+            variant="outline"
+            className="w-full"
+            disabled={resendPending}
+          >
+            {resendPending ? "Sending…" : "Resend verification email"}
+          </Button>
+        </form>
+      ) : null}
 
       <AuthDivider />
       <OAuthButton />

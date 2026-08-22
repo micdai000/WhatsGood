@@ -54,3 +54,8 @@ export function isAuthRoute(pathname: string): boolean {
 export function getSiteUrl(): string {
   return getPublicSiteUrl();
 }
+
+/** Origin + path for email confirmation and recovery links. No query string — extra params break Supabase redirect allowlists. */
+export function getAuthCallbackUrl(): string {
+  return `${getSiteUrl()}/auth/callback`;
+}

@@ -1,8 +1,10 @@
 /**
  * Profile photos must be uploaded to the project's Supabase avatars bucket.
  */
+import { getSupabaseUrl } from "@/lib/public-env";
+
 export function isAllowedProfilePhotoUrl(url: string): boolean {
-  const supabaseUrl = import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = getSupabaseUrl();
   if (!supabaseUrl) return false;
 
   try {

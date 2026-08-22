@@ -297,10 +297,16 @@ export function EditProfileForm({
   };
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start">
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+      <div className="lg:col-start-2 lg:row-start-1">
+        <div className="lg:sticky lg:top-6">
+          <PublicProfilePreview profile={previewProfile} />
+        </div>
+      </div>
+
       <form
         onSubmit={handleSubmit}
-        className="space-y-8"
+        className="space-y-8 lg:col-start-1 lg:row-start-1"
         aria-busy={submitting}
         noValidate
       >
@@ -424,10 +430,6 @@ export function EditProfileForm({
           </Link>
         </div>
       </form>
-
-      <div className="lg:sticky lg:top-6">
-        <PublicProfilePreview profile={previewProfile} />
-      </div>
     </div>
   );
 }

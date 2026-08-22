@@ -30,19 +30,23 @@ export function ProfilePhotoField({
     setUploading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.set("photo", file);
+    try {
+      const formData = new FormData();
+      formData.set("photo", file);
 
-    const result = await uploadProfilePhotoAction(formData);
+      const result = await uploadProfilePhotoAction(formData);
 
-    setUploading(false);
+      if (!result.success) {
+        setError(result.message);
+        return;
+      }
 
-    if (!result.success) {
-      setError(result.message);
-      return;
+      onChange(result.data.url);
+    } catch {
+      setError("Couldn't upload that photo. Try a JPEG, PNG, WebP, or GIF under 5 MB.");
+    } finally {
+      setUploading(false);
     }
-
-    onChange(result.data.url);
   }
 
   function handleRemove() {

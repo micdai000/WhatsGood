@@ -57,8 +57,9 @@ export async function signUpAction(
 
     return {
       success: true,
-      message:
-        "Account created. Check your email to verify your address before signing in.",
+      message: result.data.emailVerified
+        ? "Account created. You can sign in now."
+        : "Account created. Check your email to verify your address before signing in.",
     };
   } catch (error) {
     if (error instanceof ValidationError) {
@@ -149,6 +150,42 @@ export async function resetPasswordAction(
     return {
       success: true,
       message: "If an account exists for that email, a reset link has been sent.",
+    };
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return toActionState({
+        message: error.message,
+        code: error.code,
+        details: error.details,
+      });
+    }
+    return {
+      success: false,
+      message: "An unexpected error occurred. Please try again.",
+      code: "INTERNAL_ERROR",
+    };
+  }
+}
+
+export async function resendSignupEmailAction(
+  _prev: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  try {
+    const input = validate(resetPasswordSchema, {
+      email: formData.get("email"),
+    });
+
+    const result = await authService.resendSignupEmail(input.email);
+
+    if (isFailure(result)) {
+      return toActionState(result.error);
+    }
+
+    return {
+      success: true,
+      message:
+        "If that email still needs verification, we sent a new link. Check your inbox.",
     };
   } catch (error) {
     if (error instanceof ValidationError) {
