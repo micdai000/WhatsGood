@@ -16,7 +16,7 @@ import {
   clearOnboardingStorage,
   useOnboardingWizard,
 } from "@/hooks/use-onboarding-wizard";
-import { getSiteUrl } from "@/lib/auth/routes";
+import { getPublicProfileUrl } from "@/lib/profile/public-url";
 import { ONBOARDING_CONFIRM_PROFILE_TITLE } from "@/lib/copy/vocabulary";
 import { cn } from "@/lib/utils";
 
@@ -48,7 +48,7 @@ export function ReviewStep() {
 
   if (!isReady) return null;
 
-  const publicUrl = `${getSiteUrl()}/u/${state.slug}`;
+  const publicUrl = getPublicProfileUrl(state.slug);
 
   async function handleSubmit() {
     setSubmitting(true);

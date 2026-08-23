@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  isExpiredAuthCallback,
+  parseAuthCallbackParams,
+  toEmailOtpType,
+} from "@/lib/auth/callback-params";
 import { sanitizeRedirectPath } from "@/lib/auth/safe-redirect";
 import { createClient } from "@/lib/supabase/client";
 import { authService } from "@/services/auth/auth.service";
@@ -11,14 +16,23 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const code = searchParams.get("code");
-    const tokenHash = searchParams.get("token_hash");
-    const type = searchParams.get("type");
-    const next = sanitizeRedirectPath(searchParams.get("next"), "/login");
+    const params = parseAuthCallbackParams(
+      window.location.search,
+      window.location.hash,
+    );
+    const next = sanitizeRedirectPath(params.next, "/login");
 
     async function handleCallback() {
-      if (tokenHash && type === "email") {
-        const result = await authService.verifyEmail(tokenHash);
+      if (isExpiredAuthCallback(params)) {
+        navigate("/login?error=EXPIRED_TOKEN", { replace: true });
+        return;
+      }
+
+      if (params.tokenHash) {
+        const result = await authService.verifyEmail(
+          params.tokenHash,
+          toEmailOtpType(params.type),
+        );
         if (isFailure(result)) {
           navigate(`/login?error=${result.error.code}`, { replace: true });
           return;
@@ -27,30 +41,51 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      if (code) {
-        const supabase = createClient();
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const supabase = createClient();
+
+      if (params.code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(
+          params.code,
+        );
 
         if (error) {
           navigate("/login?error=EXPIRED_TOKEN", { replace: true });
           return;
         }
+      } else if (params.accessToken && params.refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: params.accessToken,
+          refresh_token: params.refreshToken,
+        });
 
-        if (type === "recovery") {
-          navigate("/reset-password", { replace: true });
+        if (error) {
+          navigate("/login?error=EXPIRED_TOKEN", { replace: true });
           return;
         }
+      }
 
-        await supabase.auth.signOut();
-        if (type === "signup") {
-          navigate("/login?verified=true", { replace: true });
-          return;
-        }
-        navigate(next, { replace: true });
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        navigate("/login", { replace: true });
         return;
       }
 
-      navigate("/login", { replace: true });
+      const type = params.type ?? searchParams.get("type");
+
+      if (type === "recovery") {
+        navigate("/reset-password", { replace: true });
+        return;
+      }
+
+      await supabase.auth.signOut();
+      if (type === "signup" || type === "email") {
+        navigate("/login?verified=true", { replace: true });
+        return;
+      }
+      navigate(next, { replace: true });
     }
 
     void handleCallback();

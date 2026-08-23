@@ -10,10 +10,11 @@ import {
 import { OAuthButton } from "@/components/auth/oauth-button";
 import { PasswordInput } from "@/components/auth/password-input";
 import { PasswordStrengthIndicator } from "@/components/auth/password-strength";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Muted } from "@/components/typography/typography";
+import { cn } from "@/lib/utils";
 
 const initialState: AuthActionState = { success: false };
 const FORM_ERROR_ID = "signup-form-error";
@@ -30,7 +31,15 @@ export function SignUpForm() {
       description="Start building a current reputation with verified client feedback"
     >
       {state.success ? (
-        <AuthFormSuccess message={state.message} />
+        <>
+          <AuthFormSuccess message={state.message} />
+          <Link
+            to="/login"
+            className={cn(buttonVariants({ variant: "default" }), "w-full")}
+          >
+            Continue to sign in
+          </Link>
+        </>
       ) : (
         <AuthFormError
           id={FORM_ERROR_ID}

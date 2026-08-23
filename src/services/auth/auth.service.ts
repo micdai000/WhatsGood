@@ -1,8 +1,8 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { EmailOtpType, SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { mapSupabaseUser } from "@/lib/auth/map-user";
 import { mapUnknownAuthError } from "@/lib/auth/map-auth-error";
-import { getSiteUrl } from "@/lib/auth/routes";
+import { getAuthCallbackUrl } from "@/lib/auth/routes";
 import { logger } from "@/lib/logger";
 import { failure, handleServiceError, success } from "@/services/shared";
 import type {
@@ -36,12 +36,13 @@ export class AuthService {
 
     try {
       const supabase = this.getClient();
+      const emailRedirectTo = getAuthCallbackUrl();
       const { data, error } = await supabase.auth.signUp({
         email: input.email,
         password: input.password,
         options: {
           data: { full_name: input.fullName },
-          emailRedirectTo: `${getSiteUrl()}/auth/callback?type=signup`,
+          emailRedirectTo,
         },
       });
 
@@ -56,13 +57,32 @@ export class AuthService {
         );
       }
 
-      // Do not keep users signed in before email verification.
+      const mapped = mapSupabaseUser(data.user);
+      const isDuplicatePlaceholder =
+        !data.session && (data.user.identities?.length ?? 0) === 0;
+
+      // Existing unconfirmed accounts get a fake success and no email. Resend so they still get a live-site link.
+      if (isDuplicatePlaceholder && !mapped.emailVerified) {
+        const { error: resendError } = await supabase.auth.resend({
+          type: "signup",
+          email: input.email,
+          options: { emailRedirectTo },
+        });
+        if (resendError) {
+          logger.info(method, { resendSkipped: resendError.message });
+        }
+      }
+
+      // Do not keep users signed in before they choose to log in.
       if (data.session) {
         await supabase.auth.signOut();
       }
 
-      logger.info(method, { userId: data.user.id, emailVerified: false });
-      return success(mapSupabaseUser(data.user));
+      logger.info(method, {
+        userId: data.user.id,
+        emailVerified: mapped.emailVerified,
+      });
+      return success(mapped);
     } catch (error) {
       return handleServiceError(method, error);
     }
@@ -137,7 +157,7 @@ export class AuthService {
     try {
       const supabase = this.getClient();
       const { error } = await supabase.auth.resetPasswordForEmail(input.email, {
-        redirectTo: `${getSiteUrl()}/auth/callback?type=recovery`,
+        redirectTo: getAuthCallbackUrl(),
       });
 
       if (error) {
@@ -146,6 +166,28 @@ export class AuthService {
       }
 
       logger.info(method, { email: input.email });
+      return success(undefined);
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async resendSignupEmail(email: string): Promise<ServiceResult<void>> {
+    const method = "AuthService.resendSignupEmail";
+
+    try {
+      const supabase = this.getClient();
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: getAuthCallbackUrl() },
+      });
+
+      if (error) {
+        logger.info(method, { email, skipped: error.message });
+      }
+
+      logger.info(method, { email });
       return success(undefined);
     } catch (error) {
       return handleServiceError(method, error);
@@ -175,14 +217,17 @@ export class AuthService {
     }
   }
 
-  async verifyEmail(tokenHash: string): Promise<ServiceResult<AuthUser>> {
+  async verifyEmail(
+    tokenHash: string,
+    type: EmailOtpType = "email",
+  ): Promise<ServiceResult<AuthUser>> {
     const method = "AuthService.verifyEmail";
 
     try {
       const supabase = this.getClient();
       const { data, error } = await supabase.auth.verifyOtp({
         token_hash: tokenHash,
-        type: "email",
+        type,
       });
 
       if (error) {

@@ -50,6 +50,23 @@ const ALLOWED_PHOTO_TYPES = new Set([
   "image/gif",
 ]);
 
+const PHOTO_TYPE_BY_EXTENSION: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+};
+
+function resolvePhotoContentType(file: File): string | null {
+  if (ALLOWED_PHOTO_TYPES.has(file.type)) {
+    return file.type;
+  }
+
+  const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+  return PHOTO_TYPE_BY_EXTENSION[extension] ?? null;
+}
+
 export class ProfileService {
   async getProfile(id: string): Promise<ServiceResult<Profile>> {
     const method = "ProfileService.getProfile";
@@ -282,7 +299,9 @@ export class ProfileService {
 
       const userId = sessionResult.data.user.id;
 
-      if (!ALLOWED_PHOTO_TYPES.has(file.type)) {
+      const contentType = resolvePhotoContentType(file);
+
+      if (!contentType) {
         return failure(
           new ValidationError("Photo must be a JPEG, PNG, WebP, or GIF image"),
         );
@@ -301,12 +320,11 @@ export class ProfileService {
       const path = `${userId}/${Date.now()}.${safeExtension}`;
 
       const supabase = createClient();
-      const buffer = Buffer.from(await file.arrayBuffer());
 
       const { error: uploadError } = await supabase.storage
         .from(AVATARS_BUCKET)
-        .upload(path, buffer, {
-          contentType: file.type,
+        .upload(path, file, {
+          contentType,
           upsert: true,
         });
 
