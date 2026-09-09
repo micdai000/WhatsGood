@@ -1,31 +1,25 @@
-import { useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SignUpForm } from "@/components/auth/signup-form";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuthContext } from "@/contexts/auth-context";
-import { ONBOARDING_ROUTES } from "@/lib/onboarding/constants";
-import { getOnboardingStatus } from "@/lib/onboarding/routing";
+import { resolvePostAuthRedirect } from "@/lib/onboarding/routing";
 
 export default function SignUpPage() {
   const { user, loading } = useAuthContext();
   const navigate = useNavigate();
+  const [checkingRedirect, setCheckingRedirect] = useState(false);
 
   useEffect(() => {
-    if (loading || !user) {
-      return;
-    }
+    if (loading || !user) return;
 
     let cancelled = false;
+    setCheckingRedirect(true);
 
-    getOnboardingStatus(user.id).then((status) => {
-      if (cancelled || !status.ok) {
-        return;
+    resolvePostAuthRedirect(user.id).then((href) => {
+      if (!cancelled) {
+        navigate(href, { replace: true });
       }
-
-      navigate(
-        status.status === "has_profile" ? "/" : ONBOARDING_ROUTES.welcome,
-        { replace: true },
-      );
     });
 
     return () => {
@@ -33,7 +27,7 @@ export default function SignUpPage() {
     };
   }, [user, loading, navigate]);
 
-  if (loading || user) {
+  if (loading || checkingRedirect) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner className="h-8 w-8" />

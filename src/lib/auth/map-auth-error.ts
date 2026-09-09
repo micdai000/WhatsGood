@@ -40,7 +40,7 @@ export function mapAuthError(error: AuthError): ApplicationError {
     message.includes("email not verified")
   ) {
     return new AuthorizationError(
-      "Please verify your email before signing in.",
+      "Unable to sign in with this account. Please try again.",
     );
   }
 
