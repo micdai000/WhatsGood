@@ -93,10 +93,6 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
 
 
 
-        <ProfileReviewsSection slug={profile.username} />
-
-
-
         <ProfileBio profile={profile} />
 
 
@@ -114,6 +110,10 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
           />
 
         ) : null}
+
+
+
+        <ProfileReviewsSection slug={profile.username} />
 
 
 
