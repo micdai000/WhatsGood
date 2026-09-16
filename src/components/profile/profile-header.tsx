@@ -2,6 +2,8 @@ import { AppImage } from "@/components/ui/app-image";
 import { Badge } from "@/components/ui/badge";
 import { MapPin } from "lucide-react";
 import { Muted } from "@/components/typography/typography";
+import { ProfileSocialLinks } from "@/components/profile/profile-social-links";
+import { getDisplayableSocialLinks } from "@/lib/profile/social-links";
 import type { PublicProfile } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +26,8 @@ export function ProfileHeader({ profile, className }: ProfileHeaderProps) {
     profile.city && profile.state
       ? `${profile.city}, ${profile.state}`
       : null;
+  const hasProfessionalLinks =
+    getDisplayableSocialLinks(profile.socialLinks).length > 0;
 
   return (
     <header className={cn("meritt-card overflow-hidden", className)}>
@@ -75,6 +79,12 @@ export function ProfileHeader({ profile, className }: ProfileHeaderProps) {
               </div>
             </div>
           </div>
+
+          {hasProfessionalLinks ? (
+            <div className="flex w-full justify-center sm:mt-3 sm:min-w-0 sm:flex-1 sm:self-center">
+              <ProfileSocialLinks links={profile.socialLinks} />
+            </div>
+          ) : null}
         </div>
       </div>
     </header>

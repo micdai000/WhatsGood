@@ -31,18 +31,16 @@ export class AuthService {
     };
   }
 
-  async signUp(input: SignUpInput): Promise<ServiceResult<AuthUser>> {
+  async signUp(input: SignUpInput): Promise<ServiceResult<AuthSession>> {
     const method = "AuthService.signUp";
 
     try {
       const supabase = this.getClient();
-      const emailRedirectTo = getAuthCallbackUrl();
       const { data, error } = await supabase.auth.signUp({
         email: input.email,
         password: input.password,
         options: {
           data: { full_name: input.fullName },
-          emailRedirectTo,
         },
       });
 
@@ -57,32 +55,36 @@ export class AuthService {
         );
       }
 
-      const mapped = mapSupabaseUser(data.user);
-      const isDuplicatePlaceholder =
-        !data.session && (data.user.identities?.length ?? 0) === 0;
+      let session = data.session;
 
-      // Existing unconfirmed accounts get a fake success and no email. Resend so they still get a live-site link.
-      if (isDuplicatePlaceholder && !mapped.emailVerified) {
-        const { error: resendError } = await supabase.auth.resend({
-          type: "signup",
+      // If the project still has "Confirm email" enabled, signup may not return
+      // a session. Sign in immediately so the user can continue.
+      if (!session) {
+        const signIn = await supabase.auth.signInWithPassword({
           email: input.email,
-          options: { emailRedirectTo },
+          password: input.password,
         });
-        if (resendError) {
-          logger.info(method, { resendSkipped: resendError.message });
+
+        if (signIn.error || !signIn.data.session) {
+          logger.error(method, signIn.error ?? new Error("No session after signup"));
+          return failure(
+            mapUnknownAuthError(
+              signIn.error ??
+                new Error("Account created. Please sign in to continue."),
+            ),
+          );
         }
+
+        session = signIn.data.session;
       }
 
-      // Do not keep users signed in before they choose to log in.
-      if (data.session) {
-        await supabase.auth.signOut();
-      }
-
-      logger.info(method, {
-        userId: data.user.id,
-        emailVerified: mapped.emailVerified,
-      });
-      return success(mapped);
+      logger.info(method, { userId: session.user.id });
+      return success(
+        this.mapSession(
+          mapSupabaseUser(session.user),
+          session.expires_at ?? null,
+        ),
+      );
     } catch (error) {
       return handleServiceError(method, error);
     }
@@ -106,15 +108,6 @@ export class AuthService {
       if (!data.user || !data.session) {
         return failure(
           mapUnknownAuthError(new Error("Sign in failed. Please try again.")),
-        );
-      }
-
-      if (!data.user.email_confirmed_at) {
-        await supabase.auth.signOut();
-        return failure(
-          mapUnknownAuthError(
-            new Error("Please verify your email before signing in."),
-          ),
         );
       }
 
@@ -241,11 +234,6 @@ export class AuthService {
         );
       }
 
-      // Verification confirms email but does not auto-login.
-      if (data.session) {
-        await supabase.auth.signOut();
-      }
-
       logger.info(method, { userId: data.user.id });
       return success(mapSupabaseUser(data.user));
     } catch (error) {
@@ -290,11 +278,6 @@ export class AuthService {
       }
 
       if (!session?.user) {
-        return success(null);
-      }
-
-      if (!session.user.email_confirmed_at) {
-        await supabase.auth.signOut();
         return success(null);
       }
 
@@ -355,11 +338,6 @@ export class AuthService {
       }
 
       if (!session?.user) {
-        return success(null);
-      }
-
-      if (!session.user.email_confirmed_at) {
-        await supabase.auth.signOut();
         return success(null);
       }
 

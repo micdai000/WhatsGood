@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { createClient } from "@/lib/supabase/client";
 import { mapSupabaseUser } from "@/lib/auth/map-user";
 import type { AuthSession } from "@/types";
@@ -17,7 +18,7 @@ function mapSupabaseSession(
     ReturnType<ReturnType<typeof createClient>["auth"]["getSession"]>
   >["data"]["session"],
 ): AuthSession | null {
-  if (!session?.user?.email_confirmed_at) {
+  if (!session?.user) {
     return null;
   }
 
@@ -30,6 +31,7 @@ function mapSupabaseSession(
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const refresh = useCallback(async () => {
     const supabase = createClient();
@@ -51,23 +53,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!mounted) return;
       setSession(mapSupabaseSession(currentSession));
       setLoading(false);
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("type") === "recovery" && currentSession) {
+        navigate("/reset-password", { replace: true });
+      }
     }
 
     void hydrate();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+    } = supabase.auth.onAuthStateChange((event, currentSession) => {
       if (!mounted) return;
       setSession(mapSupabaseSession(currentSession));
       setLoading(false);
+
+      if (event === "PASSWORD_RECOVERY") {
+        navigate("/reset-password", { replace: true });
+      }
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

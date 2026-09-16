@@ -1,6 +1,6 @@
 import { useEffect, useState, useTransition } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
+import { LayoutDashboard, LogOut, Pencil, Settings, User } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth.actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -90,6 +90,10 @@ export function UserMenu({ userId, email }: UserMenuProps) {
         <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
           <User className="size-4" aria-hidden />
           Business profile
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/dashboard/profile/edit")}>
+          <Pencil className="size-4" aria-hidden />
+          Edit Profile
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/dashboard/settings")}>
           <Settings className="size-4" aria-hidden />

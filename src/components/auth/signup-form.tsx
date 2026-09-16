@@ -1,5 +1,5 @@
-import { useActionState, useState } from "react";
-import { Link } from "react-router-dom";
+import { useActionState, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { signUpAction, type AuthActionState } from "@/app/actions/auth.actions";
 import { AuthCard } from "@/components/auth/auth-card";
 import { AuthDivider } from "@/components/auth/auth-divider";
@@ -10,20 +10,30 @@ import {
 import { OAuthButton } from "@/components/auth/oauth-button";
 import { PasswordInput } from "@/components/auth/password-input";
 import { PasswordStrengthIndicator } from "@/components/auth/password-strength";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Muted } from "@/components/typography/typography";
-import { cn } from "@/lib/utils";
+import { useAuthContext } from "@/contexts/auth-context";
 
 const initialState: AuthActionState = { success: false };
 const FORM_ERROR_ID = "signup-form-error";
 
 export function SignUpForm() {
+  const navigate = useNavigate();
+  const { refresh } = useAuthContext();
   const [password, setPassword] = useState("");
   const [state, formAction, pending] = useActionState(signUpAction, initialState);
 
   const describedBy = state.message ? FORM_ERROR_ID : undefined;
+
+  useEffect(() => {
+    if (state.redirect) {
+      void refresh().then(() => {
+        navigate(state.redirect!, { replace: true });
+      });
+    }
+  }, [state.redirect, navigate, refresh]);
 
   return (
     <AuthCard
@@ -31,15 +41,7 @@ export function SignUpForm() {
       description="Start building a current reputation with verified client feedback"
     >
       {state.success ? (
-        <>
-          <AuthFormSuccess message={state.message} />
-          <Link
-            to="/login"
-            className={cn(buttonVariants({ variant: "default" }), "w-full")}
-          >
-            Continue to sign in
-          </Link>
-        </>
+        <AuthFormSuccess message={state.message} />
       ) : (
         <AuthFormError
           id={FORM_ERROR_ID}

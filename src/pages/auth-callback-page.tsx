@@ -20,7 +20,7 @@ export default function AuthCallbackPage() {
       window.location.search,
       window.location.hash,
     );
-    const next = sanitizeRedirectPath(params.next, "/login");
+    const next = sanitizeRedirectPath(params.next, "/");
 
     async function handleCallback() {
       if (isExpiredAuthCallback(params)) {
@@ -37,20 +37,25 @@ export default function AuthCallbackPage() {
           navigate(`/login?error=${result.error.code}`, { replace: true });
           return;
         }
-        navigate("/login?verified=true", { replace: true });
+        navigate(next, { replace: true });
         return;
       }
 
       const supabase = createClient();
 
       if (params.code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(
-          params.code,
-        );
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        if (error) {
-          navigate("/login?error=EXPIRED_TOKEN", { replace: true });
-          return;
+        if (!session) {
+          const { error } = await supabase.auth.exchangeCodeForSession(
+            params.code,
+          );
+          if (error) {
+            navigate("/login?error=EXPIRED_TOKEN", { replace: true });
+            return;
+          }
         }
       } else if (params.accessToken && params.refreshToken) {
         const { error } = await supabase.auth.setSession({
@@ -80,11 +85,6 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      await supabase.auth.signOut();
-      if (type === "signup" || type === "email") {
-        navigate("/login?verified=true", { replace: true });
-        return;
-      }
       navigate(next, { replace: true });
     }
 

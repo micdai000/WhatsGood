@@ -55,12 +55,7 @@ export async function signUpAction(
       return toActionState(result.error);
     }
 
-    return {
-      success: true,
-      message: result.data.emailVerified
-        ? "Account created. You can sign in now."
-        : "Account created. Check your email to verify your address before signing in.",
-    };
+    return { success: true, redirect: "/" };
   } catch (error) {
     if (error instanceof ValidationError) {
       return toActionState({

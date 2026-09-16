@@ -16,13 +16,10 @@ import { ProfileReputationWhy } from "@/components/profile/profile-reputation-wh
 
 import { ProfileReviewsSection } from "@/components/profile/profile-reviews-section";
 
-import { ProfileSocialLinks } from "@/components/profile/profile-social-links";
-
 import { StatusAlert } from "@/components/ui/status-alert";
 
 import { brandCopy } from "@/lib/brand";
 import { getPublicProfileUrl } from "@/lib/profile/public-url";
-import { getDisplayableSocialLinks } from "@/lib/profile/social-links";
 
 import type { PublicProfile } from "@/types";
 
@@ -41,9 +38,6 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
   const profileUrl = getPublicProfileUrl(profile.username);
 
   const leaveReviewHref = `/review/${profile.username}`;
-
-  const hasProfessionalLinks =
-    getDisplayableSocialLinks(profile.socialLinks).length > 0;
 
 
 
@@ -99,10 +93,6 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
 
 
 
-        <ProfileReviewsSection slug={profile.username} />
-
-
-
         <ProfileBio profile={profile} />
 
 
@@ -123,19 +113,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
 
 
 
-        {hasProfessionalLinks ? (
-
-          <ProfileSocialLinks
-
-            links={profile.socialLinks}
-
-            align="start"
-
-            className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
-
-          />
-
-        ) : null}
+        <ProfileReviewsSection slug={profile.username} />
 
 
 
