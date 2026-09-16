@@ -2,6 +2,7 @@ import { ONBOARDING } from "@/lib/constants";
 
 export const ONBOARDING_ROUTES = {
   welcome: "/welcome",
+  business: "/onboarding/business",
   dashboard: "/dashboard",
   profession: "/onboarding/profession",
   name: "/onboarding/name",
@@ -35,8 +36,19 @@ export function isOnboardingWizardRoute(pathname: string): boolean {
   );
 }
 
+export function isBusinessOnboardingRoute(pathname: string): boolean {
+  return (
+    pathname === ONBOARDING_ROUTES.business ||
+    pathname.startsWith(`${ONBOARDING_ROUTES.business}/`)
+  );
+}
+
 export function isOnboardingRoute(pathname: string): boolean {
-  return isWelcomeRoute(pathname) || isOnboardingWizardRoute(pathname);
+  return (
+    isWelcomeRoute(pathname) ||
+    isBusinessOnboardingRoute(pathname) ||
+    isOnboardingWizardRoute(pathname)
+  );
 }
 
 export function isDashboardRoute(pathname: string): boolean {
@@ -48,14 +60,18 @@ export function isDashboardRoute(pathname: string): boolean {
 
 export function resolveOnboardingRedirect(
   pathname: string,
-  hasProfile: boolean,
+  hasBusiness: boolean,
 ): string | null {
-  if (isOnboardingRoute(pathname) && hasProfile) {
+  if (isOnboardingRoute(pathname) && hasBusiness) {
     return ONBOARDING_ROUTES.dashboard;
   }
 
-  if (isDashboardRoute(pathname) && !hasProfile) {
-    return ONBOARDING_ROUTES.welcome;
+  if (isDashboardRoute(pathname) && !hasBusiness) {
+    return ONBOARDING_ROUTES.business;
+  }
+
+  if (isWelcomeRoute(pathname) && !hasBusiness) {
+    return ONBOARDING_ROUTES.business;
   }
 
   return null;

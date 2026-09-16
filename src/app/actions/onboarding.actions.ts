@@ -13,6 +13,8 @@ import type { SerializableActionResult } from "@/lib/actions/serializable-result
 
 export type OnboardingCheckState =
   | { status: "loading" }
+  | { status: "no_business" }
+  | { status: "has_business" }
   | { status: "no_profile" }
   | { status: "has_profile" }
   | { status: "error"; message: string; code: string };
@@ -43,7 +45,7 @@ export async function checkOnboardingStatusAction(): Promise<OnboardingCheckStat
   }
 
   return {
-    status: onboarding.status === "has_profile" ? "has_profile" : "no_profile",
+    status: onboarding.status === "has_business" ? "has_business" : "no_business",
   };
 }
 
@@ -144,8 +146,8 @@ export async function completeOnboardingAction(): Promise<string> {
 
   const onboarding = await getOnboardingStatus(sessionResult.data.user.id);
 
-  if (!onboarding.ok || onboarding.status !== "has_profile") {
-    return ONBOARDING_ROUTES.welcome;
+  if (!onboarding.ok || onboarding.status !== "has_business") {
+    return ONBOARDING_ROUTES.business;
   }
 
   return ONBOARDING_ROUTES.dashboard;

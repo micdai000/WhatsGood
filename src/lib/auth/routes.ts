@@ -17,7 +17,7 @@ export const AUTH_ROUTES = [
   "/reset-password",
 ] as const;
 
-/** Where new professionals create a Meritt Pros account. */
+/** Where new businesses create a Meritt account. */
 export const PRO_SIGNUP_ROUTE = "/signup";
 
 export function isPublicRoute(pathname: string): boolean {
@@ -41,6 +41,16 @@ export function isPublicRoute(pathname: string): boolean {
 
   // Token-based review request links
   if (/^\/review\/request\/[0-9a-f-]{36}$/i.test(pathname)) {
+    return true;
+  }
+
+  // Public QR destinations: /q/<code>
+  if (/^\/q\/[0-9a-z_-]+$/i.test(pathname)) {
+    return true;
+  }
+
+  // Public business profiles: /b/<slug>
+  if (/^\/b\/[a-z0-9-]+$/.test(pathname)) {
     return true;
   }
 

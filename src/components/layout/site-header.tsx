@@ -82,7 +82,7 @@ export function SiteHeader({ className }: { className?: string }) {
               Log in
             </Link>
             <Link to={PRO_SIGNUP_ROUTE} className={buttonVariants({ size: "sm" })}>
-              Join as a pro
+              Get started
             </Link>
           </div>
         )}

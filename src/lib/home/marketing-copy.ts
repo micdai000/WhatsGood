@@ -5,9 +5,9 @@ export const HOME_HERO_EYEBROW = SITE_NAME;
 export const HOME_HERO_TITLE = "Know who you can trust.";
 
 export const HOME_HERO_SUBTITLE =
-  "Find professionals with current, verified reputations — not outdated star ratings.";
+  "See current reputation for businesses, built from recent customer feedback.";
 
-export const HOME_PRIMARY_CTA = "Find a professional";
+export const HOME_PRIMARY_CTA = "Find a business";
 
 export const HOME_PRO_CTA = "Build your reputation";
 
@@ -16,19 +16,19 @@ export const HOME_FEATURED_EYEBROW = "Current reputation";
 export const HOME_FEATURED_TITLE = "Highest current reputation";
 
 export const HOME_FEATURED_SUBTITLE =
-  "Professionals with the strongest recent reputation.";
+  "Businesses with the strongest recent reputation.";
 
 export const HOME_HOW_IT_WORKS_STEPS = [
   {
     title: "Search",
-    description: "Pick a profession and location to see who is trusted right now.",
+    description: "Pick a category and location to see who is trusted right now.",
   },
   {
     title: "Compare",
-    description: "Review current tiers, recent client feedback, and reputation history.",
+    description: "Review current reputation and recent customer feedback.",
   },
   {
     title: "Choose",
-    description: "Hire with confidence based on how they perform today.",
+    description: "Decide with confidence based on how a business is doing today.",
   },
 ] as const;

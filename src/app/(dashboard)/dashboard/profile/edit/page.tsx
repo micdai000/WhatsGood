@@ -1,4 +1,5 @@
 import { Link, Navigate } from "react-router-dom";
+// TODO: this page edits the legacy professional profile, not the business.
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
 import { PageHeader } from "@/components/layout/page-header";

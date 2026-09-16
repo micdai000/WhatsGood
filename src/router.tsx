@@ -18,6 +18,7 @@ import SignupPage from "@/app/(auth)/signup/page";
 import ForgotPasswordPage from "@/app/(auth)/forgot-password/page";
 import ResetPasswordPage from "@/app/(auth)/reset-password/page";
 import WelcomePage from "@/app/(onboarding)/welcome/page";
+import BusinessOnboardingPage from "@/app/(onboarding)/onboarding/business/page";
 import OnboardingNamePage from "@/app/(onboarding)/onboarding/name/page";
 import OnboardingUsernamePage from "@/app/(onboarding)/onboarding/username/page";
 import OnboardingPhotoPage from "@/app/(onboarding)/onboarding/photo/page";
@@ -26,7 +27,13 @@ import OnboardingLocationPage from "@/app/(onboarding)/onboarding/location/page"
 import OnboardingProfessionPage from "@/app/(onboarding)/onboarding/profession/page";
 import OnboardingReviewPage from "@/app/(onboarding)/onboarding/review/page";
 import DashboardPage from "@/app/(dashboard)/dashboard/page";
+import DashboardProfilePage from "@/app/(dashboard)/dashboard/profile/page";
 import DashboardProfileEditPage from "@/app/(dashboard)/dashboard/profile/edit/page";
+import DashboardQrPage from "@/app/(dashboard)/dashboard/qr/page";
+import QrPrintPage from "@/app/(dashboard)/dashboard/qr/print/[id]/page";
+import DashboardFeedbackPage from "@/app/(dashboard)/dashboard/feedback/page";
+import PublicBusinessPage from "@/app/b/[slug]/page";
+import DashboardLocationsPage from "@/app/(dashboard)/dashboard/locations/page";
 import DashboardReviewRequestsPage from "@/app/(dashboard)/dashboard/review-requests/page";
 import DashboardSettingsPage from "@/app/(dashboard)/dashboard/settings/page";
 import StyleGuidePage from "@/app/(protected)/style-guide/page";
@@ -36,9 +43,11 @@ import AdminProfilesPage from "@/app/(admin)/admin/profiles/page";
 import AdminReviewsPage from "@/app/(admin)/admin/reviews/page";
 import AdminProfessionsPage from "@/app/(admin)/admin/professions/page";
 import PublicProfilePage from "@/app/u/[slug]/page";
+import PublicQrPage from "@/app/q/[code]/page";
 import ReviewPage from "@/app/review/[slug]/page";
 import ReviewRequestPage from "@/app/review/request/[token]/page";
 import { OnboardingWizardProvider } from "@/contexts/onboarding-wizard-context";
+import { BusinessDashboardLayout } from "@/components/business-dashboard/business-dashboard-layout";
 
 function AuthLayout() {
   return (
@@ -87,6 +96,7 @@ export const router = createBrowserRouter([
         element: <RequireOnboarding />,
         children: [
           { path: "welcome", element: <WelcomePage /> },
+          { path: "onboarding/business", element: <BusinessOnboardingPage /> },
           {
             element: <OnboardingWizardLayout />,
             children: [
@@ -104,16 +114,26 @@ export const router = createBrowserRouter([
       {
         element: <RequireDashboard />,
         children: [
-          { path: "dashboard", element: <DashboardPage /> },
-          { path: "dashboard/profile/edit", element: <DashboardProfileEditPage /> },
-          { path: "dashboard/review-requests", element: <DashboardReviewRequestsPage /> },
-          { path: "dashboard/settings", element: <DashboardSettingsPage /> },
+          {
+            element: <BusinessDashboardLayout />,
+            children: [
+              { path: "dashboard", element: <DashboardPage /> },
+              { path: "dashboard/profile", element: <DashboardProfilePage /> },
+              { path: "dashboard/profile/edit", element: <DashboardProfileEditPage /> },
+              { path: "dashboard/qr", element: <DashboardQrPage /> },
+              { path: "dashboard/qr/print/:id", element: <QrPrintPage /> },
+              { path: "dashboard/feedback", element: <DashboardFeedbackPage /> },
+              { path: "dashboard/locations", element: <DashboardLocationsPage /> },
+              { path: "dashboard/settings", element: <DashboardSettingsPage /> },
+              { path: "dashboard/review-requests", element: <DashboardReviewRequestsPage /> },
+            ],
+          },
         ],
       },
       {
         element: <RequireAuth />,
         children: [
-          { path: "create", element: <Navigate to="/dashboard/review-requests" replace /> },
+          { path: "create", element: <Navigate to="/dashboard" replace /> },
           { path: "entity/:id", element: <Navigate to="/search" replace /> },
           { path: "profile", element: <Navigate to="/dashboard" replace /> },
           { path: "style-guide", element: <StyleGuidePage /> },
@@ -130,6 +150,8 @@ export const router = createBrowserRouter([
         ],
       },
       { path: "u/:slug", element: <PublicProfilePage /> },
+      { path: "b/:slug", element: <PublicBusinessPage /> },
+      { path: "q/:code", element: <PublicQrPage /> },
       { path: "@:slug", element: <AtUsernameRedirect /> },
       { path: "review/:slug", element: <ReviewPage /> },
       { path: "review/request/:token", element: <ReviewRequestPage /> },

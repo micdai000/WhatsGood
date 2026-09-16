@@ -73,12 +73,50 @@ const badgeSnapshotsOk = await check(
   { url: `${url}/rest/v1/badge_snapshots?select=id&limit=0` },
 );
 
+const businessCategoriesOk = await check(
+  "public.business_categories table exists and is readable",
+  { url: `${url}/rest/v1/business_categories?select=id,name,slug&limit=1` },
+);
+
+const businessesOk = await check(
+  "public.businesses table exists and is readable",
+  { url: `${url}/rest/v1/businesses?select=id,slug,name,status&limit=0` },
+);
+
+const businessLocationsOk = await check(
+  "public.business_locations table exists and is readable",
+  { url: `${url}/rest/v1/business_locations?select=id,business_id&limit=0` },
+);
+
+const businessQrCodesOk = await check(
+  "public.business_qr_codes table exists and is readable",
+  { url: `${url}/rest/v1/business_qr_codes?select=id,code&limit=0` },
+);
+
+const reputationSnapshotsOk = await check(
+  "public.reputation_snapshots table exists and is readable",
+  { url: `${url}/rest/v1/reputation_snapshots?select=id&limit=0` },
+);
+
+const claimRequestsOk = await check(
+  "public.business_claim_requests table exists",
+  { url: `${url}/rest/v1/business_claim_requests?select=id&limit=0` },
+);
+
 if (professionsOk) {
   const countRes = await fetch(`${url}/rest/v1/professions?select=id`, {
     headers: { ...headers, Prefer: "count=exact" },
   });
   const count = countRes.headers.get("content-range")?.split("/")[1] ?? "?";
   console.log(`   → ${count} profession(s) seeded`);
+}
+
+if (businessCategoriesOk) {
+  const countRes = await fetch(`${url}/rest/v1/business_categories?select=id`, {
+    headers: { ...headers, Prefer: "count=exact" },
+  });
+  const count = countRes.headers.get("content-range")?.split("/")[1] ?? "?";
+  console.log(`   → ${count} business categor${count === "1" ? "y" : "ies"} seeded`);
 }
 
 console.log("");
@@ -90,7 +128,13 @@ if (
   !profileRatingsOk ||
   !reviewRequestsOk ||
   !badgeColumnsOk ||
-  !badgeSnapshotsOk
+  !badgeSnapshotsOk ||
+  !businessCategoriesOk ||
+  !businessesOk ||
+  !businessLocationsOk ||
+  !businessQrCodesOk ||
+  !reputationSnapshotsOk ||
+  !claimRequestsOk
 ) {
   console.error("Onboarding database is NOT ready.");
   console.error("Run: npm run db:migrate");

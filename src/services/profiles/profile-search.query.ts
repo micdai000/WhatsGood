@@ -18,6 +18,8 @@ export const PUBLIC_PROFILE_SELECT = `
   professions ( name )
 `;
 
+// TODO: stop requiring profession_id / badge fields once public discovery uses businesses.
+
 /** Escape special characters for PostgREST ilike patterns */
 export function escapeIlikePattern(value: string): string {
   return value.replace(/[%_\\]/g, "\\$&");

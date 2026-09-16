@@ -9,5 +9,9 @@ export { professionService, ProfessionService } from "./professions";
 export { dashboardService, DashboardService } from "./dashboard";
 export { adminService, AdminService } from "./admin";
 export { badgeService, BadgeService } from "./badges";
+export { businessService, BusinessService } from "./businesses";
+export { qrCodeService, QrCodeService } from "./qr";
+export { feedbackService, FeedbackService } from "./feedback";
+export { reputationService, ReputationService } from "./reputation";
 
 export { success, failure, handleServiceError, notImplemented } from "./shared";

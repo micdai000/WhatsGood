@@ -1,15 +1,50 @@
 # WhatsGood — Database Architecture
 
-> Last updated: June 2025  
-> Stack: PostgreSQL (via Supabase), Next.js 15, TypeScript
+> Last updated: September 2026  
+> Stack: PostgreSQL (via Supabase), Vite + React, TypeScript
 
 ---
 
 ## Overview
 
-WhatsGood (package name: `meritt`) is a reputation voting platform. Users vote to **promote**, **maintain**, or **demote** entities — food, places, entertainment, and movies/shows. They follow entities, curate **libraries**, and see an **activity feed** of community actions.
+Meritt (package name: `meritt`) is a **business reputation platform**. Businesses get a live reputation profile based on current customer experiences, plus a unique QR code that links customers to that business’s Meritt experience.
 
-This schema mirrors the types in `src/data/mock.ts`.
+The original WhatsGood voting product (entities, libraries, activity) and the TrustLoop professional profile/review tables still exist in this schema. They remain functional during the transition. New product work should use the business architecture below, not `profiles` as a stand-in for a business.
+
+---
+
+# Meritt Business Architecture
+
+A user account is not a business. Ownership is modeled through membership so one user can manage multiple businesses, and one business can have a team.
+
+```
+User (auth.users)
+  → Business Membership (owner | admin | member)
+    → Business
+      → Location(s)
+      → QR Code(s)          (business-level or location-specific)
+      → Customer Feedback
+      → Reputation snapshots
+```
+
+**Why businesses are separated from users**
+
+- `profiles` is still the app user record (`profiles.id` = `auth.users.id`). It is not a public business identity.
+- `business_members.user_id` references `auth.users(id)`, not `profiles.id`.
+- Physical addresses live on `business_locations`, not on `businesses`, so a business can have many locations and location-specific QR codes / reputation later.
+- QR `code` is an unpredictable identifier (never the business slug). Destination shape: `/q/<code>`.
+- Customer feedback is stored in `reputation_feedback` (structured `feedback_data` JSONB, optional `would_recommend`). It is not a star-rating clone of `reviews`. Business owners cannot update feedback; admins can delete it for moderation.
+- Public profile reads use denormalized `businesses.current_reputation_*` and `total_feedback`. `reputation_snapshots` holds computed history. Scoring is not defined in this migration.
+
+Tables (migration `023`): `business_categories`, `businesses`, `business_locations`, `business_members`, `business_qr_codes`, `reputation_feedback`, `reputation_snapshots`.
+
+Helper functions: `is_business_member(uuid)`, `has_business_role(uuid, text[])`. Creating a business inserts the current user as `owner` via `handle_business_created()`. Anonymous customers submit feedback through `submit_reputation_feedback(...)` so the inserted row can be returned without making all feedback publicly readable.
+
+Authenticated onboarding (migrations `024`–`025`) uses `complete_business_onboarding(...)` to create the business, primary location, and first QR code in one transaction. The owner membership still comes from `handle_business_created()`. The RPC is `SECURITY DEFINER` with `search_path = public, extensions` so QR fallback generation can call `gen_random_bytes`. Claim attempts are stored in `business_claim_requests` (`pending` / `approved` / `rejected` / `cancelled`) and do not grant ownership automatically.
+
+Public QR landing pages (migration `026`) resolve through `resolve_public_qr(p_code)` (`SECURITY DEFINER`, granted to `anon` and `authenticated`). The function returns jsonb `{ status, slug, qr }` where `status` is `ok`, `inactive`, `unavailable`, or `not_found`. This is required because RLS only exposes active QR codes on active businesses, so a client-side lookup cannot distinguish inactive vs missing. `submit_reputation_feedback(...)` was tightened to reject inactive businesses, QR codes that do not belong to the business, inactive QR codes, and locations that do not match the QR/business.
+
+Legacy tables (`profiles`, `professions`, `reviews`, `review_requests`, `badge_snapshots`, `entities`, …) are unchanged.
 
 ---
 

@@ -23,7 +23,7 @@ export default function SignUpPage() {
       }
 
       navigate(
-        status.status === "has_profile" ? "/" : ONBOARDING_ROUTES.welcome,
+        status.status === "has_business" ? "/dashboard" : ONBOARDING_ROUTES.business,
         { replace: true },
       );
     });
