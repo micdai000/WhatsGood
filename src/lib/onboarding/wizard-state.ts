@@ -11,6 +11,8 @@ export interface OnboardingWizardState {
   state: string;
 }
 
+// TODO: remove this professional-profile wizard when legacy onboarding is retired.
+
 export const EMPTY_ONBOARDING_STATE: OnboardingWizardState = {
   professionId: null,
   fullName: "",

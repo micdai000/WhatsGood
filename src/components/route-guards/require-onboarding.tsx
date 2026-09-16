@@ -22,7 +22,7 @@ export function RequireOnboarding() {
     let cancelled = false;
     getOnboardingStatus(user.id).then((status) => {
       if (cancelled) return;
-      setHasProfile(status.ok && status.status === "has_profile");
+      setHasProfile(status.ok && status.status === "has_business");
       setChecking(false);
     });
 

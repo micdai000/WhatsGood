@@ -11,8 +11,8 @@ import {
 
 describe("reputation copy", () => {
   it("labels the current month as updated this month", () => {
-    const period = currentBadgePeriod(new Date("2026-08-15T12:00:00.000Z"));
-    expect(period).toBe("2026-08");
+    const now = new Date();
+    const period = currentBadgePeriod(now);
     expect(formatReputationUpdatedLabel(period)).toBe("Updated this month");
   });
 

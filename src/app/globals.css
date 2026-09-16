@@ -436,3 +436,16 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: #6B9B82;
 }
+
+@media print {
+  header,
+  footer,
+  nav {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+}

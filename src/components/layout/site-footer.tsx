@@ -2,16 +2,23 @@ import { Link } from "react-router-dom";
 import { Container } from "@/components/layout/container";
 import { Caption, Muted } from "@/components/typography/typography";
 import { Separator } from "@/components/ui/separator";
+import { useAuthContext } from "@/contexts/auth-context";
 import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo/site";
 import { cn } from "@/lib/utils";
 
-const footerLinks = [
-  { href: "/search", label: "Discover" },
-  { href: "/about", label: "About" },
-  { href: "/login", label: "Log in" },
-] as const;
-
 export function SiteFooter({ className }: { className?: string }) {
+  const { user, loading } = useAuthContext();
+  const accountLink =
+    !loading && user
+      ? { href: "/dashboard", label: "Dashboard" }
+      : { href: "/login", label: "Log in" };
+
+  const footerLinks = [
+    { href: "/search", label: "Discover" },
+    { href: "/about", label: "About" },
+    accountLink,
+  ] as const;
+
   return (
     <footer className={cn("border-t border-border bg-card", className)}>
       <Container className="py-10 sm:py-12">

@@ -60,7 +60,7 @@ export default function ReviewRequestsPage() {
           </Link>
           <PageHeader
             title={FEEDBACK_REQUESTS_TITLE}
-            description="Generate unique links for clients. Copy and share them manually — no email is sent yet."
+            description="Legacy client feedback links. New businesses should share a QR code instead."
           />
         </div>
 

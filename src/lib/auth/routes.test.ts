@@ -10,6 +10,14 @@ describe("route guards", () => {
       expect(isPublicRoute("/login")).toBe(true);
     });
 
+    it("allows public QR destinations", () => {
+      expect(isPublicRoute("/q/abc123")).toBe(true);
+    });
+
+    it("allows public business pages", () => {
+      expect(isPublicRoute("/b/riverside-auto-care")).toBe(true);
+    });
+
     it("allows public profile and review pages", () => {
       expect(isPublicRoute("/@jane-doe")).toBe(true);
       expect(isPublicRoute("/u/jane-doe")).toBe(true);
@@ -18,6 +26,7 @@ describe("route guards", () => {
 
     it("blocks dashboard routes", () => {
       expect(isPublicRoute("/dashboard")).toBe(false);
+      expect(isPublicRoute("/dashboard/qr/print/abc")).toBe(false);
       expect(isPublicRoute("/admin")).toBe(false);
     });
   });

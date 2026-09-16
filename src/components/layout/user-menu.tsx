@@ -39,6 +39,7 @@ export function UserMenu({ userId, email }: UserMenuProps) {
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
 
   useEffect(() => {
+    // TODO: replace this direct profiles query when legacy identity is retired.
     const supabase = createClient();
 
     supabase
@@ -59,9 +60,6 @@ export function UserMenu({ userId, email }: UserMenuProps) {
 
   const displayName = profile?.displayName || email.split("@")[0];
   const initials = getInitials(displayName) || email[0]?.toUpperCase() || "?";
-  const profileHref = profile?.username
-    ? `/u/${profile.username}`
-    : "/dashboard/profile/edit";
 
   return (
     <DropdownMenu>
@@ -89,9 +87,9 @@ export function UserMenu({ userId, email }: UserMenuProps) {
           <LayoutDashboard className="size-4" aria-hidden />
           Dashboard
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate(profileHref)}>
+        <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
           <User className="size-4" aria-hidden />
-          My Profile
+          Business profile
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/dashboard/profile/edit")}>
           <Pencil className="size-4" aria-hidden />
