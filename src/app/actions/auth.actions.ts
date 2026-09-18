@@ -55,7 +55,8 @@ export async function signUpAction(
       return toActionState(result.error);
     }
 
-    return { success: true, redirect: "/" };
+    const destination = await resolvePostAuthRedirect(result.data.user.id);
+    return { success: true, redirect: destination };
   } catch (error) {
     if (error instanceof ValidationError) {
       return toActionState({
