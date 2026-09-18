@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { PRO_SIGNUP_ROUTE } from "@/lib/auth/routes";
 import { Search, UserRound } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { ResultsGrid } from "@/components/search";
+import { BusinessResultsGrid } from "@/components/search";
 import { Spinner } from "@/components/ui/spinner";
 import { Container } from "@/components/layout/container";
 import { PageWrapper } from "@/components/layout/page-wrapper";
@@ -21,12 +21,12 @@ import {
   HOME_PRO_CTA,
 } from "@/lib/home/marketing-copy";
 import { useServiceQuery } from "@/hooks/use-service-query";
-import { profileService } from "@/services/profiles/profile.service";
+import { businessService } from "@/services/businesses";
 
 export default function HomePage() {
   const featured = useServiceQuery(
     () =>
-      profileService.searchProfiles({
+      businessService.listPublicBusinesses({
         page: 1,
         limit: 6,
         sort: "rating",
@@ -107,10 +107,10 @@ export default function HomePage() {
               {featured.message}
             </div>
           ) : featured.data.items.length > 0 ? (
-            <ResultsGrid profiles={featured.data.items} />
+            <BusinessResultsGrid businesses={featured.data.items} />
           ) : (
             <div className="meritt-panel text-center text-sm text-muted-foreground">
-              No professionals to show yet.{" "}
+              No businesses to show yet.{" "}
               <Link to={PRO_SIGNUP_ROUTE} className="font-medium text-foreground underline">
                 {HOME_PRO_CTA}
               </Link>
@@ -122,4 +122,4 @@ export default function HomePage() {
     </PageWrapper>
   );
 }
-
+

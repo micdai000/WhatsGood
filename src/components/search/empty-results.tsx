@@ -17,10 +17,10 @@ export function EmptyResults({ hasFilters = false, className }: EmptyResultsProp
           <Search className="size-6 text-muted-foreground" aria-hidden />
         </div>
         <div className="space-y-1">
-          <H3 className="text-lg">No professionals found</H3>
+          <H3 className="text-lg">No businesses found</H3>
           <Muted className="max-w-sm text-sm">
             {hasFilters
-              ? "Try a different profession or location, or clear your filters."
+              ? "Try a different category or location, or clear your filters."
               : brandCopy.joiningMessage}
           </Muted>
         </div>

@@ -1,6 +1,7 @@
 import type { Business } from "./business";
 import type { BusinessLocation } from "./business-location";
 import type { BusinessQrCode } from "./business-qr";
+import type { ReputationTier } from "./reputation";
 
 export const CLAIM_REQUEST_STATUSES = [
   "pending",
@@ -32,6 +33,13 @@ export interface BusinessSearchResult {
   categoryName: string | null;
   city: string | null;
   state: string | null;
+}
+
+export interface DiscoverableBusiness extends BusinessSearchResult {
+  logoUrl: string | null;
+  reputationTier: ReputationTier;
+  reputationPeriod: string | null;
+  totalFeedback: number;
 }
 
 export interface CompleteBusinessOnboardingInput {

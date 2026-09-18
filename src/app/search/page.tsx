@@ -5,9 +5,9 @@ import { Section } from "@/components/layout/section";
 import { PageHeader } from "@/components/layout/page-header";
 import { Muted } from "@/components/typography/typography";
 import {
+  BusinessResultsGrid,
   EmptyResults,
   FilterPanel,
-  ResultsGrid,
   SearchForm,
   SearchPagination,
   SortDropdown,
@@ -19,8 +19,7 @@ import {
   SEARCH_PAGE_SUBTITLE,
   SEARCH_PAGE_TITLE,
 } from "@/lib/search/discovery-copy";
-import { profileService } from "@/services/profiles/profile.service";
-import { professionService } from "@/services/professions/profession.service";
+import { businessService } from "@/services/businesses";
 
 function searchParamsToRecord(
   searchParams: URLSearchParams,
@@ -40,7 +39,7 @@ export default function SearchPage() {
   );
 
   const searchResult = useServiceQuery(
-    () => profileService.searchProfiles(params),
+    () => businessService.listPublicBusinesses(params),
     [
       params.query,
       params.professionId,
@@ -52,8 +51,8 @@ export default function SearchPage() {
     ],
   );
 
-  const professionsResult = useServiceQuery(
-    () => professionService.getProfessions(),
+  const categoriesResult = useServiceQuery(
+    () => businessService.getCategories(),
     [],
   );
 
@@ -63,7 +62,7 @@ export default function SearchPage() {
 
   if (
     searchResult.status === "loading" ||
-    professionsResult.status === "loading"
+    categoriesResult.status === "loading"
   ) {
     return (
       <Section spacing="default">
@@ -82,7 +81,16 @@ export default function SearchPage() {
   }
 
   const professions =
-    professionsResult.status === "success" ? professionsResult.data : [];
+    categoriesResult.status === "success"
+      ? categoriesResult.data.map((category) => ({
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+          icon: category.icon,
+          isDisabled: !category.isActive,
+          createdAt: category.createdAt,
+        }))
+      : [];
   const results = searchResult.data;
   const hasActiveFilters = Boolean(
     params.query || params.professionId || params.city || params.state,
@@ -104,7 +112,7 @@ export default function SearchPage() {
             ) : (
               <>
                 <span className="font-medium text-foreground">{results.total}</span>{" "}
-                professional{results.total === 1 ? "" : "s"} with current reputation
+                business{results.total === 1 ? "" : "es"} with current reputation
                 data
               </>
             )}
@@ -114,7 +122,7 @@ export default function SearchPage() {
 
         {results.items.length > 0 ? (
           <>
-            <ResultsGrid profiles={results.items} />
+            <BusinessResultsGrid businesses={results.items} />
             <SearchPagination result={results} params={params} />
           </>
         ) : (

@@ -31,6 +31,7 @@ import {
   validate,
 } from "@/lib/validators";
 import { failure, handleServiceError, success } from "@/services/shared";
+import { PAGINATION } from "@/lib/constants";
 import type {
   AddBusinessMemberInput,
   Business,
@@ -45,10 +46,14 @@ import type {
   CreateBusinessInput,
   CreateBusinessLocationInput,
   CreateClaimRequestInput,
+  DiscoverableBusiness,
+  PaginatedResult,
+  ProfileSearchParams,
   ServiceResult,
   UpdateBusinessInput,
   UpdateBusinessLocationInput,
 } from "@/types";
+import { REPUTATION_TIERS, type ReputationTier } from "@/types/reputation";
 import { isSuccess } from "@/types";
 import {
   mapBusinessCategoryRow,
@@ -881,6 +886,144 @@ export class BusinessService {
       });
 
       return success(results);
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async listPublicBusinesses(
+    params?: ProfileSearchParams,
+  ): Promise<ServiceResult<PaginatedResult<DiscoverableBusiness>>> {
+    const method = "BusinessService.listPublicBusinesses";
+
+    try {
+      const page = params?.page ?? PAGINATION.DEFAULT_PAGE;
+      const limit = Math.min(params?.limit ?? 12, PAGINATION.MAX_LIMIT);
+      const supabase = createClient();
+
+      let query = supabase
+        .from("businesses")
+        .select(
+          `
+          id,
+          name,
+          slug,
+          logo_url,
+          is_claimed,
+          current_reputation_score,
+          current_reputation_tier,
+          current_reputation_period,
+          total_feedback,
+          created_at,
+          business_categories ( name ),
+          business_locations ( city, state, is_primary )
+        `,
+          { count: "exact" },
+        )
+        .eq("status", "active")
+        .eq("is_claimed", true);
+
+      if (params?.professionId) {
+        query = query.eq("category_id", params.professionId);
+      }
+
+      if (params?.query) {
+        query = query.ilike(
+          "name",
+          `%${escapeIlikePattern(params.query)}%`,
+        );
+      }
+
+      switch (params?.sort) {
+        case "rating":
+          query = query.order("current_reputation_score", {
+            ascending: false,
+            nullsFirst: false,
+          });
+          break;
+        case "reviews":
+          query = query.order("total_feedback", { ascending: false });
+          break;
+        case "name":
+          query = query.order("name", { ascending: true });
+          break;
+        case "newest":
+        default:
+          query = query.order("created_at", { ascending: false });
+          break;
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        logger.error(method, error, { params });
+        return failure(DatabaseError.fromSource(error));
+      }
+
+      const cityFilter = params?.city?.trim().toLowerCase();
+      const stateFilter = params?.state?.trim().toLowerCase();
+
+      const mapped = (data ?? []).map((row) => {
+        const categoryRel = row.business_categories as
+          | { name: string }
+          | { name: string }[]
+          | null;
+        const category = Array.isArray(categoryRel)
+          ? categoryRel[0]
+          : categoryRel;
+        const locations = (row.business_locations ?? []) as Array<{
+          city: string;
+          state: string;
+          is_primary: boolean;
+        }>;
+        const primary =
+          locations.find((location) => location.is_primary) ?? locations[0];
+        const tier = row.current_reputation_tier as string;
+
+        return {
+          id: row.id as string,
+          name: row.name as string,
+          slug: row.slug as string,
+          isClaimed: Boolean(row.is_claimed),
+          categoryName: category?.name ?? null,
+          city: primary?.city ?? null,
+          state: primary?.state ?? null,
+          logoUrl: (row.logo_url as string | null) ?? null,
+          reputationTier: (REPUTATION_TIERS as readonly string[]).includes(tier)
+            ? (tier as ReputationTier)
+            : "building",
+          reputationPeriod: (row.current_reputation_period as string | null) ?? null,
+          totalFeedback: Number(row.total_feedback ?? 0),
+        } satisfies DiscoverableBusiness;
+      });
+
+      const filtered = mapped.filter((business) => {
+        if (
+          cityFilter &&
+          !(business.city ?? "").toLowerCase().includes(cityFilter)
+        ) {
+          return false;
+        }
+        if (
+          stateFilter &&
+          !(business.state ?? "").toLowerCase().includes(stateFilter)
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      const total = cityFilter || stateFilter ? filtered.length : (count ?? filtered.length);
+      const from = (page - 1) * limit;
+      const items = filtered.slice(from, from + limit);
+
+      return success({
+        items,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 1,
+      });
     } catch (error) {
       return handleServiceError(method, error);
     }

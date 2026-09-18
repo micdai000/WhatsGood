@@ -98,6 +98,7 @@ export { REPUTATION_TIERS } from "./reputation";
 export type {
   BusinessClaimRequest,
   BusinessSearchResult,
+  DiscoverableBusiness,
   ClaimRequestStatus,
   CompleteBusinessOnboardingInput,
   CompleteBusinessOnboardingResult,
