@@ -14,9 +14,7 @@ import { useAuthContext } from "@/contexts/auth-context";
 import { useBusinessWorkspace } from "@/contexts/business-workspace-context";
 import { getAccountDisplayName } from "@/lib/auth/display-name";
 import { DELETE_ACCOUNT_DATA_SUMMARY } from "@/lib/copy/vocabulary";
-import { authService } from "@/services/auth/auth.service";
-import { businessService } from "@/services/businesses";
-import { isFailure } from "@/types";
+import { persistAccountPhoto } from "@/lib/profile/persist-account-photo";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
@@ -32,28 +30,10 @@ export default function SettingsPage() {
   const photoUrl = currentBusiness?.logoUrl ?? user!.avatarUrl;
 
   async function persistPhoto(url: string | null) {
-    if (!currentBusiness) {
-      const metadataResult = await authService.updateUserMetadata({
-        avatar_url: url,
-      });
-      if (isFailure(metadataResult)) {
-        throw new Error(metadataResult.error.message);
-      }
-      await refreshAuth();
-      return;
-    }
-
-    const [metadataResult, businessResult] = await Promise.all([
-      authService.updateUserMetadata({ avatar_url: url }),
-      businessService.updateBusiness(currentBusiness.id, { logoUrl: url }),
-    ]);
-
-    if (isFailure(businessResult)) {
-      throw new Error(businessResult.error.message);
-    }
-    if (isFailure(metadataResult)) {
-      throw new Error(metadataResult.error.message);
-    }
+    await persistAccountPhoto({
+      url,
+      businessId: currentBusiness?.id,
+    });
     await Promise.all([refresh(), refreshAuth()]);
   }
 

@@ -5,6 +5,7 @@ import { uploadProfilePhotoAction } from "@/app/actions/onboarding.actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Muted } from "@/components/typography/typography";
+import { normalizeProfilePhoto } from "@/lib/profile/normalize-photo";
 import { cn } from "@/lib/utils";
 
 interface ProfilePhotoFieldProps {
@@ -31,8 +32,9 @@ export function ProfilePhotoField({
     setError(null);
 
     try {
+      const photo = await normalizeProfilePhoto(file);
       const formData = new FormData();
-      formData.set("photo", file);
+      formData.set("photo", photo);
 
       const result = await uploadProfilePhotoAction(formData);
 
@@ -119,16 +121,17 @@ export function ProfilePhotoField({
           ref={inputRef}
           id="profile-photo"
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
+          accept="image/*"
           className="sr-only"
           onChange={(event) => {
             const file = event.target.files?.[0] ?? null;
+            event.target.value = "";
             void handleFileChange(file);
           }}
         />
 
         <Muted className="text-center text-xs">
-          JPEG, PNG, WebP, or GIF. Max 5 MB.
+          Choose a photo from your library. We&apos;ll resize it automatically.
         </Muted>
       </div>
 

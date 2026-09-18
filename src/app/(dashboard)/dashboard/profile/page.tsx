@@ -15,7 +15,7 @@ import { useBusinessWorkspace } from "@/contexts/business-workspace-context";
 import { getAccountDisplayName } from "@/lib/auth/display-name";
 import { getPublicBusinessPath, getPublicBusinessUrl } from "@/lib/business/public-url";
 import { cn } from "@/lib/utils";
-import { authService } from "@/services/auth/auth.service";
+import { persistAccountPhoto } from "@/lib/profile/persist-account-photo";
 import { businessService } from "@/services/businesses";
 import { isFailure } from "@/types";
 
@@ -45,24 +45,22 @@ export default function DashboardProfilePage() {
     setError(null);
     setMessage(null);
 
-    const [metadataResult, businessResult] = await Promise.all([
-      authService.updateUserMetadata({ avatar_url: url }),
-      businessService.updateBusiness(currentBusiness.id, { logoUrl: url }),
-    ]);
-
-    if (isFailure(metadataResult) || isFailure(businessResult)) {
+    try {
+      await persistAccountPhoto({
+        url,
+        businessId: currentBusiness.id,
+      });
+      setMessage("Profile photo updated.");
+      await Promise.all([refresh(), refreshAuth()]);
+    } catch (caught) {
       setPhotoUrl(previous);
-      const persistError = isFailure(businessResult)
-        ? businessResult.error.message
-        : isFailure(metadataResult)
-          ? metadataResult.error.message
+      const persistError =
+        caught instanceof Error && caught.message
+          ? caught.message
           : "Unable to update your photo.";
       setError(persistError);
       throw new Error(persistError);
     }
-
-    setMessage("Profile photo updated.");
-    await Promise.all([refresh(), refreshAuth()]);
   }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {

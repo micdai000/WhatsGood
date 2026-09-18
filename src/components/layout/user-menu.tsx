@@ -36,22 +36,33 @@ export function UserMenu({
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
 
   useEffect(() => {
-    // TODO: replace this direct profiles query when legacy identity is retired.
     const supabase = createClient();
 
-    supabase
-      .from("profiles")
-      .select("display_name, avatar")
-      .eq("id", userId)
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          setProfile({
-            displayName: data.display_name || null,
-            avatarUrl: data.avatar || null,
-          });
-        }
+    void Promise.all([
+      supabase
+        .from("profiles")
+        .select("display_name, avatar")
+        .eq("id", userId)
+        .maybeSingle(),
+      supabase
+        .from("business_members")
+        .select("businesses(logo_url)")
+        .eq("user_id", userId),
+    ]).then(([{ data: profileRow }, { data: memberships }]) => {
+      const businessLogo = (memberships ?? [])
+        .map((row) => {
+          const business = Array.isArray(row.businesses)
+            ? row.businesses[0]
+            : row.businesses;
+          return business?.logo_url ?? null;
+        })
+        .find((url): url is string => Boolean(url));
+
+      setProfile({
+        displayName: profileRow?.display_name || null,
+        avatarUrl: profileRow?.avatar || businessLogo || null,
       });
+    });
   }, [userId]);
 
   const displayName = getAccountDisplayName({

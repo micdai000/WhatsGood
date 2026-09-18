@@ -5,6 +5,7 @@ import { AppImage } from "@/components/ui/app-image";
 import { Button } from "@/components/ui/button";
 import { Muted } from "@/components/typography/typography";
 import { getInitials } from "@/lib/auth/display-name";
+import { normalizeProfilePhoto } from "@/lib/profile/normalize-photo";
 import { cn } from "@/lib/utils";
 
 interface AccountPhotoEditorProps {
@@ -31,8 +32,9 @@ export function AccountPhotoEditor({
     setError(null);
 
     try {
+      const photo = await normalizeProfilePhoto(file);
       const formData = new FormData();
-      formData.set("photo", file);
+      formData.set("photo", photo);
 
       const result = await uploadProfilePhotoAction(formData);
 
@@ -151,7 +153,7 @@ export function AccountPhotoEditor({
         </div>
 
         <Muted className="text-xs">
-          JPEG, PNG, WebP, or GIF. Max 5 MB.
+          Choose a photo from your library. We&apos;ll resize it automatically.
         </Muted>
 
         {error ? (
@@ -165,10 +167,11 @@ export function AccountPhotoEditor({
         ref={inputRef}
         id="account-photo"
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept="image/*"
         className="sr-only"
         onChange={(event) => {
           const file = event.target.files?.[0] ?? null;
+          event.target.value = "";
           void handleFileChange(file);
         }}
       />
