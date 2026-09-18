@@ -5,19 +5,57 @@ import {
   DeleteAccountDialog,
   SignOutButton,
 } from "@/components/settings";
+import { AccountPhotoEditor } from "@/components/profile-fields/account-photo-editor";
 import { StatusAlert } from "@/components/ui/status-alert";
 import { Muted, Paragraph } from "@/components/typography/typography";
 import { buttonVariants } from "@/components/ui/button";
 import { brandCopy } from "@/lib/brand";
 import { useAuthContext } from "@/contexts/auth-context";
+import { useBusinessWorkspace } from "@/contexts/business-workspace-context";
+import { getAccountDisplayName } from "@/lib/auth/display-name";
 import { DELETE_ACCOUNT_DATA_SUMMARY } from "@/lib/copy/vocabulary";
+import { authService } from "@/services/auth/auth.service";
+import { businessService } from "@/services/businesses";
+import { isFailure } from "@/types";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
-  const { user } = useAuthContext();
+  const { user, refresh: refreshAuth } = useAuthContext();
+  const { currentBusiness, refresh } = useBusinessWorkspace();
   const [searchParams] = useSearchParams();
   const error = searchParams.get("error");
   const email = user!.email;
+  const displayName = getAccountDisplayName({
+    fullName: user!.fullName,
+    email,
+  });
+  const photoUrl = currentBusiness?.logoUrl ?? user!.avatarUrl;
+
+  async function persistPhoto(url: string | null) {
+    if (!currentBusiness) {
+      const metadataResult = await authService.updateUserMetadata({
+        avatar_url: url,
+      });
+      if (isFailure(metadataResult)) {
+        throw new Error(metadataResult.error.message);
+      }
+      await refreshAuth();
+      return;
+    }
+
+    const [metadataResult, businessResult] = await Promise.all([
+      authService.updateUserMetadata({ avatar_url: url }),
+      businessService.updateBusiness(currentBusiness.id, { logoUrl: url }),
+    ]);
+
+    if (isFailure(businessResult)) {
+      throw new Error(businessResult.error.message);
+    }
+    if (isFailure(metadataResult)) {
+      throw new Error(metadataResult.error.message);
+    }
+    await Promise.all([refresh(), refreshAuth()]);
+  }
 
   return (
     <div className="space-y-8">
@@ -28,6 +66,14 @@ export default function SettingsPage() {
           description="Something went wrong while deleting your account. Please try again or contact support."
         />
       ) : null}
+
+      <DashboardCard title="Your profile">
+        <AccountPhotoEditor
+          value={photoUrl}
+          displayName={displayName}
+          onChange={persistPhoto}
+        />
+      </DashboardCard>
 
       <DashboardCard title="Email address">
         <div className="space-y-2">
@@ -46,7 +92,7 @@ export default function SettingsPage() {
       <DashboardCard title="Business profile">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Muted className="text-sm">
-            Update your business name, category, contact details, and logo.
+            Update your business name, category, and contact details.
           </Muted>
           <Link
             to="/dashboard/profile"

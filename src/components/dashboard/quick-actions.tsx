@@ -41,7 +41,7 @@ export function QuickActions({ profile, className }: QuickActionsProps) {
         <QuickActionCard
           title="Edit profile"
           description="Update your name, bio, photo, and public profile URL."
-          href="/dashboard/profile/edit"
+          href="/dashboard/profile"
           icon={Pencil}
         />
         <QuickActionCard

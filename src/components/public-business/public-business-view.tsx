@@ -1,6 +1,7 @@
 import { AppImage } from "@/components/ui/app-image";
 import { Muted, Paragraph } from "@/components/typography/typography";
 import { GiveFeedbackFlow } from "@/components/public-business/give-feedback-flow";
+import { getInitials } from "@/lib/auth/display-name";
 import type { Business, BusinessCategory, BusinessLocation, PublicBusinessQrCode } from "@/types";
 
 export function PublicBusinessView({
@@ -23,13 +24,20 @@ export function PublicBusinessView({
   return (
     <div className="space-y-8">
       <header className="space-y-4">
-        {business.logoUrl ? (
-          <AppImage
-            src={business.logoUrl}
-            alt={business.name}
-            className="size-16 rounded-xl border border-border object-cover"
-          />
-        ) : null}
+        <div className="relative size-20 overflow-hidden rounded-full border border-border bg-muted">
+          {business.logoUrl ? (
+            <AppImage
+              src={business.logoUrl}
+              alt={business.name}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <span className="flex size-full items-center justify-center text-lg font-semibold text-muted-foreground">
+              {getInitials(business.name) || "?"}
+            </span>
+          )}
+        </div>
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">{business.name}</h1>
           <Muted>

@@ -2,6 +2,8 @@ export interface AuthUser {
   id: string;
   email: string;
   emailVerified: boolean;
+  fullName: string | null;
+  avatarUrl: string | null;
 }
 
 export interface AuthSession {

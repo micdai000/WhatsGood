@@ -3,26 +3,66 @@ import { Link } from "react-router-dom";
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { CopyLinkButton } from "@/components/dashboard/copy-link-button";
 import { ShareProfileButton } from "@/components/business-dashboard/share-profile-button";
+import { AccountPhotoEditor } from "@/components/profile-fields/account-photo-editor";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusAlert } from "@/components/ui/status-alert";
 import { Muted } from "@/components/typography/typography";
+import { useAuthContext } from "@/contexts/auth-context";
 import { useBusinessWorkspace } from "@/contexts/business-workspace-context";
+import { getAccountDisplayName } from "@/lib/auth/display-name";
 import { getPublicBusinessPath, getPublicBusinessUrl } from "@/lib/business/public-url";
 import { cn } from "@/lib/utils";
+import { authService } from "@/services/auth/auth.service";
 import { businessService } from "@/services/businesses";
 import { isFailure } from "@/types";
 
 export default function DashboardProfilePage() {
+  const { user, refresh: refreshAuth } = useAuthContext();
   const { currentBusiness, categories, refresh } = useBusinessWorkspace();
   const [saving, setSaving] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(
+    currentBusiness?.logoUrl ?? user?.avatarUrl ?? null,
+  );
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (!currentBusiness) {
+  if (!currentBusiness || !user) {
     return null;
+  }
+
+  const displayName = getAccountDisplayName({
+    fullName: user.fullName,
+    email: user.email,
+  });
+
+  async function persistPhoto(url: string | null) {
+    if (!currentBusiness) return;
+    const previous = photoUrl;
+    setPhotoUrl(url);
+    setError(null);
+    setMessage(null);
+
+    const [metadataResult, businessResult] = await Promise.all([
+      authService.updateUserMetadata({ avatar_url: url }),
+      businessService.updateBusiness(currentBusiness.id, { logoUrl: url }),
+    ]);
+
+    if (isFailure(metadataResult) || isFailure(businessResult)) {
+      setPhotoUrl(previous);
+      const persistError = isFailure(businessResult)
+        ? businessResult.error.message
+        : isFailure(metadataResult)
+          ? metadataResult.error.message
+          : "Unable to update your photo.";
+      setError(persistError);
+      throw new Error(persistError);
+    }
+
+    setMessage("Profile photo updated.");
+    await Promise.all([refresh(), refreshAuth()]);
   }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -39,7 +79,7 @@ export default function DashboardProfilePage() {
       websiteUrl: empty(form.get("websiteUrl")),
       phone: empty(form.get("phone")),
       email: empty(form.get("email")),
-      logoUrl: empty(form.get("logoUrl")),
+      logoUrl: photoUrl,
       categoryId: empty(form.get("categoryId")),
     });
 
@@ -55,6 +95,20 @@ export default function DashboardProfilePage() {
 
   return (
     <div className="space-y-8">
+      <DashboardCard title="Your profile">
+        <Muted className="text-sm">
+          This is the name from your account, and the photo customers see on
+          your public profile.
+        </Muted>
+        <div className="mt-5">
+          <AccountPhotoEditor
+            value={photoUrl}
+            displayName={displayName}
+            onChange={persistPhoto}
+          />
+        </div>
+      </DashboardCard>
+
       <DashboardCard title="Public profile">
         <Muted className="text-sm">
           Share your Meritt page so customers can see your current reputation.
@@ -134,14 +188,6 @@ export default function DashboardProfilePage() {
               id="websiteUrl"
               name="websiteUrl"
               defaultValue={currentBusiness.websiteUrl ?? ""}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="logoUrl">Logo URL</Label>
-            <Input
-              id="logoUrl"
-              name="logoUrl"
-              defaultValue={currentBusiness.logoUrl ?? ""}
             />
           </div>
           <div className="space-y-2">
