@@ -8,6 +8,7 @@ import {
   ValidationError,
 } from "@/lib/errors";
 import { canCreateClaimRequest } from "@/lib/business/claim";
+import { sortCategoriesForSelect } from "@/lib/business/categories";
 import { slugFromBusinessName, uniquifyBusinessSlug } from "@/lib/business/slug";
 import { generateSecureCode } from "@/lib/qr/generate-code";
 import { logger } from "@/lib/logger";
@@ -105,8 +106,10 @@ export class BusinessService {
       }
 
       return success(
-        (data ?? []).map((row) =>
-          mapBusinessCategoryRow(row as BusinessCategoryRow),
+        sortCategoriesForSelect(
+          (data ?? []).map((row) =>
+            mapBusinessCategoryRow(row as BusinessCategoryRow),
+          ),
         ),
       );
     } catch (error) {

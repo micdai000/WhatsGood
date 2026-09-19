@@ -536,11 +536,13 @@ CREATE POLICY "Reputation snapshots are publicly readable"
 
 INSERT INTO public.business_categories (name, slug, description, icon) VALUES
   ('Automotive',                  'automotive',                  'Auto repair, detailing, and vehicle services',           'car'),
+  ('Barber',                      'barber',                      'Barbershops and men''s grooming',                        'scissors'),
   ('Beauty & Personal Care',      'beauty-personal-care',        'Salons, barbers, spas, and personal care',               'sparkles'),
   ('Construction & Home Services','construction-home-services',  'Contractors, trades, and home services',                 'hammer'),
   ('Education & Coaching',        'education-coaching',          'Tutors, coaches, and education services',                'graduation-cap'),
   ('Food & Dining',               'food-dining',                 'Restaurants, cafes, and food businesses',                'utensils'),
   ('Health & Wellness',           'health-wellness',             'Gyms, clinics, and wellness providers',                  'heart'),
+  ('Hotel',                       'hotel',                       'Hotels, motels, and lodging',                            'bed'),
   ('Photography & Creative',      'photography-creative',        'Photographers and creative studios',                     'camera'),
   ('Professional Services',       'professional-services',       'Legal, accounting, consulting, and other professionals', 'briefcase'),
   ('Retail',                      'retail',                      'Stores and retail shops',                                'shopping-bag'),
