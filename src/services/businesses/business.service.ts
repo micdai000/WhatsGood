@@ -137,7 +137,12 @@ export class BusinessService {
           name: validated.name,
           description: nullableText(validated.description) ?? null,
           logo_url: validated.logoUrl ?? null,
-          website_url: validated.websiteUrl ?? null,
+          website_url:
+            validated.websiteUrl ??
+            (validated.socialLinks?.website?.trim()
+              ? validated.socialLinks.website
+              : null),
+          social_links: validated.socialLinks ?? {},
           phone: nullableText(validated.phone) ?? null,
           email: validated.email ?? null,
           category_id: validated.categoryId ?? null,
@@ -249,6 +254,13 @@ export class BusinessService {
       }
       if (validated.logoUrl !== undefined) {
         updates.logo_url = validated.logoUrl;
+      }
+      if (validated.socialLinks !== undefined) {
+        updates.social_links = validated.socialLinks;
+        if (validated.websiteUrl === undefined) {
+          const website = validated.socialLinks.website?.trim();
+          updates.website_url = website ? website : null;
+        }
       }
       if (validated.websiteUrl !== undefined) {
         updates.website_url = validated.websiteUrl;

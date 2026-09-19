@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { CopyLinkButton } from "@/components/dashboard/copy-link-button";
 import { ShareProfileButton } from "@/components/business-dashboard/share-profile-button";
+import { ProfessionalLinksSection } from "@/components/profile/professional-links-section";
 import { AccountPhotoEditor } from "@/components/profile-fields/account-photo-editor";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +17,19 @@ import { getAccountDisplayName } from "@/lib/auth/display-name";
 import { getPublicBusinessPath, getPublicBusinessUrl } from "@/lib/business/public-url";
 import { cn } from "@/lib/utils";
 import { persistAccountPhoto } from "@/lib/profile/persist-account-photo";
+import {
+  normalizeSocialLinksForSave,
+  socialLinksForBusiness,
+  socialLinksToFormValues,
+  toSocialInputValue,
+  type SocialLinkPlatform,
+  validateSocialLinksFormValues,
+  validateSocialUsernameInput,
+  validateWebsiteInput,
+} from "@/lib/profile/social-links";
 import { businessService } from "@/services/businesses";
-import { isFailure } from "@/types";
+import { DEFAULT_SOCIAL_LINKS, isFailure } from "@/types";
+import type { SocialLinks } from "@/types";
 
 export default function DashboardProfilePage() {
   const { user, refresh: refreshAuth } = useAuthContext();
@@ -26,8 +38,81 @@ export default function DashboardProfilePage() {
   const [photoUrl, setPhotoUrl] = useState<string | null>(
     currentBusiness?.logoUrl ?? user?.avatarUrl ?? null,
   );
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>(() =>
+    toSocialFormValues(currentBusiness?.socialLinks, currentBusiness?.websiteUrl),
+  );
+  const [socialErrors, setSocialErrors] = useState<
+    Partial<Record<SocialLinkPlatform, string>>
+  >({});
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSocialLinks(
+      toSocialFormValues(currentBusiness?.socialLinks, currentBusiness?.websiteUrl),
+    );
+    setSocialErrors({});
+  }, [currentBusiness?.id, currentBusiness?.socialLinks, currentBusiness?.websiteUrl]);
+
+  const updateSocialLink = useCallback((platform: SocialLinkPlatform, value: string) => {
+    setSocialLinks((prev) => ({
+      ...prev,
+      [platform]: value,
+    }));
+    setMessage(null);
+    setError(null);
+    setSocialErrors((prev) => {
+      if (!prev[platform]) return prev;
+      const next = { ...prev };
+      delete next[platform];
+      return next;
+    });
+  }, []);
+
+  const handleSocialBlur = useCallback(
+    (platform: SocialLinkPlatform, rawValue: string) => {
+      const fieldError =
+        platform === "website"
+          ? validateWebsiteInput(rawValue)
+          : validateSocialUsernameInput(platform, rawValue);
+
+      setSocialErrors((prev) => {
+        const next = { ...prev };
+        if (fieldError) {
+          next[platform] = fieldError;
+        } else {
+          delete next[platform];
+        }
+        return next;
+      });
+
+      if (fieldError || !rawValue.trim()) return;
+
+      if (platform === "website") {
+        const normalized = normalizeSocialLinksForSave({
+          ...DEFAULT_SOCIAL_LINKS,
+          website: rawValue,
+        }).website;
+        if (normalized && normalized !== rawValue) {
+          updateSocialLink("website", normalized);
+        }
+        return;
+      }
+
+      const username = toSocialInputValue(
+        platform,
+        normalizeSocialLinksForSave({
+          ...DEFAULT_SOCIAL_LINKS,
+          [platform]: rawValue,
+        })[platform],
+      );
+
+      if (username && username !== rawValue.trim()) {
+        updateSocialLink(platform, username);
+      }
+    },
+    [updateSocialLink],
+  );
 
   if (!currentBusiness || !user) {
     return null;
@@ -71,10 +156,21 @@ export default function DashboardProfilePage() {
     setError(null);
     setMessage(null);
 
+    const nextSocialErrors = validateSocialLinksFormValues(socialLinks);
+    if (Object.keys(nextSocialErrors).length > 0) {
+      setSocialErrors(nextSocialErrors);
+      setSaving(false);
+      return;
+    }
+
+    const normalizedLinks = normalizeSocialLinksForSave(socialLinks);
+    const website = normalizedLinks.website.trim();
+
     const result = await businessService.updateBusiness(currentBusiness.id, {
       name: String(form.get("name") ?? ""),
       description: empty(form.get("description")),
-      websiteUrl: empty(form.get("websiteUrl")),
+      websiteUrl: website ? website : null,
+      socialLinks: normalizedLinks,
       phone: empty(form.get("phone")),
       email: empty(form.get("email")),
       logoUrl: photoUrl,
@@ -87,6 +183,7 @@ export default function DashboardProfilePage() {
       return;
     }
 
+    setSocialLinks(socialLinksToFormValues(result.data.socialLinks));
     setMessage("Business profile saved.");
     await refresh();
   }
@@ -181,14 +278,6 @@ export default function DashboardProfilePage() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="websiteUrl">Website</Label>
-            <Input
-              id="websiteUrl"
-              name="websiteUrl"
-              defaultValue={currentBusiness.websiteUrl ?? ""}
-            />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
             <Input id="phone" name="phone" defaultValue={currentBusiness.phone ?? ""} />
           </div>
@@ -197,12 +286,42 @@ export default function DashboardProfilePage() {
             <Input id="email" name="email" type="email" defaultValue={currentBusiness.email ?? ""} />
           </div>
         </div>
+
+        <section className="space-y-4 border-t border-border pt-4" aria-labelledby="professional-links-heading">
+          <div className="space-y-1">
+            <h3 id="professional-links-heading" className="text-sm font-semibold">
+              Professional links
+            </h3>
+            <Muted className="text-sm">
+              Add Instagram, Facebook, or X. Icons appear on your public profile
+              when you save a link.
+            </Muted>
+          </div>
+          <ProfessionalLinksSection
+            values={socialLinks}
+            errors={socialErrors}
+            onChange={updateSocialLink}
+            onBlur={handleSocialBlur}
+            platforms={["instagram", "facebook", "x"]}
+            embedded
+          />
+        </section>
+
           <Button type="submit" disabled={saving}>
             {saving ? "Saving…" : "Save changes"}
           </Button>
         </form>
       </DashboardCard>
     </div>
+  );
+}
+
+function toSocialFormValues(
+  socialLinks?: SocialLinks | null,
+  websiteUrl?: string | null,
+): SocialLinks {
+  return socialLinksToFormValues(
+    socialLinksForBusiness({ socialLinks, websiteUrl }),
   );
 }
 

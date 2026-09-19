@@ -1,7 +1,8 @@
-import type { Business } from "@/types";
+import type { Business, SocialLinks } from "@/types";
 import type { ReputationTier } from "@/types/reputation";
 import { BUSINESS_STATUSES, type BusinessStatus } from "@/types/business";
 import { REPUTATION_TIERS } from "@/types/reputation";
+import { socialLinksForBusiness } from "@/lib/profile/social-links";
 
 export type BusinessRow = {
   id: string;
@@ -10,6 +11,7 @@ export type BusinessRow = {
   description: string | null;
   logo_url: string | null;
   website_url: string | null;
+  social_links?: SocialLinks | Record<string, unknown> | null;
   phone: string | null;
   email: string | null;
   category_id: string | null;
@@ -43,6 +45,10 @@ export function mapBusinessRow(row: BusinessRow): Business {
     description: row.description,
     logoUrl: row.logo_url,
     websiteUrl: row.website_url,
+    socialLinks: socialLinksForBusiness({
+      socialLinks: row.social_links,
+      websiteUrl: row.website_url,
+    }),
     phone: row.phone,
     email: row.email,
     categoryId: row.category_id,

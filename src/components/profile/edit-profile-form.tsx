@@ -404,6 +404,7 @@ export function EditProfileForm({
           errors={socialFieldErrors}
           onChange={updateSocialLink}
           onBlur={handleSocialBlur}
+          platforms={["instagram", "facebook", "x"]}
         />
 
         <div className="flex flex-wrap gap-3">

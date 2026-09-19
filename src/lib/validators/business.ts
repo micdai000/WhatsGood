@@ -2,6 +2,7 @@ import { z } from "zod";
 import { LIMITS } from "@/lib/constants";
 import { sanitizeSlug } from "@/lib/utils/slug";
 import { BUSINESS_STATUSES } from "@/types/business";
+import { socialLinksSchema } from "./profile";
 
 const businessSlugSchema = z
   .string()
@@ -60,6 +61,7 @@ export const createBusinessSchema = z.object({
   description: z.string().trim().max(2000).nullable().optional(),
   logoUrl: optionalUrlSchema,
   websiteUrl: optionalUrlSchema,
+  socialLinks: socialLinksSchema.optional(),
   phone: z.string().trim().max(30).nullable().optional(),
   email: optionalEmailSchema,
   categoryId: z.string().uuid("Invalid category ID").nullable().optional(),

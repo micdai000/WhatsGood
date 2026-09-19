@@ -1,5 +1,5 @@
+import { normalizeSocialLinks } from "@/lib/profile/social-links";
 import type { Profile, SocialLinks } from "@/types";
-import { DEFAULT_SOCIAL_LINKS } from "@/types/profile";
 
 export type ProfileRow = {
   id: string;
@@ -20,23 +20,7 @@ export type ProfileRow = {
   updated_at: string;
 };
 
-/** Normalize DB JSONB (including `{}` / null / partial objects) into SocialLinks. */
-export function normalizeSocialLinks(value: unknown): SocialLinks {
-  const raw =
-    value !== null && typeof value === "object" && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {};
-
-  const links: SocialLinks = { ...DEFAULT_SOCIAL_LINKS };
-
-  for (const [key, entry] of Object.entries(raw)) {
-    if (typeof entry === "string") {
-      links[key] = entry;
-    }
-  }
-
-  return links;
-}
+export { normalizeSocialLinks };
 
 export function mapProfileRow(row: ProfileRow): Profile {
   return {

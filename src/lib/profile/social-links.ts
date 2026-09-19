@@ -2,6 +2,36 @@ import { LIMITS } from "@/lib/constants";
 import type { SocialLinks } from "@/types";
 import { DEFAULT_SOCIAL_LINKS } from "@/types/profile";
 
+/** Normalize DB JSONB (including `{}` / null / partial objects) into SocialLinks. */
+export function normalizeSocialLinks(value: unknown): SocialLinks {
+  const raw =
+    value !== null && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const links: SocialLinks = { ...DEFAULT_SOCIAL_LINKS };
+
+  for (const [key, entry] of Object.entries(raw)) {
+    if (typeof entry === "string") {
+      links[key] = entry;
+    }
+  }
+
+  return links;
+}
+
+/** Prefer stored social_links, and fall back to website_url for older rows. */
+export function socialLinksForBusiness(input: {
+  socialLinks?: SocialLinks | Record<string, unknown> | null;
+  websiteUrl?: string | null;
+}): SocialLinks {
+  const links = normalizeSocialLinks(input.socialLinks);
+  if (!links.website.trim() && input.websiteUrl?.trim()) {
+    return { ...links, website: input.websiteUrl.trim() };
+  }
+  return links;
+}
+
 export type SocialUsernamePlatform = "instagram" | "facebook" | "x";
 export type SocialLinkPlatform = SocialUsernamePlatform | "website";
 
