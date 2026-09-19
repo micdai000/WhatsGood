@@ -16,6 +16,7 @@ export interface Business {
   phone: string | null;
   email: string | null;
   categoryId: string | null;
+  customCategory: string | null;
   status: BusinessStatus;
   isClaimed: boolean;
   currentReputationScore: number | null;
@@ -36,6 +37,7 @@ export interface CreateBusinessInput {
   phone?: string | null;
   email?: string | null;
   categoryId?: string | null;
+  customCategory?: string | null;
 }
 
 export interface UpdateBusinessInput {
@@ -47,5 +49,6 @@ export interface UpdateBusinessInput {
   phone?: string | null;
   email?: string | null;
   categoryId?: string | null;
+  customCategory?: string | null;
   status?: BusinessStatus;
 }

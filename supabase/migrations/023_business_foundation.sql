@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS public.businesses (
   phone                       TEXT,
   email                       TEXT,
   category_id                 UUID REFERENCES public.business_categories(id) ON DELETE SET NULL,
+  custom_category             TEXT,
   status                      TEXT NOT NULL DEFAULT 'active'
                                 CHECK (status IN ('active', 'suspended', 'archived')),
   is_claimed                  BOOLEAN NOT NULL DEFAULT false,

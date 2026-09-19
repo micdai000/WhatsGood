@@ -15,6 +15,7 @@ export type BusinessRow = {
   phone: string | null;
   email: string | null;
   category_id: string | null;
+  custom_category?: string | null;
   status: string;
   is_claimed: boolean;
   current_reputation_score: number | string | null;
@@ -52,6 +53,7 @@ export function mapBusinessRow(row: BusinessRow): Business {
     phone: row.phone,
     email: row.email,
     categoryId: row.category_id,
+    customCategory: row.custom_category ?? null,
     status: asBusinessStatus(row.status),
     isClaimed: row.is_claimed,
     currentReputationScore:

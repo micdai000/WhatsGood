@@ -1,6 +1,7 @@
 import { Muted, Paragraph } from "@/components/typography/typography";
 import { GiveFeedbackFlow } from "@/components/public-business/give-feedback-flow";
 import { PublicBusinessHeader } from "@/components/public-business/public-business-header";
+import { displayCategoryName } from "@/lib/business/categories";
 import type { Business, BusinessCategory, BusinessLocation, PublicBusinessQrCode } from "@/types";
 
 export function PublicBusinessView({
@@ -21,7 +22,7 @@ export function PublicBusinessView({
     <div className="space-y-8 sm:space-y-10">
       <PublicBusinessHeader
         business={business}
-        categoryName={category?.name}
+        categoryName={displayCategoryName(category, business.customCategory)}
         city={location?.city}
         state={location?.state}
       />

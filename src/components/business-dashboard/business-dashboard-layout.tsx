@@ -8,6 +8,7 @@ import { Muted } from "@/components/typography/typography";
 import { StatusAlert } from "@/components/ui/status-alert";
 import { BusinessWorkspaceProvider, useBusinessWorkspace } from "@/contexts/business-workspace-context";
 import { isQrPrintRoute } from "@/lib/qr/print-route";
+import { displayCategoryName } from "@/lib/business/categories";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS: Array<{ to: string; label: string; end?: boolean }> = [
@@ -80,9 +81,13 @@ function BusinessDashboardShell() {
     return <Outlet />;
   }
 
-  const categoryName = categories.find(
-    (category) => category.id === currentBusiness.categoryId,
-  )?.name;
+  const category = categories.find(
+    (item) => item.id === currentBusiness.categoryId,
+  );
+  const categoryName = displayCategoryName(
+    category,
+    currentBusiness.customCategory,
+  );
   const primary = locations.find((location) => location.isPrimary) ?? locations[0];
   const locationLabel = primary
     ? [primary.city, primary.state].filter(Boolean).join(", ")

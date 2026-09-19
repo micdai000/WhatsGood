@@ -45,6 +45,7 @@ export interface DiscoverableBusiness extends BusinessSearchResult {
 export interface CompleteBusinessOnboardingInput {
   name: string;
   categoryId: string;
+  customCategory?: string | null;
   description?: string | null;
   websiteUrl?: string | null;
   phone?: string | null;

@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { SectionEyebrow } from "@/components/typography/typography";
 import { useUrlSyncedState } from "@/hooks/use-url-synced-state";
+import { isOtherCategory, sortCategoriesForSelect } from "@/lib/business/categories";
 import { buildSearchUrl } from "@/lib/search/params";
 import {
   SEARCH_WHAT_LABEL,
@@ -23,6 +24,13 @@ export function FilterPanel({ params, professions, className }: FilterPanelProps
   const [isPending, startTransition] = useTransition();
   const [city, setCity] = useUrlSyncedState(params.city);
   const [state, setState] = useUrlSyncedState(params.state);
+  const sortedProfessions = sortCategoriesForSelect(professions);
+  const listedProfessions = sortedProfessions.filter(
+    (profession) => !isOtherCategory(profession),
+  );
+  const otherProfessions = sortedProfessions.filter((profession) =>
+    isOtherCategory(profession),
+  );
 
   function updateFilters(updates: Partial<ProfileSearchParams>) {
     const next: ProfileSearchParams = {
@@ -80,11 +88,20 @@ export function FilterPanel({ params, professions, className }: FilterPanelProps
           className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option value="">All categories</option>
-          {professions.map((profession) => (
+          {listedProfessions.map((profession) => (
             <option key={profession.id} value={profession.id}>
               {profession.name}
             </option>
           ))}
+          {otherProfessions.length > 0 ? (
+            <optgroup label=" ">
+              {otherProfessions.map((profession) => (
+                <option key={profession.id} value={profession.id}>
+                  {profession.name}
+                </option>
+              ))}
+            </optgroup>
+          ) : null}
         </select>
       </div>
 

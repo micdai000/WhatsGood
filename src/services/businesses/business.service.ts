@@ -8,7 +8,12 @@ import {
   ValidationError,
 } from "@/lib/errors";
 import { canCreateClaimRequest } from "@/lib/business/claim";
-import { sortCategoriesForSelect } from "@/lib/business/categories";
+import {
+  displayCategoryName,
+  isOtherCategory,
+  normalizeCustomCategory,
+  sortCategoriesForSelect,
+} from "@/lib/business/categories";
 import { slugFromBusinessName, uniquifyBusinessSlug } from "@/lib/business/slug";
 import { generateSecureCode } from "@/lib/qr/generate-code";
 import { logger } from "@/lib/logger";
@@ -32,7 +37,7 @@ import {
   validate,
 } from "@/lib/validators";
 import { failure, handleServiceError, success } from "@/services/shared";
-import { PAGINATION } from "@/lib/constants";
+import { LIMITS, PAGINATION } from "@/lib/constants";
 import type {
   AddBusinessMemberInput,
   Business,
@@ -88,6 +93,35 @@ function nullableText(
   return trimmed.length > 0 ? trimmed : null;
 }
 
+type CategoryRef = { id: string; name: string; slug: string };
+
+async function loadCategory(
+  supabase: ReturnType<typeof createClient>,
+  categoryId: string | null | undefined,
+): Promise<CategoryRef | null> {
+  if (!categoryId) return null;
+  const { data } = await supabase
+    .from("business_categories")
+    .select("id, name, slug")
+    .eq("id", categoryId)
+    .maybeSingle();
+  return (data as CategoryRef | null) ?? null;
+}
+
+function requireCustomCategory(
+  category: CategoryRef | null,
+  customCategory: string | null | undefined,
+): ServiceResult<string | null> {
+  const value = normalizeCustomCategory(category, customCategory);
+  if (category && isOtherCategory(category)) {
+    if (!value || value.length < LIMITS.CUSTOM_CATEGORY_MIN_LENGTH) {
+      return failure(new ValidationError("Please describe your category"));
+    }
+    return success(value);
+  }
+  return success(null);
+}
+
 export class BusinessService {
   async getCategories(): Promise<ServiceResult<BusinessCategory[]>> {
     const method = "BusinessService.getCategories";
@@ -133,6 +167,14 @@ export class BusinessService {
 
       const validated = validate(createBusinessSchema, input);
       const supabase = createClient();
+      const category = await loadCategory(supabase, validated.categoryId);
+      const customResult = requireCustomCategory(
+        category,
+        validated.customCategory,
+      );
+      if (!isSuccess(customResult)) {
+        return customResult;
+      }
       const { data, error } = await supabase
         .from("businesses")
         .insert({
@@ -149,6 +191,7 @@ export class BusinessService {
           phone: nullableText(validated.phone) ?? null,
           email: validated.email ?? null,
           category_id: validated.categoryId ?? null,
+          custom_category: customResult.data,
           is_claimed: true,
         })
         .select("*")
@@ -247,6 +290,7 @@ export class BusinessService {
 
       const { id: businessId } = validate(businessIdSchema, { id });
       const validated = validate(updateBusinessSchema, input);
+      const supabase = createClient();
       const updates: Record<string, unknown> = {};
 
       if (validated.name !== undefined) {
@@ -276,12 +320,22 @@ export class BusinessService {
       }
       if (validated.categoryId !== undefined) {
         updates.category_id = validated.categoryId;
+        const category = await loadCategory(supabase, validated.categoryId);
+        const customResult = requireCustomCategory(
+          category,
+          validated.customCategory,
+        );
+        if (!isSuccess(customResult)) {
+          return customResult;
+        }
+        updates.custom_category = customResult.data;
+      } else if (validated.customCategory !== undefined) {
+        updates.custom_category = nullableText(validated.customCategory) ?? null;
       }
       if (validated.status !== undefined) {
         updates.status = validated.status;
       }
 
-      const supabase = createClient();
       const { data, error } = await supabase
         .from("businesses")
         .update(updates)
@@ -766,6 +820,14 @@ export class BusinessService {
 
       const validated = validate(completeBusinessOnboardingSchema, input);
       const supabase = createClient();
+      const category = await loadCategory(supabase, validated.categoryId);
+      const customResult = requireCustomCategory(
+        category,
+        validated.customCategory,
+      );
+      if (!isSuccess(customResult)) {
+        return customResult;
+      }
       const baseSlug = slugFromBusinessName(validated.name);
 
       for (let attempt = 0; attempt < 4; attempt += 1) {
@@ -776,6 +838,7 @@ export class BusinessService {
             p_name: validated.name,
             p_slug: slug,
             p_category_id: validated.categoryId,
+            p_custom_category: customResult.data,
             p_description: nullableText(validated.description) ?? null,
             p_website_url: validated.websiteUrl ?? null,
             p_phone: nullableText(validated.phone) ?? null,
@@ -859,7 +922,8 @@ export class BusinessService {
           name,
           slug,
           is_claimed,
-          business_categories ( name ),
+          custom_category,
+          business_categories ( name, slug ),
           business_locations ( city, state, is_primary )
         `,
         )
@@ -875,8 +939,8 @@ export class BusinessService {
 
       const results = (data ?? []).map((row) => {
         const categoryRel = row.business_categories as
-          | { name: string }
-          | { name: string }[]
+          | { name: string; slug?: string }
+          | { name: string; slug?: string }[]
           | null;
         const category = Array.isArray(categoryRel)
           ? categoryRel[0]
@@ -894,7 +958,10 @@ export class BusinessService {
           name: row.name as string,
           slug: row.slug as string,
           isClaimed: Boolean(row.is_claimed),
-          categoryName: category?.name ?? null,
+          categoryName: displayCategoryName(
+            category,
+            row.custom_category as string | null,
+          ),
           city: primary?.city ?? null,
           state: primary?.state ?? null,
         } satisfies BusinessSearchResult;
@@ -925,12 +992,13 @@ export class BusinessService {
           slug,
           logo_url,
           is_claimed,
+          custom_category,
           current_reputation_score,
           current_reputation_tier,
           current_reputation_period,
           total_feedback,
           created_at,
-          business_categories ( name ),
+          business_categories ( name, slug ),
           business_locations ( city, state, is_primary )
         `,
           { count: "exact" },
@@ -980,8 +1048,8 @@ export class BusinessService {
 
       const mapped = (data ?? []).map((row) => {
         const categoryRel = row.business_categories as
-          | { name: string }
-          | { name: string }[]
+          | { name: string; slug?: string }
+          | { name: string; slug?: string }[]
           | null;
         const category = Array.isArray(categoryRel)
           ? categoryRel[0]
@@ -1000,7 +1068,10 @@ export class BusinessService {
           name: row.name as string,
           slug: row.slug as string,
           isClaimed: Boolean(row.is_claimed),
-          categoryName: category?.name ?? null,
+          categoryName: displayCategoryName(
+            category,
+            row.custom_category as string | null,
+          ),
           city: primary?.city ?? null,
           state: primary?.state ?? null,
           logoUrl: (row.logo_url as string | null) ?? null,

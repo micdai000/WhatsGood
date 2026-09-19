@@ -43,6 +43,17 @@ describe("business onboarding validators", () => {
       expect("role" in result.data).toBe(false);
     }
   });
+
+  it("accepts a custom category label", () => {
+    const result = completeBusinessOnboardingSchema.safeParse({
+      name: "Willow Pets",
+      categoryId: VALID_UUID,
+      customCategory: "Pet sitting",
+      city: "Austin",
+      state: "TX",
+    });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe("claim requests", () => {

@@ -65,6 +65,15 @@ export const createBusinessSchema = z.object({
   phone: z.string().trim().max(30).nullable().optional(),
   email: optionalEmailSchema,
   categoryId: z.string().uuid("Invalid category ID").nullable().optional(),
+  customCategory: z
+    .string()
+    .trim()
+    .max(
+      LIMITS.CUSTOM_CATEGORY_MAX_LENGTH,
+      `Category must be ${LIMITS.CUSTOM_CATEGORY_MAX_LENGTH} characters or fewer`,
+    )
+    .nullable()
+    .optional(),
 });
 
 export const updateBusinessSchema = createBusinessSchema

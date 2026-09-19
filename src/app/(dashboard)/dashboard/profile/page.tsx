@@ -17,6 +17,11 @@ import { getAccountDisplayName } from "@/lib/auth/display-name";
 import { getPublicBusinessPath, getPublicBusinessUrl } from "@/lib/business/public-url";
 import { cn } from "@/lib/utils";
 import { persistAccountPhoto } from "@/lib/profile/persist-account-photo";
+import { BusinessCategoryFields } from "@/components/business/category-fields";
+import {
+  isOtherCategory,
+} from "@/lib/business/categories";
+import { LIMITS } from "@/lib/constants";
 import {
   normalizeSocialLinksForSave,
   socialLinksForBusiness,
@@ -44,6 +49,16 @@ export default function DashboardProfilePage() {
   const [socialErrors, setSocialErrors] = useState<
     Partial<Record<SocialLinkPlatform, string>>
   >({});
+  const [categoryId, setCategoryId] = useState(
+    currentBusiness?.categoryId ?? "",
+  );
+  const [customCategory, setCustomCategory] = useState(
+    currentBusiness?.customCategory ?? "",
+  );
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [customCategoryError, setCustomCategoryError] = useState<string | null>(
+    null,
+  );
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +67,17 @@ export default function DashboardProfilePage() {
       toSocialFormValues(currentBusiness?.socialLinks, currentBusiness?.websiteUrl),
     );
     setSocialErrors({});
-  }, [currentBusiness?.id, currentBusiness?.socialLinks, currentBusiness?.websiteUrl]);
+    setCategoryId(currentBusiness?.categoryId ?? "");
+    setCustomCategory(currentBusiness?.customCategory ?? "");
+    setCategoryError(null);
+    setCustomCategoryError(null);
+  }, [
+    currentBusiness?.id,
+    currentBusiness?.socialLinks,
+    currentBusiness?.websiteUrl,
+    currentBusiness?.categoryId,
+    currentBusiness?.customCategory,
+  ]);
 
   const updateSocialLink = useCallback((platform: SocialLinkPlatform, value: string) => {
     setSocialLinks((prev) => ({
@@ -155,6 +180,8 @@ export default function DashboardProfilePage() {
     setSaving(true);
     setError(null);
     setMessage(null);
+    setCategoryError(null);
+    setCustomCategoryError(null);
 
     const nextSocialErrors = validateSocialLinksFormValues(socialLinks);
     if (Object.keys(nextSocialErrors).length > 0) {
@@ -166,6 +193,22 @@ export default function DashboardProfilePage() {
     const normalizedLinks = normalizeSocialLinksForSave(socialLinks);
     const website = normalizedLinks.website.trim();
 
+    const selected = categories.find((category) => category.id === categoryId);
+    if (!categoryId) {
+      setCategoryError("Please select a category");
+      setSaving(false);
+      return;
+    }
+    if (
+      selected &&
+      isOtherCategory(selected) &&
+      customCategory.trim().length < LIMITS.CUSTOM_CATEGORY_MIN_LENGTH
+    ) {
+      setCustomCategoryError("Please describe your category");
+      setSaving(false);
+      return;
+    }
+
     const result = await businessService.updateBusiness(currentBusiness.id, {
       name: String(form.get("name") ?? ""),
       description: empty(form.get("description")),
@@ -174,7 +217,8 @@ export default function DashboardProfilePage() {
       phone: empty(form.get("phone")),
       email: empty(form.get("email")),
       logoUrl: photoUrl,
-      categoryId: empty(form.get("categoryId")),
+      categoryId,
+      customCategory: customCategory.trim() || null,
     });
 
     setSaving(false);
@@ -251,22 +295,28 @@ export default function DashboardProfilePage() {
           <Label htmlFor="name">Business name</Label>
           <Input id="name" name="name" defaultValue={currentBusiness.name} required />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="categoryId">Category</Label>
-          <select
-            id="categoryId"
-            name="categoryId"
-            defaultValue={currentBusiness.categoryId ?? ""}
-            className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
-          >
-            <option value="">Select a category</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <BusinessCategoryFields
+          categories={categories}
+          categoryId={categoryId}
+          customCategory={customCategory}
+          onCategoryIdChange={(nextId) => {
+            const selected = categories.find((category) => category.id === nextId);
+            setCategoryId(nextId);
+            setCategoryError(null);
+            setCustomCategoryError(null);
+            if (!selected || !isOtherCategory(selected)) {
+              setCustomCategory("");
+            }
+          }}
+          onCustomCategoryChange={(value) => {
+            setCustomCategory(value);
+            setCustomCategoryError(null);
+          }}
+          categoryError={categoryError ?? undefined}
+          customCategoryError={customCategoryError ?? undefined}
+          selectId="categoryId"
+          customId="customCategory"
+        />
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
           <Textarea

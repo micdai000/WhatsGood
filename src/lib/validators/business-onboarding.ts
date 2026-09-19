@@ -5,6 +5,15 @@ import { createBusinessSchema } from "./business";
 export const completeBusinessOnboardingSchema = z.object({
   name: createBusinessSchema.shape.name,
   categoryId: z.string().uuid("Please select a business category"),
+  customCategory: z
+    .string()
+    .trim()
+    .max(
+      LIMITS.CUSTOM_CATEGORY_MAX_LENGTH,
+      `Category must be ${LIMITS.CUSTOM_CATEGORY_MAX_LENGTH} characters or fewer`,
+    )
+    .nullable()
+    .optional(),
   description: z.string().trim().max(2000).nullable().optional(),
   websiteUrl: z
     .string()
