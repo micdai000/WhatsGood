@@ -163,6 +163,42 @@ function isSchemaCacheMiss(error: { code?: string; message?: string }): boolean 
   );
 }
 
+type RpcError = {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+};
+
+function isUniqueViolation(error: RpcError): boolean {
+  const haystack = `${error.code ?? ""} ${error.message ?? ""} ${error.details ?? ""}`;
+  return error.code === "23505" || /duplicate key|unique constraint/i.test(haystack);
+}
+
+function mapOnboardingRpcError(error: RpcError) {
+  if (isUniqueViolation(error)) {
+    return new ConflictError("This business name is already taken");
+  }
+  if (error.code === "42501") {
+    return new AuthorizationError(
+      error.message || "You must be signed in to create a business",
+    );
+  }
+  if (
+    error.code === "22023" ||
+    error.code === "23503" ||
+    error.code === "23514" ||
+    error.code === "23502"
+  ) {
+    return new ValidationError(
+      error.message || "Please check the business details and try again",
+    );
+  }
+  return DatabaseError.fromSource({
+    message: error.message || "A database error occurred",
+  });
+}
+
 export class BusinessService {
   async getCategories(): Promise<ServiceResult<BusinessCategory[]>> {
     const method = "BusinessService.getCategories";
@@ -908,7 +944,7 @@ export class BusinessService {
         }
 
         if (error) {
-          if (error.code === "23505" && attempt < 3) {
+          if (isUniqueViolation(error) && attempt < 3) {
             continue;
           }
 
@@ -917,26 +953,7 @@ export class BusinessService {
             details: error.details,
             hint: error.hint,
           });
-          if (error.code === "23505") {
-            return failure(
-              new ConflictError("This business name is already taken"),
-            );
-          }
-          if (error.code === "42501") {
-            return failure(
-              new AuthorizationError(
-                error.message || "You must be signed in to create a business",
-              ),
-            );
-          }
-          if (error.code === "22023") {
-            return failure(
-              new ValidationError(
-                error.message || "Please check the business details and try again",
-              ),
-            );
-          }
-          return failure(DatabaseError.fromSource(error));
+          return failure(mapOnboardingRpcError(error));
         }
 
         const payload = parseOnboardingPayload(data);
