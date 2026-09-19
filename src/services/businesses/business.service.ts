@@ -122,6 +122,47 @@ function requireCustomCategory(
   return success(null);
 }
 
+function parseOnboardingPayload(data: unknown): {
+  business: BusinessRow;
+  location: BusinessLocationRow;
+  qr_code: QrCodeRow;
+} | null {
+  let value = data;
+  if (typeof value === "string") {
+    try {
+      value = JSON.parse(value) as unknown;
+    } catch {
+      return null;
+    }
+  }
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+  const payload = value as {
+    business?: BusinessRow;
+    location?: BusinessLocationRow;
+    qr_code?: QrCodeRow;
+  };
+  if (!payload.business || !payload.location || !payload.qr_code) {
+    return null;
+  }
+  return {
+    business: payload.business,
+    location: payload.location,
+    qr_code: payload.qr_code,
+  };
+}
+
+function isSchemaCacheMiss(error: { code?: string; message?: string }): boolean {
+  const code = error.code ?? "";
+  const message = error.message ?? "";
+  return (
+    code === "PGRST202" ||
+    code === "PGRST203" ||
+    /schema cache/i.test(message)
+  );
+}
+
 export class BusinessService {
   async getCategories(): Promise<ServiceResult<BusinessCategory[]>> {
     const method = "BusinessService.getCategories";
@@ -832,34 +873,50 @@ export class BusinessService {
 
       for (let attempt = 0; attempt < 4; attempt += 1) {
         const slug = uniquifyBusinessSlug(baseSlug, attempt);
-        const { data, error } = await supabase.rpc(
+        const rpcParams: Record<string, unknown> = {
+          p_name: validated.name,
+          p_slug: slug,
+          p_category_id: validated.categoryId,
+          p_description: nullableText(validated.description) ?? null,
+          p_website_url: validated.websiteUrl ?? null,
+          p_phone: nullableText(validated.phone) ?? null,
+          p_email: validated.email ?? null,
+          p_logo_url: validated.logoUrl ?? null,
+          p_address_line_1: nullableText(validated.addressLine1) ?? null,
+          p_city: validated.city,
+          p_state: validated.state,
+          p_postal_code: nullableText(validated.postalCode) ?? null,
+          p_country: validated.country ?? "US",
+          p_qr_code: generateSecureCode(),
+          p_qr_label: "Primary Business QR",
+        };
+        if (customResult.data) {
+          rpcParams.p_custom_category = customResult.data;
+        }
+
+        let { data, error } = await supabase.rpc(
           "complete_business_onboarding",
-          {
-            p_name: validated.name,
-            p_slug: slug,
-            p_category_id: validated.categoryId,
-            p_custom_category: customResult.data,
-            p_description: nullableText(validated.description) ?? null,
-            p_website_url: validated.websiteUrl ?? null,
-            p_phone: nullableText(validated.phone) ?? null,
-            p_email: validated.email ?? null,
-            p_logo_url: validated.logoUrl ?? null,
-            p_address_line_1: nullableText(validated.addressLine1) ?? null,
-            p_city: validated.city,
-            p_state: validated.state,
-            p_postal_code: nullableText(validated.postalCode) ?? null,
-            p_country: validated.country ?? "US",
-            p_qr_code: generateSecureCode(),
-            p_qr_label: "Primary Business QR",
-          },
+          rpcParams,
         );
+
+        if (error && isSchemaCacheMiss(error) && "p_custom_category" in rpcParams) {
+          delete rpcParams.p_custom_category;
+          ({ data, error } = await supabase.rpc(
+            "complete_business_onboarding",
+            rpcParams,
+          ));
+        }
 
         if (error) {
           if (error.code === "23505" && attempt < 3) {
             continue;
           }
 
-          logger.error(method, error);
+          logger.error(method, error, {
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+          });
           if (error.code === "23505") {
             return failure(
               new ConflictError("This business name is already taken"),
@@ -882,20 +939,31 @@ export class BusinessService {
           return failure(DatabaseError.fromSource(error));
         }
 
-        const payload = data as {
-          business: BusinessRow;
-          location: BusinessLocationRow;
-          qr_code: QrCodeRow;
-        } | null;
-
-        if (!payload?.business || !payload.location || !payload.qr_code) {
+        const payload = parseOnboardingPayload(data);
+        if (!payload) {
+          logger.error(method, "Onboarding RPC returned an unexpected payload", {
+            data,
+          });
           return failure(new DatabaseError());
         }
 
+        let business = mapBusinessRow(payload.business);
+        const location = mapBusinessLocationRow(payload.location);
+        const qrCode = mapQrCodeRow(payload.qr_code);
+
+        if (customResult.data && business.customCategory !== customResult.data) {
+          const saved = await this.updateBusiness(business.id, {
+            customCategory: customResult.data,
+          });
+          if (isSuccess(saved)) {
+            business = saved.data;
+          }
+        }
+
         return success({
-          business: mapBusinessRow(payload.business),
-          location: mapBusinessLocationRow(payload.location),
-          qrCode: mapQrCodeRow(payload.qr_code),
+          business,
+          location,
+          qrCode,
         });
       }
 
