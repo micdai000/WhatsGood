@@ -1,13 +1,13 @@
 import { SearchResultCard } from "@/components/search/search-result-card";
-import type { PublicProfile } from "@/types";
+import type { DiscoverableBusiness } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface ResultsGridProps {
-  profiles: PublicProfile[];
+  businesses: DiscoverableBusiness[];
   className?: string;
 }
 
-export function ResultsGrid({ profiles, className }: ResultsGridProps) {
+export function ResultsGrid({ businesses, className }: ResultsGridProps) {
   return (
     <ul
       className={cn(
@@ -15,9 +15,9 @@ export function ResultsGrid({ profiles, className }: ResultsGridProps) {
         className,
       )}
     >
-      {profiles.map((profile) => (
-        <li key={profile.username} className="min-h-0">
-          <SearchResultCard profile={profile} className="h-full" />
+      {businesses.map((business) => (
+        <li key={business.id} className="min-h-0">
+          <SearchResultCard business={business} className="h-full" />
         </li>
       ))}
     </ul>

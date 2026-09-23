@@ -69,6 +69,7 @@ export type {
   Business,
   BusinessStatus,
   CreateBusinessInput,
+  DiscoverableBusiness,
   UpdateBusinessInput,
 } from "./business";
 export { BUSINESS_STATUSES } from "./business";

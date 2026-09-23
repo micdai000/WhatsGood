@@ -35,6 +35,19 @@ export interface CreateBusinessInput {
   categoryId?: string | null;
 }
 
+export interface DiscoverableBusiness {
+  id: string;
+  slug: string;
+  name: string;
+  logoUrl: string | null;
+  categoryName: string | null;
+  city: string | null;
+  state: string | null;
+  reputationTier: ReputationTier;
+  reputationPeriod: string | null;
+  totalFeedback: number;
+}
+
 export interface UpdateBusinessInput {
   name?: string;
   description?: string | null;

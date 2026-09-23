@@ -29,7 +29,7 @@ export function SearchBar({
         onChange={(event) => onChange(event.target.value)}
         placeholder={SEARCH_NAME_PLACEHOLDER}
         className="h-11 pl-10"
-        aria-label="Search by name or username"
+        aria-label="Search by business name"
         disabled={disabled}
       />
     </div>

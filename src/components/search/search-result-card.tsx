@@ -5,19 +5,14 @@ import { AppImage } from "@/components/ui/app-image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Paragraph, Muted, SectionEyebrow } from "@/components/typography/typography";
-import { formatBadgeHeroTitle } from "@/lib/badges/display";
-import {
-  CURRENT_REPUTATION_LABEL,
-  formatReputationUpdatedLabel,
-  formatVerifiedExperienceCount,
-} from "@/lib/badges/reputation-copy";
+import { CURRENT_REPUTATION_LABEL } from "@/lib/badges/reputation-copy";
+import { getPublicBusinessPath } from "@/lib/business/public-url";
 import { VIEW_REPUTATION_LABEL } from "@/lib/search/discovery-copy";
-import { getPublicProfilePath } from "@/lib/profile/public-url";
-import type { PublicProfile } from "@/types";
+import type { BadgeTier, DiscoverableBusiness, ReputationTier } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface SearchResultCardProps {
-  profile: PublicProfile;
+  business: DiscoverableBusiness;
   className?: string;
 }
 
@@ -30,13 +25,27 @@ function getInitials(name: string): string {
     .join("");
 }
 
-export function SearchResultCard({ profile, className }: SearchResultCardProps) {
-  const location =
-    profile.city && profile.state
-      ? `${profile.city}, ${profile.state}`
-      : profile.city || profile.state;
+function sealTier(tier: ReputationTier): BadgeTier {
+  return tier === "building" ? "none" : tier;
+}
 
-  const tierTitle = formatBadgeHeroTitle(profile.badgeTier, profile.badgeSubTier);
+function tierTitle(tier: ReputationTier): string {
+  if (tier === "building") return "Building reputation";
+  const label = tier.charAt(0).toUpperCase() + tier.slice(1);
+  return label;
+}
+
+function feedbackLabel(count: number): string {
+  return count === 1
+    ? "1 customer feedback submission"
+    : `${count} customer feedback submissions`;
+}
+
+export function SearchResultCard({ business, className }: SearchResultCardProps) {
+  const location =
+    business.city && business.state
+      ? `${business.city}, ${business.state}`
+      : business.city || business.state;
 
   return (
     <Card
@@ -46,7 +55,7 @@ export function SearchResultCard({ profile, className }: SearchResultCardProps) 
       )}
     >
       <Link
-        to={getPublicProfilePath(profile.username)}
+        to={getPublicBusinessPath(business.slug)}
         className="flex h-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <CardContent className="flex flex-1 flex-col gap-3 p-4">
@@ -56,12 +65,11 @@ export function SearchResultCard({ profile, className }: SearchResultCardProps) 
                 {CURRENT_REPUTATION_LABEL}
               </SectionEyebrow>
               <p className="text-base font-semibold leading-tight text-foreground">
-                {tierTitle}
+                {tierTitle(business.reputationTier)}
               </p>
             </div>
             <TrustBadge
-              tier={profile.badgeTier}
-              subTier={profile.badgeSubTier}
+              tier={sealTier(business.reputationTier)}
               size="sm"
               showLabel={false}
               className="shrink-0"
@@ -70,9 +78,9 @@ export function SearchResultCard({ profile, className }: SearchResultCardProps) 
 
           <div className="flex items-start gap-3">
             <div className="relative size-12 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
-              {profile.avatar ? (
+              {business.logoUrl ? (
                 <AppImage
-                  src={profile.avatar}
+                  src={business.logoUrl}
                   alt=""
                   fill
                   className="object-cover"
@@ -83,17 +91,17 @@ export function SearchResultCard({ profile, className }: SearchResultCardProps) 
                   className="flex size-full items-center justify-center bg-primary/10 text-xs font-semibold text-primary"
                   aria-hidden
                 >
-                  {getInitials(profile.displayName)}
+                  {getInitials(business.name)}
                 </div>
               )}
             </div>
             <div className="min-w-0 flex-1 space-y-1">
               <Paragraph className="truncate font-semibold leading-snug">
-                {profile.displayName}
+                {business.name}
               </Paragraph>
-              {profile.professionName ? (
+              {business.categoryName ? (
                 <Badge variant="secondary" className="max-w-full truncate text-xs">
-                  {profile.professionName}
+                  {business.categoryName}
                 </Badge>
               ) : null}
               {location ? (
@@ -105,14 +113,9 @@ export function SearchResultCard({ profile, className }: SearchResultCardProps) 
             </div>
           </div>
 
-          <div className="mt-auto space-y-1">
-            <Muted className="block text-xs">
-              {formatReputationUpdatedLabel(profile.badgePeriod)}
-            </Muted>
-            <Muted className="block text-xs">
-              {formatVerifiedExperienceCount(profile.totalReviews)}
-            </Muted>
-          </div>
+          <Muted className="mt-auto block text-xs">
+            {feedbackLabel(business.totalFeedback)}
+          </Muted>
 
           <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
             {VIEW_REPUTATION_LABEL}

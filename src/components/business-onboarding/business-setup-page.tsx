@@ -13,9 +13,9 @@ import { storeBusinessId } from "@/lib/business/current-business-storage";
 import { completeBusinessOnboardingSchema } from "@/lib/validators";
 import { businessService } from "@/services/businesses";
 import { isFailure } from "@/types";
-import type { BusinessCategory, BusinessSearchResult } from "@/types";
+import type { BusinessCategory } from "@/types";
 
-type Step = "choice" | "create" | "location" | "claim" | "success";
+type Step = "create" | "location" | "success";
 
 interface BusinessDraft {
   name: string;
@@ -61,17 +61,13 @@ function withHttps(value: string): string | undefined {
 
 export function BusinessSetupPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>("choice");
+  const [step, setStep] = useState<Step>("create");
   const [draft, setDraft] = useState<BusinessDraft>(EMPTY_DRAFT);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [search, setSearch] = useState("");
-  const [searching, setSearching] = useState(false);
-  const [results, setResults] = useState<BusinessSearchResult[]>([]);
-  const [claimMessage, setClaimMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -176,54 +172,9 @@ export function BusinessSetupPage() {
     setStep("success");
   }
 
-  async function runSearch(value: string) {
-    setSearch(value);
-    setClaimMessage(null);
-    if (value.trim().length < 2) {
-      setResults([]);
-      return;
-    }
-
-    setSearching(true);
-    const result = await businessService.searchBusinesses(value);
-    setSearching(false);
-    if (isFailure(result)) {
-      setError(result.error.message);
-      return;
-    }
-    setResults(result.data);
-  }
-
-  async function requestClaim(businessId: string, isClaimed: boolean) {
-    setClaimMessage(null);
-    setError(null);
-    if (isClaimed) {
-      setClaimMessage("This business is already claimed.");
-      return;
-    }
-
-    setSubmitting(true);
-    const result = await businessService.createClaimRequest({ businessId });
-    setSubmitting(false);
-
-    if (isFailure(result)) {
-      setError(result.error.message);
-      return;
-    }
-
-    setClaimMessage("Your claim request is pending review.");
-  }
-
   return (
     <OnboardingLayout>
       <div className="space-y-8 rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
-        {step === "choice" ? (
-          <ChoiceStep
-            onCreate={() => setStep("create")}
-            onClaim={() => setStep("claim")}
-          />
-        ) : null}
-
         {step === "create" ? (
           <CreateStep
             draft={draft}
@@ -231,7 +182,6 @@ export function BusinessSetupPage() {
             loadingCategories={loadingCategories}
             fieldErrors={fieldErrors}
             onChange={updateDraft}
-            onBack={() => setStep("choice")}
             onContinue={() => {
               if (validateCreateStep()) setStep("location");
             }}
@@ -251,20 +201,6 @@ export function BusinessSetupPage() {
           />
         ) : null}
 
-        {step === "claim" ? (
-          <ClaimStep
-            search={search}
-            searching={searching}
-            results={results}
-            error={error}
-            claimMessage={claimMessage}
-            submitting={submitting}
-            onSearch={runSearch}
-            onClaim={(id, claimed) => void requestClaim(id, claimed)}
-            onBack={() => setStep("choice")}
-          />
-        ) : null}
-
         {step === "success" ? (
           <SuccessStep
             businessName={draft.name}
@@ -276,60 +212,12 @@ export function BusinessSetupPage() {
   );
 }
 
-function ChoiceStep({
-  onCreate,
-  onClaim,
-}: {
-  onCreate: () => void;
-  onClaim: () => void;
-}) {
-  return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">Get started</p>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Your business deserves a current reputation.
-        </h1>
-        <Paragraph className="text-muted-foreground">
-          Create a Meritt business profile, or claim one that is already listed.
-        </Paragraph>
-      </div>
-
-      <div className="grid gap-4">
-        <button
-          type="button"
-          onClick={onCreate}
-          className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-primary/40 hover:bg-muted/40"
-        >
-          <p className="font-semibold">Create a Business</p>
-          <Muted className="mt-1 text-sm">
-            Create a new business profile and start building your current
-            reputation.
-          </Muted>
-        </button>
-        <button
-          type="button"
-          onClick={onClaim}
-          className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-primary/40 hover:bg-muted/40"
-        >
-          <p className="font-semibold">Claim a Business</p>
-          <Muted className="mt-1 text-sm">
-            Already listed on Meritt? Claim your business to manage its profile
-            and reputation.
-          </Muted>
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function CreateStep({
   draft,
   categories,
   loadingCategories,
   fieldErrors,
   onChange,
-  onBack,
   onContinue,
 }: {
   draft: BusinessDraft;
@@ -337,7 +225,6 @@ function CreateStep({
   loadingCategories: boolean;
   fieldErrors: Record<string, string>;
   onChange: (patch: Partial<BusinessDraft>) => void;
-  onBack: () => void;
   onContinue: () => void;
 }) {
   return (
@@ -435,14 +322,9 @@ function CreateStep({
         </Field>
       </div>
 
-      <div className="flex gap-3">
-        <Button type="button" variant="outline" onClick={onBack}>
-          Back
-        </Button>
-        <Button type="button" className="flex-1" onClick={onContinue}>
-          Continue
-        </Button>
-      </div>
+      <Button type="button" className="w-full" onClick={onContinue}>
+        Continue
+      </Button>
     </div>
   );
 }
@@ -536,93 +418,6 @@ function LocationStep({
           {submitting ? "Creating…" : "Create business"}
         </Button>
       </div>
-    </div>
-  );
-}
-
-function ClaimStep({
-  search,
-  searching,
-  results,
-  error,
-  claimMessage,
-  submitting,
-  onSearch,
-  onClaim,
-  onBack,
-}: {
-  search: string;
-  searching: boolean;
-  results: BusinessSearchResult[];
-  error: string | null;
-  claimMessage: string | null;
-  submitting: boolean;
-  onSearch: (value: string) => void;
-  onClaim: (id: string, isClaimed: boolean) => void;
-  onBack: () => void;
-}) {
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Claim a business</h1>
-        <Paragraph className="text-muted-foreground">
-          Search for a listed business. Claim requests are reviewed before ownership
-          is granted.
-        </Paragraph>
-      </div>
-
-      {error ? <StatusAlert status="error" title="Unable to continue" description={error} /> : null}
-      {claimMessage ? (
-        <StatusAlert status="success" title="Claim update" description={claimMessage} />
-      ) : null}
-
-      <Field label="Search" htmlFor="business-search">
-        <Input
-          id="business-search"
-          value={search}
-          onChange={(event) => onSearch(event.target.value)}
-          placeholder="Business name"
-        />
-      </Field>
-
-      {searching ? <Muted className="text-sm">Searching…</Muted> : null}
-
-      {results.length > 0 ? (
-        <ul className="divide-y divide-border rounded-xl border border-border">
-          {results.map((result) => (
-            <li key={result.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-medium">{result.name}</p>
-                <Muted className="text-sm">
-                  {[result.categoryName, [result.city, result.state].filter(Boolean).join(", ")]
-                    .filter(Boolean)
-                    .join(" · ")}
-                  {result.isClaimed ? " · Claimed" : " · Unclaimed"}
-                </Muted>
-              </div>
-              {result.isClaimed ? (
-                <Muted className="text-sm">This business is already claimed.</Muted>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={submitting}
-                  onClick={() => onClaim(result.id, result.isClaimed)}
-                >
-                  Request to Claim
-                </Button>
-              )}
-            </li>
-          ))}
-        </ul>
-      ) : search.trim().length >= 2 && !searching ? (
-        <Muted className="text-sm">No matching businesses yet.</Muted>
-      ) : null}
-
-      <Button type="button" variant="outline" onClick={onBack}>
-        Back
-      </Button>
     </div>
   );
 }

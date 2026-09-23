@@ -19,8 +19,7 @@ import {
   SEARCH_PAGE_SUBTITLE,
   SEARCH_PAGE_TITLE,
 } from "@/lib/search/discovery-copy";
-import { profileService } from "@/services/profiles/profile.service";
-import { professionService } from "@/services/professions/profession.service";
+import { businessService } from "@/services/businesses";
 
 function searchParamsToRecord(
   searchParams: URLSearchParams,
@@ -40,7 +39,7 @@ export default function SearchPage() {
   );
 
   const searchResult = useServiceQuery(
-    () => profileService.searchProfiles(params),
+    () => businessService.discoverBusinesses(params),
     [
       params.query,
       params.professionId,
@@ -52,8 +51,8 @@ export default function SearchPage() {
     ],
   );
 
-  const professionsResult = useServiceQuery(
-    () => professionService.getProfessions(),
+  const categoriesResult = useServiceQuery(
+    () => businessService.getCategories(),
     [],
   );
 
@@ -63,7 +62,7 @@ export default function SearchPage() {
 
   if (
     searchResult.status === "loading" ||
-    professionsResult.status === "loading"
+    categoriesResult.status === "loading"
   ) {
     return (
       <Section spacing="default">
@@ -81,8 +80,8 @@ export default function SearchPage() {
     throw new Error(searchResult.message);
   }
 
-  const professions =
-    professionsResult.status === "success" ? professionsResult.data : [];
+  const categories =
+    categoriesResult.status === "success" ? categoriesResult.data : [];
   const results = searchResult.data;
   const hasActiveFilters = Boolean(
     params.query || params.professionId || params.city || params.state,
@@ -93,7 +92,7 @@ export default function SearchPage() {
       <Container className="space-y-6">
         {pageHeader}
 
-        <FilterPanel params={params} professions={professions} />
+        <FilterPanel params={params} professions={categories} />
 
         <SearchForm params={params} />
 
@@ -104,8 +103,7 @@ export default function SearchPage() {
             ) : (
               <>
                 <span className="font-medium text-foreground">{results.total}</span>{" "}
-                professional{results.total === 1 ? "" : "s"} with current reputation
-                data
+                business{results.total === 1 ? "" : "es"} with current reputation
               </>
             )}
           </p>
@@ -114,7 +112,7 @@ export default function SearchPage() {
 
         {results.items.length > 0 ? (
           <>
-            <ResultsGrid profiles={results.items} />
+            <ResultsGrid businesses={results.items} />
             <SearchPagination result={results} params={params} />
           </>
         ) : (
