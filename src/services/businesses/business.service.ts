@@ -10,6 +10,7 @@ import {
 import { canCreateClaimRequest } from "@/lib/business/claim";
 import { slugFromBusinessName, uniquifyBusinessSlug } from "@/lib/business/slug";
 import { generateSecureCode } from "@/lib/qr/generate-code";
+import { LIMITS } from "@/lib/constants";
 import { logger } from "@/lib/logger";
 import { escapeIlikePattern } from "@/services/profiles/profile-search.query";
 import {
@@ -77,6 +78,32 @@ import {
   type ClaimRequestRow,
 } from "./business-claim.mapper";
 import { mapQrCodeRow, type QrCodeRow } from "@/services/qr/qr.mapper";
+
+const BUSINESS_LOGOS_BUCKET = "entity-images";
+
+const ALLOWED_LOGO_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+
+const LOGO_TYPE_BY_EXTENSION: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+};
+
+function resolveLogoContentType(file: File): string | null {
+  if (ALLOWED_LOGO_TYPES.has(file.type)) {
+    return file.type;
+  }
+
+  const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+  return LOGO_TYPE_BY_EXTENSION[extension] ?? null;
+}
 
 function nullableText(
   value: string | null | undefined,
@@ -256,6 +283,12 @@ export class BusinessService {
       }
       if (validated.websiteUrl !== undefined) {
         updates.website_url = validated.websiteUrl;
+      }
+      if (validated.socialLinks !== undefined) {
+        updates.social_links = validated.socialLinks;
+        if (validated.websiteUrl === undefined) {
+          updates.website_url = validated.socialLinks.website || null;
+        }
       }
       if (validated.phone !== undefined) {
         updates.phone = nullableText(validated.phone) ?? null;
@@ -1068,6 +1101,58 @@ export class BusinessService {
       return success(
         (data ?? []).map((row) => mapClaimRequestRow(row as ClaimRequestRow)),
       );
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async uploadLogo(
+    file: File,
+  ): Promise<ServiceResult<{ url: string; path: string }>> {
+    const method = "BusinessService.uploadLogo";
+
+    try {
+      const sessionResult = await authService.getSession();
+
+      if (!isSuccess(sessionResult) || !sessionResult.data) {
+        return failure(new AuthorizationError("You must be signed in to upload a logo"));
+      }
+
+      const userId = sessionResult.data.user.id;
+      const contentType = resolveLogoContentType(file);
+
+      if (!contentType) {
+        return failure(
+          new ValidationError("Logo must be a JPEG, PNG, WebP, or GIF image"),
+        );
+      }
+
+      if (file.size > LIMITS.PROFILE_PHOTO_MAX_BYTES) {
+        return failure(new ValidationError("Logo must be 5 MB or smaller"));
+      }
+
+      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const safeExtension = ["jpeg", "jpg", "png", "webp", "gif"].includes(extension)
+        ? extension === "jpeg"
+          ? "jpg"
+          : extension
+        : "jpg";
+      const path = `${userId}/${Date.now()}.${safeExtension}`;
+      const supabase = createClient();
+      const { error: uploadError } = await supabase.storage
+        .from(BUSINESS_LOGOS_BUCKET)
+        .upload(path, file, { contentType });
+
+      if (uploadError) {
+        logger.error(method, uploadError, { userId, path });
+        return failure(DatabaseError.fromSource(uploadError));
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(BUSINESS_LOGOS_BUCKET).getPublicUrl(path);
+
+      return success({ url: publicUrl, path });
     } catch (error) {
       return handleServiceError(method, error);
     }

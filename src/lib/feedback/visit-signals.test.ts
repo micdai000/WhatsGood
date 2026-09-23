@@ -47,10 +47,18 @@ describe("visit signals", () => {
     });
 
     expect(summary.title).toBe("Would not go back");
+    expect(summary.answers).toEqual([
+      { question: "Would you come back?", answer: "I wouldn't go back" },
+      { question: "Did they do what they said?", answer: "No" },
+      { question: "Was it worth it?", answer: "Partly" },
+      { question: "How were you treated?", answer: "Poorly" },
+      { question: "Which fits this visit?", answer: "Client" },
+    ]);
     expect(summary.lines).toEqual([
-      "Did not do what they said",
-      "Partly worth it",
-      "Treated poorly",
+      "I wouldn't go back",
+      "No",
+      "Partly",
+      "Poorly",
       "Client",
     ]);
   });
@@ -63,6 +71,10 @@ describe("visit signals", () => {
     });
 
     expect(summary.title).toBe("Would recommend");
-    expect(summary.lines).toEqual(["Visitor"]);
+    expect(summary.answers).toEqual([
+      { question: "Would you come back?", answer: "Would recommend" },
+      { question: "Which fits this visit?", answer: "Visitor" },
+    ]);
+    expect(summary.lines).toEqual(["Would recommend", "Visitor"]);
   });
 });

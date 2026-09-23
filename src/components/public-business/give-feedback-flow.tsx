@@ -77,8 +77,7 @@ export function GiveFeedbackFlow({
           ))}
         </ul>
         <Paragraph className="text-muted-foreground">
-          It counts toward the current reputation of {businessName}. Older visits fade,
-          so Bronze, Silver, Gold, and Elite reflect what is recent.
+          It is saved toward the current reputation of {businessName}.
         </Paragraph>
         {user ? null : (
           <Link to="/signup" className={cn(buttonVariants({ variant: "ghost" }), "px-0")}>
@@ -94,8 +93,8 @@ export function GiveFeedbackFlow({
       <div className="space-y-2">
         <h2 className="text-xl font-semibold tracking-tight">How was this visit?</h2>
         <Muted>
-          Same questions for every visit. No comments. These taps move {businessName} through
-          Bronze, Silver, Gold, and Elite.
+          Same questions for every visit. No comments. This visit is saved toward{" "}
+          {businessName}&apos;s current reputation.
         </Muted>
       </div>
 

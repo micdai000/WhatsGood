@@ -5,6 +5,24 @@ import { DEFAULT_SOCIAL_LINKS } from "@/types/profile";
 export type SocialUsernamePlatform = "instagram" | "facebook" | "x";
 export type SocialLinkPlatform = SocialUsernamePlatform | "website";
 
+/** Normalize DB JSONB (including `{}` / null / partial objects) into SocialLinks. */
+export function normalizeSocialLinks(value: unknown): SocialLinks {
+  const raw =
+    value !== null && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  const links: SocialLinks = { ...DEFAULT_SOCIAL_LINKS };
+
+  for (const [key, entry] of Object.entries(raw)) {
+    if (typeof entry === "string") {
+      links[key] = entry;
+    }
+  }
+
+  return links;
+}
+
 type PlatformConfig = {
   label: string;
   hostnames: string[];

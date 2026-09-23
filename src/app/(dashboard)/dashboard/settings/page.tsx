@@ -71,50 +71,6 @@ export default function SettingsPage() {
         </div>
       </DashboardCard>
 
-      <DashboardCard title="Customer feedback">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Muted className="text-sm">
-            See recent customer feedback for this business.
-          </Muted>
-          <Link
-            to="/dashboard/feedback"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-          >
-            View feedback
-          </Link>
-        </div>
-      </DashboardCard>
-
-      {/* TODO: retire remaining professional-profile tools when that data is migrated. */}
-      <DashboardCard title="Legacy professional profile">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Muted className="text-sm">
-            Previous Meritt professional profile (username, bio, photo). This is
-            no longer required to use Meritt.
-          </Muted>
-          <Link
-            to="/dashboard/profile/edit"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-          >
-            Edit legacy profile
-          </Link>
-        </div>
-      </DashboardCard>
-
-      <DashboardCard title="Legacy feedback requests">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Muted className="text-sm">
-            Older client feedback links. New businesses should use QR codes instead.
-          </Muted>
-          <Link
-            to="/dashboard/review-requests"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-          >
-            Open legacy requests
-          </Link>
-        </div>
-      </DashboardCard>
-
       <DashboardCard title="Session">
         <div className="space-y-3">
           <Muted className="text-sm">{brandCopy.signOutDevice}</Muted>

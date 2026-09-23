@@ -1,6 +1,7 @@
 import { AppImage } from "@/components/ui/app-image";
 import { Muted, Paragraph } from "@/components/typography/typography";
 import { GiveFeedbackFlow } from "@/components/public-business/give-feedback-flow";
+import { ProfileSocialLinks } from "@/components/profile/profile-social-links";
 import type { Business, BusinessCategory, BusinessLocation, PublicBusinessQrCode } from "@/types";
 
 export function PublicBusinessView({
@@ -85,8 +86,8 @@ export function PublicBusinessView({
         <Paragraph className="text-muted-foreground">
           A visit is a few taps: whether you would recommend them, whether they
           did what they said, whether it was worth it, and how you were treated.
-          There is no comment box. Those recent visits move a business through
-          Bronze, Silver, Gold, and Elite.
+          There is no comment box. Each visit is saved toward this business&apos;s
+          current reputation.
         </Paragraph>
         <Muted className="text-sm">
           {business.totalFeedback} customer feedback
@@ -94,14 +95,11 @@ export function PublicBusinessView({
         </Muted>
       </section>
 
-      {(business.websiteUrl || business.phone) ? (
+      <ProfileSocialLinks links={business.socialLinks} align="start" />
+
+      {business.phone ? (
         <section className="space-y-1 text-sm">
-          {business.websiteUrl ? (
-            <a href={business.websiteUrl} className="text-primary underline-offset-4 hover:underline">
-              {business.websiteUrl}
-            </a>
-          ) : null}
-          {business.phone ? <p>{business.phone}</p> : null}
+          <p>{business.phone}</p>
         </section>
       ) : null}
 

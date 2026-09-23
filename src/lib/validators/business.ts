@@ -32,6 +32,15 @@ const optionalEmailSchema = z
   .nullable()
   .optional();
 
+const socialLinksSchema = z
+  .object({
+    instagram: z.string(),
+    facebook: z.string(),
+    x: z.string(),
+    website: z.string(),
+  })
+  .passthrough();
+
 export const businessIdSchema = z.object({
   id: z.string().uuid("Invalid business ID"),
 });
@@ -63,6 +72,7 @@ export const createBusinessSchema = z.object({
   phone: z.string().trim().max(30).nullable().optional(),
   email: optionalEmailSchema,
   categoryId: z.string().uuid("Invalid category ID").nullable().optional(),
+  socialLinks: socialLinksSchema.optional(),
 });
 
 export const updateBusinessSchema = createBusinessSchema

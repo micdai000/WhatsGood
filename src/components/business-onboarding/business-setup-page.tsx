@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { BusinessLogoField } from "@/components/business/business-logo-field";
 import { OnboardingLayout } from "@/components/onboarding/onboarding-layout";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Muted, Paragraph } from "@/components/typography/typography";
 import { cn } from "@/lib/utils";
 import { storeBusinessId } from "@/lib/business/current-business-storage";
+import { US_STATE_CODES } from "@/lib/location/us-states";
 import { completeBusinessOnboardingSchema } from "@/lib/validators";
 import { businessService } from "@/services/businesses";
 import { isFailure } from "@/types";
@@ -110,7 +112,7 @@ export function BusinessSetupPage() {
       websiteUrl: withHttps(draft.websiteUrl),
       phone: emptyToUndefined(draft.phone),
       email: emptyToUndefined(draft.email),
-      logoUrl: withHttps(draft.logoUrl),
+      logoUrl: emptyToUndefined(draft.logoUrl),
     });
 
     if (!parsed.success) {
@@ -141,7 +143,7 @@ export function BusinessSetupPage() {
       websiteUrl: withHttps(draft.websiteUrl),
       phone: emptyToUndefined(draft.phone),
       email: emptyToUndefined(draft.email),
-      logoUrl: withHttps(draft.logoUrl),
+      logoUrl: emptyToUndefined(draft.logoUrl),
       addressLine1: emptyToUndefined(draft.addressLine1),
       city: draft.city,
       state: draft.state,
@@ -227,6 +229,8 @@ function CreateStep({
   onChange: (patch: Partial<BusinessDraft>) => void;
   onContinue: () => void;
 }) {
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -312,18 +316,20 @@ function CreateStep({
           </Field>
         </div>
 
-        <Field label="Logo URL" htmlFor="business-logo" error={fieldErrors.logoUrl}>
-          <Input
-            id="business-logo"
-            value={draft.logoUrl}
-            onChange={(event) => onChange({ logoUrl: event.target.value })}
-            placeholder="https://"
-          />
-        </Field>
+        <BusinessLogoField
+          value={draft.logoUrl}
+          onChange={(logoUrl) => onChange({ logoUrl })}
+          onUploadingChange={setUploadingLogo}
+        />
+        {fieldErrors.logoUrl ? (
+          <p className="text-sm text-destructive" role="alert">
+            {fieldErrors.logoUrl}
+          </p>
+        ) : null}
       </div>
 
-      <Button type="button" className="w-full" onClick={onContinue}>
-        Continue
+      <Button type="button" className="w-full" onClick={onContinue} disabled={uploadingLogo}>
+        {uploadingLogo ? "Uploading logo…" : "Continue"}
       </Button>
     </div>
   );
@@ -381,12 +387,20 @@ function LocationStep({
             />
           </Field>
           <Field label="State" htmlFor="state" error={fieldErrors.state} required>
-            <Input
+            <select
               id="state"
               value={draft.state}
               onChange={(event) => onChange({ state: event.target.value })}
               autoComplete="address-level1"
-            />
+              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <option value="">State</option>
+              {US_STATE_CODES.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                </option>
+              ))}
+            </select>
           </Field>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">

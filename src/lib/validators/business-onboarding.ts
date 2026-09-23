@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LIMITS } from "@/lib/constants";
+import { isUsStateCode } from "@/lib/location/us-states";
 import { createBusinessSchema } from "./business";
 
 export const completeBusinessOnboardingSchema = z.object({
@@ -14,7 +15,7 @@ export const completeBusinessOnboardingSchema = z.object({
     .optional(),
   phone: z.string().trim().max(30).nullable().optional(),
   email: z.string().trim().email("Invalid email address").nullable().optional(),
-  logoUrl: z.string().trim().url("Enter a valid logo URL").nullable().optional(),
+  logoUrl: z.string().trim().url("Upload a logo image").nullable().optional(),
   addressLine1: z.string().trim().max(200).nullable().optional(),
   city: z
     .string()
@@ -24,8 +25,8 @@ export const completeBusinessOnboardingSchema = z.object({
   state: z
     .string()
     .trim()
-    .min(1, "State is required")
-    .max(LIMITS.LOCATION_MAX_LENGTH),
+    .toUpperCase()
+    .refine(isUsStateCode, "Select a state abbreviation"),
   postalCode: z.string().trim().max(20).nullable().optional(),
   country: z.string().trim().min(2).max(2).optional().default("US"),
 });

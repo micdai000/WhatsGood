@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { buttonVariants } from "@/components/ui/button";
 import { Muted } from "@/components/typography/typography";
 import { useBusinessWorkspace } from "@/contexts/business-workspace-context";
@@ -35,14 +36,23 @@ export default function DashboardPage() {
           Feedback
         </p>
         <p className="mt-2 text-4xl font-semibold tracking-tight">
-          <Link
-            to="/dashboard/feedback"
-            className="underline-offset-4 hover:underline"
-          >
-            {currentBusiness.totalFeedback}
-          </Link>
+          {currentBusiness.totalFeedback}
         </p>
       </div>
+
+      <DashboardCard title="Customer feedback">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <Muted className="text-sm">
+            See recent customer feedback for this business.
+          </Muted>
+          <Link
+            to="/dashboard/feedback"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            View feedback
+          </Link>
+        </div>
+      </DashboardCard>
 
       <Link
         to="/dashboard/qr"

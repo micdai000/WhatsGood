@@ -1,4 +1,5 @@
 import type { ReputationTier } from "./reputation";
+import type { SocialLinks } from "./profile";
 
 export const BUSINESS_STATUSES = ["active", "suspended", "archived"] as const;
 
@@ -16,6 +17,7 @@ export interface Business {
   categoryId: string | null;
   status: BusinessStatus;
   isClaimed: boolean;
+  socialLinks: SocialLinks;
   currentReputationScore: number | null;
   currentReputationTier: ReputationTier;
   currentReputationPeriod: string | null;
@@ -57,4 +59,5 @@ export interface UpdateBusinessInput {
   email?: string | null;
   categoryId?: string | null;
   status?: BusinessStatus;
+  socialLinks?: SocialLinks;
 }

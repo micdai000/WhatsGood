@@ -20,6 +20,10 @@ interface ProfessionalLinksSectionProps {
   onChange: (platform: SocialLinkPlatform, value: string) => void;
   onBlur: (platform: SocialLinkPlatform, value: string) => void;
   className?: string;
+  title?: string;
+  description?: string;
+  /** When false, renders fields without the outer card shell (for nested forms). */
+  asCard?: boolean;
 }
 
 type LinkFieldConfig = {
@@ -52,7 +56,7 @@ const FIELDS: LinkFieldConfig[] = [
   },
   {
     platform: "website",
-    label: "Personal Website",
+    label: "Website",
     placeholder: "example.com",
     autoComplete: "url",
     icon: Globe,
@@ -66,50 +70,67 @@ export function ProfessionalLinksSection({
   onChange,
   onBlur,
   className,
+  title = "Professional Links",
+  description = "Add Instagram, Facebook, X, and a website so customers can find you.",
+  asCard = true,
 }: ProfessionalLinksSectionProps) {
+  const fields = (
+    <div className="space-y-4">
+      {FIELDS.map((field) => {
+        const Icon = field.icon;
+        const error = errors[field.platform];
+        const inputId = `social-${field.platform}`;
+        const errorId = `${inputId}-error`;
+
+        return (
+          <div key={field.platform} className="space-y-2">
+            <Label htmlFor={inputId} className="flex items-center gap-2">
+              <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+              {field.label}
+            </Label>
+            <Input
+              id={inputId}
+              name={inputId}
+              value={values[field.platform] ?? ""}
+              onChange={(event) => onChange(field.platform, event.target.value)}
+              onBlur={(event) => onBlur(field.platform, event.target.value)}
+              placeholder={field.placeholder}
+              autoComplete={field.autoComplete}
+              inputMode={field.inputMode}
+              spellCheck={false}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? errorId : undefined}
+            />
+            {error ? (
+              <p id={errorId} className="text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  if (!asCard) {
+    return (
+      <div className={cn("space-y-3", className)}>
+        <div className="space-y-1">
+          <p className="text-base font-semibold">{title}</p>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+        {fields}
+      </div>
+    );
+  }
+
   return (
     <Card className={cn("border-border shadow-[var(--shadow-meritt-card)]", className)}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold">Professional Links</CardTitle>
-        <CardDescription>
-          Add your professional profiles so customers can learn more about you.
-        </CardDescription>
+        <CardTitle className="text-base font-semibold">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {FIELDS.map((field) => {
-          const Icon = field.icon;
-          const error = errors[field.platform];
-          const inputId = `social-${field.platform}`;
-          const errorId = `${inputId}-error`;
-
-          return (
-            <div key={field.platform} className="space-y-2">
-              <Label htmlFor={inputId} className="flex items-center gap-2">
-                <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                {field.label}
-              </Label>
-              <Input
-                id={inputId}
-                name={inputId}
-                value={values[field.platform] ?? ""}
-                onChange={(event) => onChange(field.platform, event.target.value)}
-                onBlur={(event) => onBlur(field.platform, event.target.value)}
-                placeholder={field.placeholder}
-                autoComplete={field.autoComplete}
-                inputMode={field.inputMode}
-                spellCheck={false}
-                aria-invalid={Boolean(error)}
-                aria-describedby={error ? errorId : undefined}
-              />
-              {error ? (
-                <p id={errorId} className="text-sm text-destructive" role="alert">
-                  {error}
-                </p>
-              ) : null}
-            </div>
-          );
-        })}
-      </CardContent>
+      <CardContent>{fields}</CardContent>
     </Card>
   );
 }

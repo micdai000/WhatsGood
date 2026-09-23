@@ -1,7 +1,8 @@
-import type { Business, DiscoverableBusiness } from "@/types";
+import type { Business, DiscoverableBusiness, SocialLinks } from "@/types";
 import type { ReputationTier } from "@/types/reputation";
 import { BUSINESS_STATUSES, type BusinessStatus } from "@/types/business";
 import { REPUTATION_TIERS } from "@/types/reputation";
+import { normalizeSocialLinks } from "@/lib/profile/social-links";
 
 export type BusinessRow = {
   id: string;
@@ -15,6 +16,7 @@ export type BusinessRow = {
   category_id: string | null;
   status: string;
   is_claimed: boolean;
+  social_links?: SocialLinks | Record<string, unknown> | null;
   current_reputation_score: number | string | null;
   current_reputation_tier: string;
   current_reputation_period: string | null;
@@ -72,18 +74,24 @@ export function mapDiscoverableBusiness(
 }
 
 export function mapBusinessRow(row: BusinessRow): Business {
+  const socialLinks = normalizeSocialLinks(row.social_links);
+  if (!socialLinks.website && row.website_url) {
+    socialLinks.website = row.website_url;
+  }
+
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
     description: row.description,
     logoUrl: row.logo_url,
-    websiteUrl: row.website_url,
+    websiteUrl: row.website_url || socialLinks.website || null,
     phone: row.phone,
     email: row.email,
     categoryId: row.category_id,
     status: asBusinessStatus(row.status),
     isClaimed: row.is_claimed,
+    socialLinks,
     currentReputationScore:
       row.current_reputation_score === null
         ? null

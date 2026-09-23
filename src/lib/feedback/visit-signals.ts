@@ -6,8 +6,9 @@
  * forces a side and hides an honest "it was fine."
  *
  * Every visitor gets the same taps. "Okay" is stored as a real outcome and
- * does not count as a recommendation or a rejection. Bronze, Silver, Gold,
- * and Elite stay the business standing those recent visits move.
+ * does not count as a recommendation or a rejection. Detail taps
+ * (keptWord / worthIt / treated) are stored for the business to review.
+ * Visit outcome maps to would_recommend for future reputation scoring.
  */
 
 export const VISIT_OUTCOMES = [
@@ -115,11 +116,23 @@ export function readVisitFeedback(
   return { visit, keptWord, worthIt, treated };
 }
 
+export interface FeedbackAnswer {
+  question: string;
+  answer: string;
+}
+
+function optionLabel<T extends string>(
+  options: readonly { id: T; label: string }[],
+  id: T,
+): string {
+  return options.find((option) => option.id === id)?.label ?? id;
+}
+
 export function summarizeFeedback(input: {
   wouldRecommend: boolean | null;
   experienceType: string | null;
   feedbackData?: Record<string, unknown> | null;
-}): { title: string; lines: string[] } {
+}): { title: string; answers: FeedbackAnswer[]; lines: string[] } {
   const stored = readVisitFeedback(input.feedbackData);
   const title = stored
     ? OUTCOME_SUMMARY[stored.visit]
@@ -129,19 +142,42 @@ export function summarizeFeedback(input: {
         ? "Would recommend"
         : "Would not recommend";
 
-  const lines = stored
+  const answers: FeedbackAnswer[] = stored
     ? [
-        KEPT_WORD_SUMMARY[stored.keptWord],
-        WORTH_IT_SUMMARY[stored.worthIt],
-        TREATED_SUMMARY[stored.treated],
+        {
+          question: "Would you come back?",
+          answer: optionLabel(VISIT_OUTCOMES, stored.visit),
+        },
+        {
+          question: "Did they do what they said?",
+          answer: optionLabel(KEPT_WORD_OPTIONS, stored.keptWord),
+        },
+        {
+          question: "Was it worth it?",
+          answer: optionLabel(WORTH_IT_OPTIONS, stored.worthIt),
+        },
+        {
+          question: "How were you treated?",
+          answer: optionLabel(TREATED_OPTIONS, stored.treated),
+        },
       ]
-    : [];
+    : [
+        {
+          question: "Would you come back?",
+          answer: title,
+        },
+      ];
 
   if (input.experienceType) {
-    lines.push(input.experienceType);
+    answers.push({
+      question: "Which fits this visit?",
+      answer: input.experienceType,
+    });
   }
 
-  return { title, lines };
+  const lines = answers.map((item) => item.answer);
+
+  return { title, answers, lines };
 }
 
 export function visitFeedbackLines(feedback: VisitFeedback, experienceType: string): string[] {
