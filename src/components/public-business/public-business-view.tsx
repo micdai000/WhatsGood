@@ -73,9 +73,10 @@ export function PublicBusinessView({
       <section className="space-y-2">
         <h2 className="text-lg font-semibold tracking-tight">How Meritt works</h2>
         <Paragraph className="text-muted-foreground">
-          Meritt uses recent customer feedback to help show a business&apos;s
-          current reputation. Older experiences should not define a business
-          forever.
+          A visit is a few taps: whether you would recommend them, whether they
+          did what they said, whether it was worth it, and how you were treated.
+          There is no comment box. Those recent visits move a business through
+          Bronze, Silver, Gold, and Elite.
         </Paragraph>
         <Muted className="text-sm">
           {business.totalFeedback} customer feedback

@@ -1,17 +1,22 @@
 import type { PublicBusinessQrCode, SubmitFeedbackInput } from "@/types";
+import {
+  buildVisitFeedbackData,
+  wouldRecommendForVisit,
+  type VisitFeedback,
+} from "@/lib/feedback/visit-signals";
 
 export function buildSubmitFeedbackInput(options: {
   businessId: string;
   qr?: PublicBusinessQrCode | null;
-  wouldRecommend: boolean;
   experienceType: string;
+  feedback: VisitFeedback;
 }): SubmitFeedbackInput {
   return {
     businessId: options.businessId,
-    wouldRecommend: options.wouldRecommend,
+    wouldRecommend: wouldRecommendForVisit(options.feedback.visit),
     experienceType: options.experienceType,
     qrCodeId: options.qr?.id ?? null,
     locationId: options.qr?.locationId ?? null,
-    feedbackData: {},
+    feedbackData: buildVisitFeedbackData(options.feedback),
   };
 }

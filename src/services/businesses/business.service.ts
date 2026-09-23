@@ -31,6 +31,7 @@ import {
   createClaimRequestSchema,
   createBusinessLocationSchema,
   createBusinessSchema,
+  profileSearchSchema,
   updateBusinessLocationSchema,
   updateBusinessMemberRoleSchema,
   updateBusinessSchema,
@@ -73,7 +74,12 @@ import {
   mapBusinessMemberRow,
   type BusinessMemberRow,
 } from "./business-member.mapper";
-import { mapBusinessRow, type BusinessRow } from "./business.mapper";
+import {
+  mapBusinessRow,
+  mapDiscoverableBusiness,
+  type BusinessRow,
+  type DiscoverableBusinessRow,
+} from "./business.mapper";
 import {
   mapClaimRequestRow,
   type ClaimRequestRow,
@@ -985,6 +991,97 @@ export class BusinessService {
       }
 
       return failure(new ConflictError("This business name is already taken"));
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async discoverBusinesses(
+    params?: ProfileSearchParams,
+  ): Promise<ServiceResult<PaginatedResult<DiscoverableBusiness>>> {
+    const method = "BusinessService.discoverBusinesses";
+
+    try {
+      const validated = validate(profileSearchSchema, params ?? {});
+      const page = validated.page;
+      const limit = validated.limit;
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+      const hasLocationFilter = Boolean(validated.city || validated.state);
+      const locationSelect = hasLocationFilter
+        ? "business_locations!inner(city, state, is_primary)"
+        : "business_locations(city, state, is_primary)";
+
+      const supabase = createClient();
+      let query = supabase
+        .from("businesses")
+        .select(
+          `id, slug, name, logo_url, is_claimed, custom_category, current_reputation_tier, current_reputation_period, total_feedback, business_categories(name, slug), ${locationSelect}`,
+          { count: "exact" },
+        )
+        .eq("status", "active")
+        .eq("is_claimed", true);
+
+      if (validated.professionId) {
+        query = query.eq("category_id", validated.professionId);
+      }
+
+      if (validated.query) {
+        query = query.ilike(
+          "name",
+          `%${escapeIlikePattern(validated.query)}%`,
+        );
+      }
+
+      if (validated.city) {
+        query = query.ilike(
+          "business_locations.city",
+          `%${escapeIlikePattern(validated.city)}%`,
+        );
+      }
+
+      if (validated.state) {
+        query = query.ilike(
+          "business_locations.state",
+          `%${escapeIlikePattern(validated.state)}%`,
+        );
+      }
+
+      switch (validated.sort) {
+        case "rating":
+          query = query.order("current_reputation_score", {
+            ascending: false,
+            nullsFirst: false,
+          });
+          break;
+        case "reviews":
+          query = query.order("total_feedback", { ascending: false });
+          break;
+        case "name":
+          query = query.order("name", { ascending: true });
+          break;
+        default:
+          query = query.order("created_at", { ascending: false });
+      }
+
+      const { data, error, count } = await query.range(from, to);
+
+      if (error) {
+        logger.error(method, error, { params: validated });
+        return failure(DatabaseError.fromSource(error));
+      }
+
+      const total = count ?? 0;
+
+      return success({
+        items: (data ?? []).map((row) =>
+          mapDiscoverableBusiness(row as DiscoverableBusinessRow),
+        ),
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 1,
+      });
     } catch (error) {
       return handleServiceError(method, error);
     }

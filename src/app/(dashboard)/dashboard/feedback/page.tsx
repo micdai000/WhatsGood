@@ -7,6 +7,7 @@ import { ErrorState } from "@/components/layout/error-state";
 import { Muted } from "@/components/typography/typography";
 import { useBusinessWorkspace } from "@/contexts/business-workspace-context";
 import { feedbackService } from "@/services/feedback";
+import { summarizeFeedback } from "@/lib/feedback/visit-signals";
 import { isFailure } from "@/types";
 import type { ReputationFeedback } from "@/types";
 
@@ -71,26 +72,23 @@ export default function DashboardFeedbackPage() {
         />
       ) : (
         <ul className="space-y-3">
-          {items.map((item) => (
-            <li key={item.id}>
-              <DashboardCard>
-                <div className="space-y-1">
-                  <p className="font-medium">
-                    {item.wouldRecommend == null
-                      ? "Experience submitted"
-                      : item.wouldRecommend
-                        ? "Would recommend"
-                        : "Would not recommend"}
-                  </p>
-                  <Muted className="text-sm">
-                    {[item.experienceType, new Date(item.createdAt).toLocaleDateString()]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </Muted>
-                </div>
-              </DashboardCard>
-            </li>
-          ))}
+          {items.map((item) => {
+            const summary = summarizeFeedback(item);
+            return (
+              <li key={item.id}>
+                <DashboardCard>
+                  <div className="space-y-1">
+                    <p className="font-medium">{summary.title}</p>
+                    <Muted className="text-sm">
+                      {[...summary.lines, new Date(item.createdAt).toLocaleDateString()]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </Muted>
+                  </div>
+                </DashboardCard>
+              </li>
+            );
+          })}
         </ul>
       )}
 

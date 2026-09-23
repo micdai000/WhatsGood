@@ -10,29 +10,38 @@ const QR: PublicBusinessQrCode = {
   isActive: true,
 };
 
+const FEEDBACK = {
+  visit: "recommend",
+  keptWord: "yes",
+  worthIt: "yes",
+  treated: "well",
+} as const;
+
 describe("buildSubmitFeedbackInput", () => {
   it("attaches QR and location ids when a QR context is present", () => {
     const input = buildSubmitFeedbackInput({
       businessId: QR.businessId,
       qr: QR,
-      wouldRecommend: true,
       experienceType: "Customer",
+      feedback: FEEDBACK,
     });
 
     expect(input.qrCodeId).toBe(QR.id);
     expect(input.locationId).toBe(QR.locationId);
     expect(input.businessId).toBe(QR.businessId);
+    expect(input.wouldRecommend).toBe(true);
   });
 
   it("omits QR attribution when the visitor did not scan a code", () => {
     const input = buildSubmitFeedbackInput({
       businessId: QR.businessId,
       qr: null,
-      wouldRecommend: false,
       experienceType: "Visitor",
+      feedback: { ...FEEDBACK, visit: "would_not" },
     });
 
     expect(input.qrCodeId).toBeNull();
     expect(input.locationId).toBeNull();
+    expect(input.wouldRecommend).toBe(false);
   });
 });
