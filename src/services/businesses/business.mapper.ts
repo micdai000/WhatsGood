@@ -19,6 +19,10 @@ export type BusinessRow = {
   custom_category?: string | null;
   status: string;
   is_claimed: boolean;
+  is_verified?: boolean | null;
+  listing_source?: string | null;
+  claimed_at?: string | null;
+  contact_locked_until?: string | null;
   current_reputation_score: number | string | null;
   current_reputation_tier: string;
   current_reputation_period: string | null;
@@ -99,6 +103,10 @@ export function mapBusinessRow(row: BusinessRow): Business {
     customCategory: row.custom_category ?? null,
     status: asBusinessStatus(row.status),
     isClaimed: row.is_claimed,
+    isVerified: Boolean(row.is_verified),
+    listingSource: row.listing_source === "admin" ? "admin" : "owner",
+    claimedAt: row.claimed_at ?? null,
+    contactLockedUntil: row.contact_locked_until ?? null,
     currentReputationScore:
       row.current_reputation_score === null
         ? null

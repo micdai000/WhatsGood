@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import {
+  BadgeCheck,
   Briefcase,
+  Store,
   LayoutDashboard,
   MessageSquare,
   Shield,
@@ -22,6 +24,8 @@ const NAV_ITEMS: Array<{
   exact?: boolean;
 }> = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/admin/businesses", label: "Businesses", icon: Store },
+  { href: "/admin/claims", label: "Claims", icon: BadgeCheck },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/profiles", label: "Profiles", icon: UserCircle },
   { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },

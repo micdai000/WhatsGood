@@ -148,10 +148,10 @@ export default function AboutPage() {
             <Eyebrow>Current reputation</Eyebrow>
             <H2>Recent feedback carries the reputation.</H2>
             <Paragraph className="text-lg text-muted-foreground">
-              A new business starts at Building reputation. As customers share
-              recent experiences, that reputation can move through Bronze,
-              Silver, Gold, and Elite. The point is what is happening now, not
-              a lifetime average.
+              A new business starts at Building reputation. Feedback is saved so
+              current standing can eventually move through Bronze, Silver, Gold,
+              and Elite. The point is what is happening now, not a lifetime
+              average.
             </Paragraph>
           </div>
 

@@ -1,6 +1,6 @@
 import { AppImage } from "@/components/ui/app-image";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone } from "lucide-react";
+import { BadgeCheck, MapPin, Phone } from "lucide-react";
 import { Muted } from "@/components/typography/typography";
 import { ProfileSocialLinks } from "@/components/profile/profile-social-links";
 import { getInitials } from "@/lib/auth/display-name";
@@ -78,6 +78,12 @@ export function PublicBusinessHeader({
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                {business.isClaimed && business.isVerified ? (
+                  <Badge variant="secondary" className="gap-1 font-medium">
+                    <BadgeCheck className="size-3.5" aria-hidden />
+                    Verified owner
+                  </Badge>
+                ) : null}
                 {categoryName ? (
                   <Badge variant="secondary" className="font-medium">
                     {categoryName}

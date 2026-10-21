@@ -1,7 +1,10 @@
+import { Link } from "react-router-dom";
+import { buttonVariants } from "@/components/ui/button";
 import { Muted, Paragraph } from "@/components/typography/typography";
 import { GiveFeedbackFlow } from "@/components/public-business/give-feedback-flow";
 import { PublicBusinessHeader } from "@/components/public-business/public-business-header";
 import { displayCategoryName } from "@/lib/business/categories";
+import { cn } from "@/lib/utils";
 import type { Business, BusinessCategory, BusinessLocation, PublicBusinessQrCode } from "@/types";
 
 export function PublicBusinessView({
@@ -89,6 +92,23 @@ export function PublicBusinessView({
         businessName={business.name}
         qr={qr}
       />
+
+      {!business.isClaimed ? (
+        <section className="space-y-2 rounded-xl border border-dashed border-border p-5">
+          <p className="font-semibold">Is this your business?</p>
+          <Muted className="text-sm">
+            {business.totalFeedback > 0
+              ? `Customers have already shared ${business.totalFeedback} piece${business.totalFeedback === 1 ? "" : "s"} of feedback. Claim this listing to see it, update your profile, and get your QR code.`
+              : "Claim this listing to manage your profile, see customer feedback, and get your QR code."}
+          </Muted>
+          <Link
+            to={`/claim/${business.id}`}
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            Claim this business
+          </Link>
+        </section>
+      ) : null}
     </div>
   );
 }

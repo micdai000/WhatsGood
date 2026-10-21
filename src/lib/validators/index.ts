@@ -113,7 +113,9 @@ export {
 
 export {
   businessSearchQuerySchema,
+  claimIdSchema,
   completeBusinessOnboardingSchema,
   createClaimRequestSchema,
+  verifyClaimCodeSchema,
 } from "./business-onboarding";
 export type { CompleteBusinessOnboardingSchema } from "./business-onboarding";

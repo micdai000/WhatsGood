@@ -16,6 +16,7 @@ import {
 } from "@/lib/business/categories";
 import { slugFromBusinessName, uniquifyBusinessSlug } from "@/lib/business/slug";
 import { generateSecureCode } from "@/lib/qr/generate-code";
+import { LIMITS } from "@/lib/constants";
 import { logger } from "@/lib/logger";
 import { escapeIlikePattern } from "@/services/profiles/profile-search.query";
 import {
@@ -27,6 +28,7 @@ import {
   businessMembersByBusinessSchema,
   businessSearchQuerySchema,
   businessSlugLookupSchema,
+  claimIdSchema,
   completeBusinessOnboardingSchema,
   createClaimRequestSchema,
   createBusinessLocationSchema,
@@ -36,9 +38,15 @@ import {
   updateBusinessMemberRoleSchema,
   updateBusinessSchema,
   validate,
+  verifyClaimCodeSchema,
 } from "@/lib/validators";
-import { failure, handleServiceError, success } from "@/services/shared";
-import { LIMITS, PAGINATION } from "@/lib/constants";
+import {
+  failure,
+  handleServiceError,
+  mapRpcError,
+  success,
+} from "@/services/shared";
+import { PAGINATION } from "@/lib/constants";
 import type {
   AddBusinessMemberInput,
   Business,
@@ -48,6 +56,7 @@ import type {
   BusinessMember,
   BusinessMemberRole,
   BusinessSearchResult,
+  ClaimRequestWithBusiness,
   CompleteBusinessOnboardingInput,
   CompleteBusinessOnboardingResult,
   CreateBusinessInput,
@@ -59,6 +68,7 @@ import type {
   ServiceResult,
   UpdateBusinessInput,
   UpdateBusinessLocationInput,
+  VerifyClaimCodeResult,
 } from "@/types";
 import { REPUTATION_TIERS, type ReputationTier } from "@/types/reputation";
 import { isSuccess } from "@/types";
@@ -85,6 +95,32 @@ import {
   type ClaimRequestRow,
 } from "./business-claim.mapper";
 import { mapQrCodeRow, type QrCodeRow } from "@/services/qr/qr.mapper";
+
+const BUSINESS_LOGOS_BUCKET = "entity-images";
+
+const ALLOWED_LOGO_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+
+const LOGO_TYPE_BY_EXTENSION: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+};
+
+function resolveLogoContentType(file: File): string | null {
+  if (ALLOWED_LOGO_TYPES.has(file.type)) {
+    return file.type;
+  }
+
+  const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+  return LOGO_TYPE_BY_EXTENSION[extension] ?? null;
+}
 
 function nullableText(
   value: string | null | undefined,
@@ -395,6 +431,12 @@ export class BusinessService {
       if (validated.websiteUrl !== undefined) {
         updates.website_url = validated.websiteUrl;
       }
+      if (validated.socialLinks !== undefined) {
+        updates.social_links = validated.socialLinks;
+        if (validated.websiteUrl === undefined) {
+          updates.website_url = validated.socialLinks.website || null;
+        }
+      }
       if (validated.phone !== undefined) {
         updates.phone = nullableText(validated.phone) ?? null;
       }
@@ -428,7 +470,7 @@ export class BusinessService {
 
       if (error) {
         logger.error(method, error, { id: businessId });
-        return failure(DatabaseError.fromSource(error));
+        return mapRpcError(error);
       }
 
       if (!data) {
@@ -1325,26 +1367,23 @@ export class BusinessService {
       }
 
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("business_claim_requests")
-        .insert({
-          business_id: validated.businessId,
-          user_id: sessionResult.data.user.id,
-          status: "pending",
-        })
-        .select("*")
-        .single();
+      const { data, error } = await supabase.rpc("request_business_claim", {
+        p_business_id: validated.businessId,
+        p_claimant_name: validated.claimantName,
+        p_claimant_role: validated.claimantRole,
+        p_contact_phone: nullableText(validated.contactPhone) ?? null,
+        p_contact_email: nullableText(validated.contactEmail) ?? null,
+        p_verification_method: validated.verificationMethod,
+        p_evidence_url: nullableText(validated.evidenceUrl) ?? null,
+        p_note: nullableText(validated.note) ?? null,
+      });
 
       if (error) {
         logger.error(method, error, { businessId: validated.businessId });
-
-        if (error.code === "23505") {
-          return failure(
-            new ConflictError("You already have a pending claim for this business"),
-          );
-        }
-
-        return failure(DatabaseError.fromSource(error));
+        return mapRpcError(
+          error,
+          "You already have a pending claim for this business",
+        );
       }
 
       return success(mapClaimRequestRow(data as ClaimRequestRow));
@@ -1353,7 +1392,9 @@ export class BusinessService {
     }
   }
 
-  async getMyClaimRequests(): Promise<ServiceResult<BusinessClaimRequest[]>> {
+  async getMyClaimRequests(): Promise<
+    ServiceResult<ClaimRequestWithBusiness[]>
+  > {
     const method = "BusinessService.getMyClaimRequests";
 
     try {
@@ -1368,7 +1409,7 @@ export class BusinessService {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("business_claim_requests")
-        .select("*")
+        .select("*, businesses ( name, slug )")
         .eq("user_id", sessionResult.data.user.id)
         .order("created_at", { ascending: false });
 
@@ -1378,8 +1419,139 @@ export class BusinessService {
       }
 
       return success(
-        (data ?? []).map((row) => mapClaimRequestRow(row as ClaimRequestRow)),
+        (data ?? []).map((row) => {
+          const businessRel = row.businesses as
+            | { name: string; slug: string }
+            | { name: string; slug: string }[]
+            | null;
+          const business = Array.isArray(businessRel)
+            ? businessRel[0]
+            : businessRel;
+
+          return {
+            ...mapClaimRequestRow(row as ClaimRequestRow),
+            businessName: business?.name ?? "Business unavailable",
+            businessSlug: business?.slug ?? "",
+          } satisfies ClaimRequestWithBusiness;
+        }),
       );
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async cancelClaimRequest(
+    claimId: string,
+  ): Promise<ServiceResult<BusinessClaimRequest>> {
+    const method = "BusinessService.cancelClaimRequest";
+
+    try {
+      const validated = validate(claimIdSchema, { claimId });
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("cancel_business_claim", {
+        p_claim_id: validated.claimId,
+      });
+
+      if (error) {
+        logger.error(method, error, { claimId: validated.claimId });
+        return mapRpcError(error);
+      }
+
+      return success(mapClaimRequestRow(data as ClaimRequestRow));
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async verifyClaimCode(
+    claimId: string,
+    code: string,
+  ): Promise<ServiceResult<VerifyClaimCodeResult>> {
+    const method = "BusinessService.verifyClaimCode";
+
+    try {
+      const validated = validate(verifyClaimCodeSchema, { claimId, code });
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("verify_business_claim_code", {
+        p_claim_id: validated.claimId,
+        p_code: validated.code,
+      });
+
+      if (error) {
+        logger.error(method, error, { claimId: validated.claimId });
+        return mapRpcError(error);
+      }
+
+      const payload = data as
+        | { ok: true; claim: ClaimRequestRow }
+        | { ok: false; error: string; attemptsRemaining?: number }
+        | null;
+
+      if (!payload) {
+        return failure(new DatabaseError());
+      }
+
+      if (payload.ok) {
+        return success({ ok: true, claim: mapClaimRequestRow(payload.claim) });
+      }
+
+      return success({
+        ok: false,
+        error: payload.error,
+        attemptsRemaining: payload.attemptsRemaining,
+      });
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async uploadLogo(
+    file: File,
+  ): Promise<ServiceResult<{ url: string; path: string }>> {
+    const method = "BusinessService.uploadLogo";
+
+    try {
+      const sessionResult = await authService.getSession();
+
+      if (!isSuccess(sessionResult) || !sessionResult.data) {
+        return failure(new AuthorizationError("You must be signed in to upload a logo"));
+      }
+
+      const userId = sessionResult.data.user.id;
+      const contentType = resolveLogoContentType(file);
+
+      if (!contentType) {
+        return failure(
+          new ValidationError("Logo must be a JPEG, PNG, WebP, or GIF image"),
+        );
+      }
+
+      if (file.size > LIMITS.PROFILE_PHOTO_MAX_BYTES) {
+        return failure(new ValidationError("Logo must be 5 MB or smaller"));
+      }
+
+      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const safeExtension = ["jpeg", "jpg", "png", "webp", "gif"].includes(extension)
+        ? extension === "jpeg"
+          ? "jpg"
+          : extension
+        : "jpg";
+      const path = `${userId}/${Date.now()}.${safeExtension}`;
+      const supabase = createClient();
+      const { error: uploadError } = await supabase.storage
+        .from(BUSINESS_LOGOS_BUCKET)
+        .upload(path, file, { contentType });
+
+      if (uploadError) {
+        logger.error(method, uploadError, { userId, path });
+        return failure(DatabaseError.fromSource(uploadError));
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(BUSINESS_LOGOS_BUCKET).getPublicUrl(path);
+
+      return success({ url: publicUrl, path });
     } catch (error) {
       return handleServiceError(method, error);
     }

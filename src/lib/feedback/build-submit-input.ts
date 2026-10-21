@@ -17,6 +17,6 @@ export function buildSubmitFeedbackInput(options: {
     experienceType: options.experienceType,
     qrCodeId: options.qr?.id ?? null,
     locationId: options.qr?.locationId ?? null,
-    feedbackData: buildVisitFeedbackData(options.feedback),
+    feedbackData: { ...buildVisitFeedbackData(options.feedback) },
   };
 }

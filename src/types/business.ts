@@ -5,6 +5,8 @@ export const BUSINESS_STATUSES = ["active", "suspended", "archived"] as const;
 
 export type BusinessStatus = (typeof BUSINESS_STATUSES)[number];
 
+export type BusinessListingSource = "owner" | "admin";
+
 export interface Business {
   id: string;
   slug: string;
@@ -19,6 +21,10 @@ export interface Business {
   customCategory: string | null;
   status: BusinessStatus;
   isClaimed: boolean;
+  isVerified: boolean;
+  listingSource: BusinessListingSource;
+  claimedAt: string | null;
+  contactLockedUntil: string | null;
   currentReputationScore: number | null;
   currentReputationTier: ReputationTier;
   currentReputationPeriod: string | null;

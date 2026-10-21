@@ -16,7 +16,9 @@ function buildPageUrl(
   params?: Record<string, string | undefined>,
 ) {
   const search = new URLSearchParams();
-  if (params?.query) search.set("query", params.query);
+  for (const [key, value] of Object.entries(params ?? {})) {
+    if (value) search.set(key, value);
+  }
   if (page > 1) search.set("page", String(page));
   const query = search.toString();
   return query ? `${basePath}?${query}` : basePath;
