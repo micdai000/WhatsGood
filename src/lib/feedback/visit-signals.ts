@@ -91,7 +91,9 @@ export function wouldRecommendForVisit(visit: VisitOutcomeId): boolean | null {
   return VISIT_OUTCOMES.find((option) => option.id === visit)?.wouldRecommend ?? null;
 }
 
-export function buildVisitFeedbackData(feedback: VisitFeedback): VisitFeedback {
+export function buildVisitFeedbackData(
+  feedback: VisitFeedback,
+): Record<string, unknown> {
   return {
     visit: feedback.visit,
     keptWord: feedback.keptWord,

@@ -61,7 +61,7 @@ export const FEEDBACK_ALREADY_SUBMITTED = "Feedback already submitted";
 export const INVALID_FEEDBACK_LINK = "Invalid feedback link";
 
 export const DELETE_ACCOUNT_DATA_SUMMARY =
-  "Permanently delete your account, profile, verified client feedback, and feedback links.";
+  "Permanently delete your account, business profile, verified client feedback, and feedback links.";
 
 export const DELETE_PROFILE_DATA_SUMMARY = (displayName: string) =>
   `This permanently removes ${displayName}'s profile, verified client feedback, and feedback links.`;

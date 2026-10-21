@@ -5,9 +5,9 @@ import { Section } from "@/components/layout/section";
 import { PageHeader } from "@/components/layout/page-header";
 import { Muted } from "@/components/typography/typography";
 import {
+  BusinessResultsGrid,
   EmptyResults,
   FilterPanel,
-  ResultsGrid,
   SearchForm,
   SearchPagination,
   SortDropdown,
@@ -39,7 +39,7 @@ export default function SearchPage() {
   );
 
   const searchResult = useServiceQuery(
-    () => businessService.discoverBusinesses(params),
+    () => businessService.listPublicBusinesses(params),
     [
       params.query,
       params.professionId,
@@ -80,8 +80,17 @@ export default function SearchPage() {
     throw new Error(searchResult.message);
   }
 
-  const categories =
-    categoriesResult.status === "success" ? categoriesResult.data : [];
+  const professions =
+    categoriesResult.status === "success"
+      ? categoriesResult.data.map((category) => ({
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+          icon: category.icon,
+          isDisabled: !category.isActive,
+          createdAt: category.createdAt,
+        }))
+      : [];
   const results = searchResult.data;
   const hasActiveFilters = Boolean(
     params.query || params.professionId || params.city || params.state,
@@ -92,7 +101,7 @@ export default function SearchPage() {
       <Container className="space-y-6">
         {pageHeader}
 
-        <FilterPanel params={params} professions={categories} />
+        <FilterPanel params={params} professions={professions} />
 
         <SearchForm params={params} />
 
@@ -104,6 +113,7 @@ export default function SearchPage() {
               <>
                 <span className="font-medium text-foreground">{results.total}</span>{" "}
                 business{results.total === 1 ? "" : "es"} with current reputation
+                data
               </>
             )}
           </p>
@@ -112,7 +122,7 @@ export default function SearchPage() {
 
         {results.items.length > 0 ? (
           <>
-            <ResultsGrid businesses={results.items} />
+            <BusinessResultsGrid businesses={results.items} />
             <SearchPagination result={results} params={params} />
           </>
         ) : (

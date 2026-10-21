@@ -9,7 +9,30 @@ const SENSITIVE_KEY_PATTERN =
 
 function formatMeta(meta?: LogMeta): string {
   if (!meta || Object.keys(meta).length === 0) return "";
-  return isDevelopment ? ` ${JSON.stringify(meta)}` : "";
+  return ` ${JSON.stringify(meta)}`;
+}
+
+function describeError(error: unknown): string | undefined {
+  if (error == null) return undefined;
+  if (typeof error === "string") return error;
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  if (typeof error === "object") {
+    const record = error as Record<string, unknown>;
+    const message = typeof record.message === "string" ? record.message : "";
+    const extra = [record.code, record.details, record.hint]
+      .filter((part) => typeof part === "string" && part.length > 0)
+      .join(" · ");
+    if (message && extra) return `${message} (${extra})`;
+    if (message) return message;
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+  return String(error);
 }
 
 function sanitizeMeta(meta?: LogMeta): LogMeta | undefined {
@@ -42,8 +65,7 @@ export const logger = {
   },
 
   error(message: string, error?: unknown, meta?: LogMeta): void {
-    const errorMessage =
-      error instanceof Error ? error.message : error ? String(error) : undefined;
+    const errorMessage = describeError(error);
 
     console.error(
       `[ERROR] ${message}${errorMessage ? `: ${errorMessage}` : ""}${formatMeta(sanitizeMeta(meta))}`,

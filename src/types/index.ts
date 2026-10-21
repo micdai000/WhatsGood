@@ -70,7 +70,6 @@ export type {
   BusinessListingSource,
   BusinessStatus,
   CreateBusinessInput,
-  DiscoverableBusiness,
   UpdateBusinessInput,
 } from "./business";
 export { BUSINESS_STATUSES } from "./business";
@@ -102,6 +101,7 @@ export type {
   BusinessClaimRequest,
   BusinessSearchResult,
   ClaimantRole,
+  DiscoverableBusiness,
   ClaimRequestStatus,
   ClaimRequestWithBusiness,
   ClaimVerificationMethod,

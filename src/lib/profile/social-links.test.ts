@@ -4,6 +4,7 @@ import {
   getDisplayableSocialLinks,
   normalizeSocialUsernameInput,
   normalizeWebsiteInput,
+  socialLinksForBusiness,
   validateSocialUsernameInput,
   validateWebsiteInput,
 } from "./social-links";
@@ -97,16 +98,37 @@ describe("validation", () => {
   });
 });
 
+describe("socialLinksForBusiness", () => {
+  it("falls back to websiteUrl when social_links has no website", () => {
+    expect(
+      socialLinksForBusiness({
+        socialLinks: {
+          instagram: "https://instagram.com/mary_ann",
+          facebook: "",
+          x: "",
+          website: "",
+        },
+        websiteUrl: "https://maryann.photo",
+      }),
+    ).toEqual({
+      instagram: "https://instagram.com/mary_ann",
+      facebook: "",
+      x: "",
+      website: "https://maryann.photo",
+    });
+  });
+});
+
 describe("getDisplayableSocialLinks", () => {
   it("returns only platforms with valid http(s) URLs", () => {
     expect(
       getDisplayableSocialLinks({
         instagram: "https://instagram.com/michael_davila",
-        facebook: "",
+        facebook: "https://facebook.com/maryann",
         x: "not-a-url",
         website: "https://example.com",
       }).map((link) => link.platform),
-    ).toEqual(["instagram", "website"]);
+    ).toEqual(["instagram", "facebook", "website"]);
   });
 
   it("returns an empty list when no links are set", () => {

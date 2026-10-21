@@ -2,7 +2,8 @@ import type { Business, DiscoverableBusiness, SocialLinks } from "@/types";
 import type { ReputationTier } from "@/types/reputation";
 import { BUSINESS_STATUSES, type BusinessStatus } from "@/types/business";
 import { REPUTATION_TIERS } from "@/types/reputation";
-import { normalizeSocialLinks } from "@/lib/profile/social-links";
+import { displayCategoryName } from "@/lib/business/categories";
+import { socialLinksForBusiness } from "@/lib/profile/social-links";
 
 export type BusinessRow = {
   id: string;
@@ -11,16 +12,17 @@ export type BusinessRow = {
   description: string | null;
   logo_url: string | null;
   website_url: string | null;
+  social_links?: SocialLinks | Record<string, unknown> | null;
   phone: string | null;
   email: string | null;
   category_id: string | null;
+  custom_category?: string | null;
   status: string;
   is_claimed: boolean;
   is_verified?: boolean | null;
   listing_source?: string | null;
   claimed_at?: string | null;
   contact_locked_until?: string | null;
-  social_links?: SocialLinks | Record<string, unknown> | null;
   current_reputation_score: number | string | null;
   current_reputation_tier: string;
   current_reputation_period: string | null;
@@ -46,10 +48,15 @@ export type DiscoverableBusinessRow = {
   slug: string;
   name: string;
   logo_url: string | null;
+  is_claimed?: boolean;
+  custom_category?: string | null;
   current_reputation_tier: string;
   current_reputation_period: string | null;
   total_feedback: number | null;
-  business_categories: { name: string } | { name: string }[] | null;
+  business_categories:
+    | { name: string; slug?: string | null }
+    | { name: string; slug?: string | null }[]
+    | null;
   business_locations:
     | Array<{ city: string | null; state: string | null; is_primary: boolean }>
     | null;
@@ -67,8 +74,9 @@ export function mapDiscoverableBusiness(
     id: row.id,
     slug: row.slug,
     name: row.name,
+    isClaimed: Boolean(row.is_claimed),
     logoUrl: row.logo_url,
-    categoryName: category?.name ?? null,
+    categoryName: displayCategoryName(category, row.custom_category),
     city: primary?.city ?? null,
     state: primary?.state ?? null,
     reputationTier: asReputationTier(row.current_reputation_tier),
@@ -78,28 +86,27 @@ export function mapDiscoverableBusiness(
 }
 
 export function mapBusinessRow(row: BusinessRow): Business {
-  const socialLinks = normalizeSocialLinks(row.social_links);
-  if (!socialLinks.website && row.website_url) {
-    socialLinks.website = row.website_url;
-  }
-
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
     description: row.description,
     logoUrl: row.logo_url,
-    websiteUrl: row.website_url || socialLinks.website || null,
+    websiteUrl: row.website_url,
+    socialLinks: socialLinksForBusiness({
+      socialLinks: row.social_links,
+      websiteUrl: row.website_url,
+    }),
     phone: row.phone,
     email: row.email,
     categoryId: row.category_id,
+    customCategory: row.custom_category ?? null,
     status: asBusinessStatus(row.status),
     isClaimed: row.is_claimed,
     isVerified: Boolean(row.is_verified),
     listingSource: row.listing_source === "admin" ? "admin" : "owner",
     claimedAt: row.claimed_at ?? null,
     contactLockedUntil: row.contact_locked_until ?? null,
-    socialLinks,
     currentReputationScore:
       row.current_reputation_score === null
         ? null

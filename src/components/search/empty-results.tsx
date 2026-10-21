@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { H3, Muted } from "@/components/typography/typography";
+import { brandCopy } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 interface EmptyResultsProps {
@@ -20,7 +21,7 @@ export function EmptyResults({ hasFilters = false, className }: EmptyResultsProp
           <Muted className="max-w-sm text-sm">
             {hasFilters
               ? "Try a different category or location, or clear your filters."
-              : "Active businesses will show up here."}
+              : brandCopy.joiningMessage}
           </Muted>
         </div>
       </CardContent>

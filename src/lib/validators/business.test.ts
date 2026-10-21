@@ -42,9 +42,14 @@ describe("business validators", () => {
   });
 
   describe("updateBusinessSchema", () => {
-    it("accepts a partial update", () => {
+    it("accepts professional social links", () => {
       const result = updateBusinessSchema.safeParse({
-        status: "archived",
+        socialLinks: {
+          instagram: "https://instagram.com/mary_ann",
+          facebook: "",
+          x: "https://x.com/maryann",
+          website: "",
+        },
       });
 
       expect(result.success).toBe(true);

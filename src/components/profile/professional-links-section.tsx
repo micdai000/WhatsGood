@@ -19,11 +19,11 @@ interface ProfessionalLinksSectionProps {
   errors?: Partial<Record<SocialLinkPlatform, string>>;
   onChange: (platform: SocialLinkPlatform, value: string) => void;
   onBlur: (platform: SocialLinkPlatform, value: string) => void;
+  /** Platforms shown in the editor. Defaults to Instagram, Facebook, and X. */
+  platforms?: SocialLinkPlatform[];
+  /** Skip the outer card when the fields sit inside another form section. */
+  embedded?: boolean;
   className?: string;
-  title?: string;
-  description?: string;
-  /** When false, renders fields without the outer card shell (for nested forms). */
-  asCard?: boolean;
 }
 
 type LinkFieldConfig = {
@@ -56,7 +56,7 @@ const FIELDS: LinkFieldConfig[] = [
   },
   {
     platform: "website",
-    label: "Website",
+    label: "Personal Website",
     placeholder: "example.com",
     autoComplete: "url",
     icon: Globe,
@@ -64,19 +64,28 @@ const FIELDS: LinkFieldConfig[] = [
   },
 ];
 
-export function ProfessionalLinksSection({
+const DEFAULT_PLATFORMS: SocialLinkPlatform[] = [
+  "instagram",
+  "facebook",
+  "x",
+];
+
+function LinkFields({
+  fields,
   values,
-  errors = {},
+  errors,
   onChange,
   onBlur,
-  className,
-  title = "Professional Links",
-  description = "Add Instagram, Facebook, X, and a website so customers can find you.",
-  asCard = true,
-}: ProfessionalLinksSectionProps) {
-  const fields = (
+}: {
+  fields: LinkFieldConfig[];
+  values: SocialLinks;
+  errors: Partial<Record<SocialLinkPlatform, string>>;
+  onChange: (platform: SocialLinkPlatform, value: string) => void;
+  onBlur: (platform: SocialLinkPlatform, value: string) => void;
+}) {
+  return (
     <div className="space-y-4">
-      {FIELDS.map((field) => {
+      {fields.map((field) => {
         const Icon = field.icon;
         const error = errors[field.platform];
         const inputId = `social-${field.platform}`;
@@ -111,26 +120,41 @@ export function ProfessionalLinksSection({
       })}
     </div>
   );
+}
 
-  if (!asCard) {
-    return (
-      <div className={cn("space-y-3", className)}>
-        <div className="space-y-1">
-          <p className="text-base font-semibold">{title}</p>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-        {fields}
-      </div>
-    );
+export function ProfessionalLinksSection({
+  values,
+  errors = {},
+  onChange,
+  onBlur,
+  platforms = DEFAULT_PLATFORMS,
+  embedded = false,
+  className,
+}: ProfessionalLinksSectionProps) {
+  const fields = FIELDS.filter((field) => platforms.includes(field.platform));
+  const fieldList = (
+    <LinkFields
+      fields={fields}
+      values={values}
+      errors={errors}
+      onChange={onChange}
+      onBlur={onBlur}
+    />
+  );
+
+  if (embedded) {
+    return <div className={className}>{fieldList}</div>;
   }
 
   return (
     <Card className={cn("border-border shadow-[var(--shadow-meritt-card)]", className)}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle className="text-base font-semibold">Professional Links</CardTitle>
+        <CardDescription>
+          Add Instagram, Facebook, or X so customers can learn more about you.
+        </CardDescription>
       </CardHeader>
-      <CardContent>{fields}</CardContent>
+      <CardContent>{fieldList}</CardContent>
     </Card>
   );
 }

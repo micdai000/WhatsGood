@@ -4,6 +4,8 @@ export { FilterPanel } from "./filter-panel";
 export { SortDropdown } from "./sort-dropdown";
 export { SearchResultCard } from "./search-result-card";
 export { ResultsGrid } from "./results-grid";
+export { BusinessResultsGrid } from "./business-results-grid";
+export { BusinessResultCard } from "./business-result-card";
 export { EmptyResults } from "./empty-results";
 export { LoadingResults } from "./loading-results";
 export { SearchPagination } from "./search-pagination";

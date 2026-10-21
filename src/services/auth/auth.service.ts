@@ -187,6 +187,35 @@ export class AuthService {
     }
   }
 
+  async updateUserMetadata(
+    metadata: Record<string, string | null>,
+  ): Promise<ServiceResult<AuthUser>> {
+    const method = "AuthService.updateUserMetadata";
+
+    try {
+      const supabase = this.getClient();
+      const { data, error } = await supabase.auth.updateUser({
+        data: metadata,
+      });
+
+      if (error) {
+        logger.error(method, error);
+        return failure(mapUnknownAuthError(error));
+      }
+
+      if (!data.user) {
+        return failure(
+          mapUnknownAuthError(new Error("Unable to update your account.")),
+        );
+      }
+
+      logger.info(method, { userId: data.user.id });
+      return success(mapSupabaseUser(data.user));
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
   async updatePassword(
     input: UpdatePasswordInput,
   ): Promise<ServiceResult<void>> {

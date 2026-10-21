@@ -8,6 +8,12 @@ import {
   ValidationError,
 } from "@/lib/errors";
 import { canCreateClaimRequest } from "@/lib/business/claim";
+import {
+  displayCategoryName,
+  isOtherCategory,
+  normalizeCustomCategory,
+  sortCategoriesForSelect,
+} from "@/lib/business/categories";
 import { slugFromBusinessName, uniquifyBusinessSlug } from "@/lib/business/slug";
 import { generateSecureCode } from "@/lib/qr/generate-code";
 import { LIMITS } from "@/lib/constants";
@@ -40,6 +46,7 @@ import {
   mapRpcError,
   success,
 } from "@/services/shared";
+import { PAGINATION } from "@/lib/constants";
 import type {
   AddBusinessMemberInput,
   Business,
@@ -63,6 +70,7 @@ import type {
   UpdateBusinessLocationInput,
   VerifyClaimCodeResult,
 } from "@/types";
+import { REPUTATION_TIERS, type ReputationTier } from "@/types/reputation";
 import { isSuccess } from "@/types";
 import {
   mapBusinessCategoryRow,
@@ -127,6 +135,112 @@ function nullableText(
   return trimmed.length > 0 ? trimmed : null;
 }
 
+type CategoryRef = { id: string; name: string; slug: string };
+
+async function loadCategory(
+  supabase: ReturnType<typeof createClient>,
+  categoryId: string | null | undefined,
+): Promise<CategoryRef | null> {
+  if (!categoryId) return null;
+  const { data } = await supabase
+    .from("business_categories")
+    .select("id, name, slug")
+    .eq("id", categoryId)
+    .maybeSingle();
+  return (data as CategoryRef | null) ?? null;
+}
+
+function requireCustomCategory(
+  category: CategoryRef | null,
+  customCategory: string | null | undefined,
+): ServiceResult<string | null> {
+  const value = normalizeCustomCategory(category, customCategory);
+  if (category && isOtherCategory(category)) {
+    if (!value || value.length < LIMITS.CUSTOM_CATEGORY_MIN_LENGTH) {
+      return failure(new ValidationError("Please describe your category"));
+    }
+    return success(value);
+  }
+  return success(null);
+}
+
+function parseOnboardingPayload(data: unknown): {
+  business: BusinessRow;
+  location: BusinessLocationRow;
+  qr_code: QrCodeRow;
+} | null {
+  let value = data;
+  if (typeof value === "string") {
+    try {
+      value = JSON.parse(value) as unknown;
+    } catch {
+      return null;
+    }
+  }
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+  const payload = value as {
+    business?: BusinessRow;
+    location?: BusinessLocationRow;
+    qr_code?: QrCodeRow;
+  };
+  if (!payload.business || !payload.location || !payload.qr_code) {
+    return null;
+  }
+  return {
+    business: payload.business,
+    location: payload.location,
+    qr_code: payload.qr_code,
+  };
+}
+
+function isSchemaCacheMiss(error: { code?: string; message?: string }): boolean {
+  const code = error.code ?? "";
+  const message = error.message ?? "";
+  return (
+    code === "PGRST202" ||
+    code === "PGRST203" ||
+    /schema cache/i.test(message)
+  );
+}
+
+type RpcError = {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+};
+
+function isUniqueViolation(error: RpcError): boolean {
+  const haystack = `${error.code ?? ""} ${error.message ?? ""} ${error.details ?? ""}`;
+  return error.code === "23505" || /duplicate key|unique constraint/i.test(haystack);
+}
+
+function mapOnboardingRpcError(error: RpcError) {
+  if (isUniqueViolation(error)) {
+    return new ConflictError("This business name is already taken");
+  }
+  if (error.code === "42501") {
+    return new AuthorizationError(
+      error.message || "You must be signed in to create a business",
+    );
+  }
+  if (
+    error.code === "22023" ||
+    error.code === "23503" ||
+    error.code === "23514" ||
+    error.code === "23502"
+  ) {
+    return new ValidationError(
+      error.message || "Please check the business details and try again",
+    );
+  }
+  return DatabaseError.fromSource({
+    message: error.message || "A database error occurred",
+  });
+}
+
 export class BusinessService {
   async getCategories(): Promise<ServiceResult<BusinessCategory[]>> {
     const method = "BusinessService.getCategories";
@@ -145,8 +259,10 @@ export class BusinessService {
       }
 
       return success(
-        (data ?? []).map((row) =>
-          mapBusinessCategoryRow(row as BusinessCategoryRow),
+        sortCategoriesForSelect(
+          (data ?? []).map((row) =>
+            mapBusinessCategoryRow(row as BusinessCategoryRow),
+          ),
         ),
       );
     } catch (error) {
@@ -170,6 +286,14 @@ export class BusinessService {
 
       const validated = validate(createBusinessSchema, input);
       const supabase = createClient();
+      const category = await loadCategory(supabase, validated.categoryId);
+      const customResult = requireCustomCategory(
+        category,
+        validated.customCategory,
+      );
+      if (!isSuccess(customResult)) {
+        return customResult;
+      }
       const { data, error } = await supabase
         .from("businesses")
         .insert({
@@ -177,10 +301,16 @@ export class BusinessService {
           name: validated.name,
           description: nullableText(validated.description) ?? null,
           logo_url: validated.logoUrl ?? null,
-          website_url: validated.websiteUrl ?? null,
+          website_url:
+            validated.websiteUrl ??
+            (validated.socialLinks?.website?.trim()
+              ? validated.socialLinks.website
+              : null),
+          social_links: validated.socialLinks ?? {},
           phone: nullableText(validated.phone) ?? null,
           email: validated.email ?? null,
           category_id: validated.categoryId ?? null,
+          custom_category: customResult.data,
           is_claimed: true,
         })
         .select("*")
@@ -279,6 +409,7 @@ export class BusinessService {
 
       const { id: businessId } = validate(businessIdSchema, { id });
       const validated = validate(updateBusinessSchema, input);
+      const supabase = createClient();
       const updates: Record<string, unknown> = {};
 
       if (validated.name !== undefined) {
@@ -289,6 +420,13 @@ export class BusinessService {
       }
       if (validated.logoUrl !== undefined) {
         updates.logo_url = validated.logoUrl;
+      }
+      if (validated.socialLinks !== undefined) {
+        updates.social_links = validated.socialLinks;
+        if (validated.websiteUrl === undefined) {
+          const website = validated.socialLinks.website?.trim();
+          updates.website_url = website ? website : null;
+        }
       }
       if (validated.websiteUrl !== undefined) {
         updates.website_url = validated.websiteUrl;
@@ -307,12 +445,22 @@ export class BusinessService {
       }
       if (validated.categoryId !== undefined) {
         updates.category_id = validated.categoryId;
+        const category = await loadCategory(supabase, validated.categoryId);
+        const customResult = requireCustomCategory(
+          category,
+          validated.customCategory,
+        );
+        if (!isSuccess(customResult)) {
+          return customResult;
+        }
+        updates.custom_category = customResult.data;
+      } else if (validated.customCategory !== undefined) {
+        updates.custom_category = nullableText(validated.customCategory) ?? null;
       }
       if (validated.status !== undefined) {
         updates.status = validated.status;
       }
 
-      const supabase = createClient();
       const { data, error } = await supabase
         .from("businesses")
         .update(updates)
@@ -797,73 +945,90 @@ export class BusinessService {
 
       const validated = validate(completeBusinessOnboardingSchema, input);
       const supabase = createClient();
+      const category = await loadCategory(supabase, validated.categoryId);
+      const customResult = requireCustomCategory(
+        category,
+        validated.customCategory,
+      );
+      if (!isSuccess(customResult)) {
+        return customResult;
+      }
       const baseSlug = slugFromBusinessName(validated.name);
 
       for (let attempt = 0; attempt < 4; attempt += 1) {
         const slug = uniquifyBusinessSlug(baseSlug, attempt);
-        const { data, error } = await supabase.rpc(
+        const rpcParams: Record<string, unknown> = {
+          p_name: validated.name,
+          p_slug: slug,
+          p_category_id: validated.categoryId,
+          p_description: nullableText(validated.description) ?? null,
+          p_website_url: validated.websiteUrl ?? null,
+          p_phone: nullableText(validated.phone) ?? null,
+          p_email: validated.email ?? null,
+          p_logo_url: validated.logoUrl ?? null,
+          p_address_line_1: nullableText(validated.addressLine1) ?? null,
+          p_city: validated.city,
+          p_state: validated.state,
+          p_postal_code: nullableText(validated.postalCode) ?? null,
+          p_country: validated.country ?? "US",
+          p_qr_code: generateSecureCode(),
+          p_qr_label: "Primary Business QR",
+        };
+        if (customResult.data) {
+          rpcParams.p_custom_category = customResult.data;
+        }
+
+        let { data, error } = await supabase.rpc(
           "complete_business_onboarding",
-          {
-            p_name: validated.name,
-            p_slug: slug,
-            p_category_id: validated.categoryId,
-            p_description: nullableText(validated.description) ?? null,
-            p_website_url: validated.websiteUrl ?? null,
-            p_phone: nullableText(validated.phone) ?? null,
-            p_email: validated.email ?? null,
-            p_logo_url: validated.logoUrl ?? null,
-            p_address_line_1: nullableText(validated.addressLine1) ?? null,
-            p_city: validated.city,
-            p_state: validated.state,
-            p_postal_code: nullableText(validated.postalCode) ?? null,
-            p_country: validated.country ?? "US",
-            p_qr_code: generateSecureCode(),
-            p_qr_label: "Primary Business QR",
-          },
+          rpcParams,
         );
 
+        if (error && isSchemaCacheMiss(error) && "p_custom_category" in rpcParams) {
+          delete rpcParams.p_custom_category;
+          ({ data, error } = await supabase.rpc(
+            "complete_business_onboarding",
+            rpcParams,
+          ));
+        }
+
         if (error) {
-          if (error.code === "23505" && attempt < 3) {
+          if (isUniqueViolation(error) && attempt < 3) {
             continue;
           }
 
-          logger.error(method, error);
-          if (error.code === "23505") {
-            return failure(
-              new ConflictError("This business name is already taken"),
-            );
-          }
-          if (error.code === "42501") {
-            return failure(
-              new AuthorizationError(
-                error.message || "You must be signed in to create a business",
-              ),
-            );
-          }
-          if (error.code === "22023") {
-            return failure(
-              new ValidationError(
-                error.message || "Please check the business details and try again",
-              ),
-            );
-          }
-          return failure(DatabaseError.fromSource(error));
+          logger.error(method, error, {
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+          });
+          return failure(mapOnboardingRpcError(error));
         }
 
-        const payload = data as {
-          business: BusinessRow;
-          location: BusinessLocationRow;
-          qr_code: QrCodeRow;
-        } | null;
-
-        if (!payload?.business || !payload.location || !payload.qr_code) {
+        const payload = parseOnboardingPayload(data);
+        if (!payload) {
+          logger.error(method, "Onboarding RPC returned an unexpected payload", {
+            data,
+          });
           return failure(new DatabaseError());
         }
 
+        let business = mapBusinessRow(payload.business);
+        const location = mapBusinessLocationRow(payload.location);
+        const qrCode = mapQrCodeRow(payload.qr_code);
+
+        if (customResult.data && business.customCategory !== customResult.data) {
+          const saved = await this.updateBusiness(business.id, {
+            customCategory: customResult.data,
+          });
+          if (isSuccess(saved)) {
+            business = saved.data;
+          }
+        }
+
         return success({
-          business: mapBusinessRow(payload.business),
-          location: mapBusinessLocationRow(payload.location),
-          qrCode: mapQrCodeRow(payload.qr_code),
+          business,
+          location,
+          qrCode,
         });
       }
 
@@ -893,10 +1058,11 @@ export class BusinessService {
       let query = supabase
         .from("businesses")
         .select(
-          `id, slug, name, logo_url, current_reputation_tier, current_reputation_period, total_feedback, business_categories(name), ${locationSelect}`,
+          `id, slug, name, logo_url, is_claimed, custom_category, current_reputation_tier, current_reputation_period, total_feedback, business_categories(name, slug), ${locationSelect}`,
           { count: "exact" },
         )
-        .eq("status", "active");
+        .eq("status", "active")
+        .eq("is_claimed", true);
 
       if (validated.professionId) {
         query = query.eq("category_id", validated.professionId);
@@ -980,7 +1146,8 @@ export class BusinessService {
           name,
           slug,
           is_claimed,
-          business_categories ( name ),
+          custom_category,
+          business_categories ( name, slug ),
           business_locations ( city, state, is_primary )
         `,
         )
@@ -996,8 +1163,8 @@ export class BusinessService {
 
       const results = (data ?? []).map((row) => {
         const categoryRel = row.business_categories as
-          | { name: string }
-          | { name: string }[]
+          | { name: string; slug?: string }
+          | { name: string; slug?: string }[]
           | null;
         const category = Array.isArray(categoryRel)
           ? categoryRel[0]
@@ -1015,13 +1182,158 @@ export class BusinessService {
           name: row.name as string,
           slug: row.slug as string,
           isClaimed: Boolean(row.is_claimed),
-          categoryName: category?.name ?? null,
+          categoryName: displayCategoryName(
+            category,
+            row.custom_category as string | null,
+          ),
           city: primary?.city ?? null,
           state: primary?.state ?? null,
         } satisfies BusinessSearchResult;
       });
 
       return success(results);
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async listPublicBusinesses(
+    params?: ProfileSearchParams,
+  ): Promise<ServiceResult<PaginatedResult<DiscoverableBusiness>>> {
+    const method = "BusinessService.listPublicBusinesses";
+
+    try {
+      const page = params?.page ?? PAGINATION.DEFAULT_PAGE;
+      const limit = Math.min(params?.limit ?? 12, PAGINATION.MAX_LIMIT);
+      const supabase = createClient();
+
+      let query = supabase
+        .from("businesses")
+        .select(
+          `
+          id,
+          name,
+          slug,
+          logo_url,
+          is_claimed,
+          custom_category,
+          current_reputation_score,
+          current_reputation_tier,
+          current_reputation_period,
+          total_feedback,
+          created_at,
+          business_categories ( name, slug ),
+          business_locations ( city, state, is_primary )
+        `,
+          { count: "exact" },
+        )
+        .eq("status", "active")
+        .eq("is_claimed", true);
+
+      if (params?.professionId) {
+        query = query.eq("category_id", params.professionId);
+      }
+
+      if (params?.query) {
+        query = query.ilike(
+          "name",
+          `%${escapeIlikePattern(params.query)}%`,
+        );
+      }
+
+      switch (params?.sort) {
+        case "rating":
+          query = query.order("current_reputation_score", {
+            ascending: false,
+            nullsFirst: false,
+          });
+          break;
+        case "reviews":
+          query = query.order("total_feedback", { ascending: false });
+          break;
+        case "name":
+          query = query.order("name", { ascending: true });
+          break;
+        case "newest":
+        default:
+          query = query.order("created_at", { ascending: false });
+          break;
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        logger.error(method, error, { params });
+        return failure(DatabaseError.fromSource(error));
+      }
+
+      const cityFilter = params?.city?.trim().toLowerCase();
+      const stateFilter = params?.state?.trim().toLowerCase();
+
+      const mapped = (data ?? []).map((row) => {
+        const categoryRel = row.business_categories as
+          | { name: string; slug?: string }
+          | { name: string; slug?: string }[]
+          | null;
+        const category = Array.isArray(categoryRel)
+          ? categoryRel[0]
+          : categoryRel;
+        const locations = (row.business_locations ?? []) as Array<{
+          city: string;
+          state: string;
+          is_primary: boolean;
+        }>;
+        const primary =
+          locations.find((location) => location.is_primary) ?? locations[0];
+        const tier = row.current_reputation_tier as string;
+
+        return {
+          id: row.id as string,
+          name: row.name as string,
+          slug: row.slug as string,
+          isClaimed: Boolean(row.is_claimed),
+          categoryName: displayCategoryName(
+            category,
+            row.custom_category as string | null,
+          ),
+          city: primary?.city ?? null,
+          state: primary?.state ?? null,
+          logoUrl: (row.logo_url as string | null) ?? null,
+          reputationTier: (REPUTATION_TIERS as readonly string[]).includes(tier)
+            ? (tier as ReputationTier)
+            : "building",
+          reputationPeriod: (row.current_reputation_period as string | null) ?? null,
+          totalFeedback: Number(row.total_feedback ?? 0),
+        } satisfies DiscoverableBusiness;
+      });
+
+      const filtered = mapped.filter((business) => {
+        if (
+          cityFilter &&
+          !(business.city ?? "").toLowerCase().includes(cityFilter)
+        ) {
+          return false;
+        }
+        if (
+          stateFilter &&
+          !(business.state ?? "").toLowerCase().includes(stateFilter)
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      const total = cityFilter || stateFilter ? filtered.length : (count ?? filtered.length);
+      const from = (page - 1) * limit;
+      const items = filtered.slice(from, from + limit);
+
+      return success({
+        items,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 1,
+      });
     } catch (error) {
       return handleServiceError(method, error);
     }

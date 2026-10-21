@@ -1,5 +1,5 @@
-import type { Profile, SocialLinks } from "@/types";
 import { normalizeSocialLinks } from "@/lib/profile/social-links";
+import type { Profile, SocialLinks } from "@/types";
 
 export type ProfileRow = {
   id: string;

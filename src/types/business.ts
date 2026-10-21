@@ -1,5 +1,5 @@
-import type { ReputationTier } from "./reputation";
 import type { SocialLinks } from "./profile";
+import type { ReputationTier } from "./reputation";
 
 export const BUSINESS_STATUSES = ["active", "suspended", "archived"] as const;
 
@@ -14,16 +14,17 @@ export interface Business {
   description: string | null;
   logoUrl: string | null;
   websiteUrl: string | null;
+  socialLinks: SocialLinks;
   phone: string | null;
   email: string | null;
   categoryId: string | null;
+  customCategory: string | null;
   status: BusinessStatus;
   isClaimed: boolean;
   isVerified: boolean;
   listingSource: BusinessListingSource;
   claimedAt: string | null;
   contactLockedUntil: string | null;
-  socialLinks: SocialLinks;
   currentReputationScore: number | null;
   currentReputationTier: ReputationTier;
   currentReputationPeriod: string | null;
@@ -38,22 +39,11 @@ export interface CreateBusinessInput {
   description?: string | null;
   logoUrl?: string | null;
   websiteUrl?: string | null;
+  socialLinks?: SocialLinks;
   phone?: string | null;
   email?: string | null;
   categoryId?: string | null;
-}
-
-export interface DiscoverableBusiness {
-  id: string;
-  slug: string;
-  name: string;
-  logoUrl: string | null;
-  categoryName: string | null;
-  city: string | null;
-  state: string | null;
-  reputationTier: ReputationTier;
-  reputationPeriod: string | null;
-  totalFeedback: number;
+  customCategory?: string | null;
 }
 
 export interface UpdateBusinessInput {
@@ -61,9 +51,10 @@ export interface UpdateBusinessInput {
   description?: string | null;
   logoUrl?: string | null;
   websiteUrl?: string | null;
+  socialLinks?: SocialLinks;
   phone?: string | null;
   email?: string | null;
   categoryId?: string | null;
+  customCategory?: string | null;
   status?: BusinessStatus;
-  socialLinks?: SocialLinks;
 }

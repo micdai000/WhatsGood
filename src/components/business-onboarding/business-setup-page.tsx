@@ -14,8 +14,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { Muted, Paragraph } from "@/components/typography/typography";
 import { cn } from "@/lib/utils";
 import { storeBusinessId } from "@/lib/business/current-business-storage";
+import {
+  displayCategoryName,
+  isOtherCategory,
+} from "@/lib/business/categories";
+import { LIMITS } from "@/lib/constants";
 import { US_STATE_CODES } from "@/lib/location/us-states";
 import { completeBusinessOnboardingSchema } from "@/lib/validators";
+import { BusinessCategoryFields } from "@/components/business/category-fields";
 import { businessService } from "@/services/businesses";
 import { isFailure } from "@/types";
 import type { BusinessCategory, BusinessSearchResult } from "@/types";
@@ -25,6 +31,7 @@ type Step = "choice" | "create" | "duplicates" | "location" | "success";
 interface BusinessDraft {
   name: string;
   categoryId: string;
+  customCategory: string;
   description: string;
   websiteUrl: string;
   phone: string;
@@ -40,6 +47,7 @@ interface BusinessDraft {
 const EMPTY_DRAFT: BusinessDraft = {
   name: "",
   categoryId: "",
+  customCategory: "",
   description: "",
   websiteUrl: "",
   phone: "",
@@ -91,8 +99,12 @@ export function BusinessSetupPage() {
   }, []);
 
   const categoryName = useMemo(
-    () => categories.find((category) => category.id === draft.categoryId)?.name,
-    [categories, draft.categoryId],
+    () =>
+      displayCategoryName(
+        categories.find((category) => category.id === draft.categoryId),
+        draft.customCategory,
+      ),
+    [categories, draft.categoryId, draft.customCategory],
   );
 
   function updateDraft(patch: Partial<BusinessDraft>) {
@@ -105,6 +117,7 @@ export function BusinessSetupPage() {
     const parsed = completeBusinessOnboardingSchema.pick({
       name: true,
       categoryId: true,
+      customCategory: true,
       description: true,
       websiteUrl: true,
       phone: true,
@@ -113,6 +126,7 @@ export function BusinessSetupPage() {
     }).safeParse({
       name: draft.name,
       categoryId: draft.categoryId,
+      customCategory: emptyToUndefined(draft.customCategory) ?? null,
       description: emptyToUndefined(draft.description),
       websiteUrl: withHttps(draft.websiteUrl),
       phone: emptyToUndefined(draft.phone),
@@ -127,6 +141,20 @@ export function BusinessSetupPage() {
         next[key] = issue.message;
       }
       setFieldErrors(next);
+      return false;
+    }
+
+    const selected = categories.find(
+      (category) => category.id === draft.categoryId,
+    );
+    if (
+      selected &&
+      isOtherCategory(selected) &&
+      draft.customCategory.trim().length < LIMITS.CUSTOM_CATEGORY_MIN_LENGTH
+    ) {
+      setFieldErrors({
+        customCategory: "Please describe your category",
+      });
       return false;
     }
 
@@ -161,6 +189,7 @@ export function BusinessSetupPage() {
     const parsed = completeBusinessOnboardingSchema.safeParse({
       name: draft.name,
       categoryId: draft.categoryId,
+      customCategory: emptyToUndefined(draft.customCategory) ?? null,
       description: emptyToUndefined(draft.description),
       websiteUrl: withHttps(draft.websiteUrl),
       phone: emptyToUndefined(draft.phone),
@@ -231,7 +260,7 @@ export function BusinessSetupPage() {
         {step === "location" ? (
           <LocationStep
             draft={draft}
-            categoryName={categoryName}
+            categoryName={categoryName ?? undefined}
             fieldErrors={fieldErrors}
             error={error}
             submitting={submitting}
@@ -405,30 +434,33 @@ function CreateStep({
           />
         </Field>
 
-        <Field
-          label="Category"
-          htmlFor="business-category"
-          error={fieldErrors.categoryId}
-          required
-        >
-          {loadingCategories ? (
-            <Spinner className="h-5 w-5" />
-          ) : (
-            <select
-              id="business-category"
-              value={draft.categoryId}
-              onChange={(event) => onChange({ categoryId: event.target.value })}
-              className={SELECT_CLASS_NAME}
-            >
-              <option value="">Select a category</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          )}
-        </Field>
+        {loadingCategories ? (
+          <Spinner className="h-5 w-5" />
+        ) : (
+          <BusinessCategoryFields
+            categories={categories}
+            categoryId={draft.categoryId}
+            customCategory={draft.customCategory}
+            onCategoryIdChange={(categoryId) => {
+              const selected = categories.find(
+                (category) => category.id === categoryId,
+              );
+              onChange({
+                categoryId,
+                customCategory:
+                  selected && isOtherCategory(selected)
+                    ? draft.customCategory
+                    : "",
+              });
+            }}
+            onCustomCategoryChange={(customCategory) =>
+              onChange({ customCategory })
+            }
+            categoryError={fieldErrors.categoryId}
+            customCategoryError={fieldErrors.customCategory}
+            required
+          />
+        )}
 
         <Field label="Description" htmlFor="business-description" error={fieldErrors.description}>
           <Textarea

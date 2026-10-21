@@ -69,7 +69,12 @@ export function SiteHeader({ className }: { className?: string }) {
         </nav>
 
         {loading ? null : isAuthenticated ? (
-          <UserMenu userId={user.id} email={user.email} />
+          <UserMenu
+            userId={user.id}
+            email={user.email}
+            fullName={user.fullName}
+            avatarUrl={user.avatarUrl}
+          />
         ) : (
           <div className="flex items-center gap-2">
             <Link

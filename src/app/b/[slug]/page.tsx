@@ -63,8 +63,8 @@ function PublicBusinessPageBody({
   });
 
   return (
-    <Section>
-      <Container className="max-w-lg">
+    <Section spacing="tight" className="pb-16 sm:pb-20">
+      <Container size="wide" className="max-w-3xl">
         <JsonLd
           data={{
             "@context": "https://schema.org",

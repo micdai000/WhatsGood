@@ -118,8 +118,8 @@ function QrReadyPage({
   });
 
   return (
-    <Section>
-      <Container className="max-w-lg">
+    <Section spacing="tight" className="pb-16 sm:pb-20">
+      <Container size="wide" className="max-w-3xl">
         <PublicBusinessView
           business={data.business}
           category={data.category}

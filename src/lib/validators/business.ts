@@ -2,6 +2,7 @@ import { z } from "zod";
 import { LIMITS } from "@/lib/constants";
 import { sanitizeSlug } from "@/lib/utils/slug";
 import { BUSINESS_STATUSES } from "@/types/business";
+import { socialLinksSchema } from "./profile";
 
 const businessSlugSchema = z
   .string()
@@ -32,15 +33,6 @@ const optionalEmailSchema = z
   .nullable()
   .optional();
 
-const socialLinksSchema = z
-  .object({
-    instagram: z.string(),
-    facebook: z.string(),
-    x: z.string(),
-    website: z.string(),
-  })
-  .passthrough();
-
 export const businessIdSchema = z.object({
   id: z.string().uuid("Invalid business ID"),
 });
@@ -69,10 +61,19 @@ export const createBusinessSchema = z.object({
   description: z.string().trim().max(2000).nullable().optional(),
   logoUrl: optionalUrlSchema,
   websiteUrl: optionalUrlSchema,
+  socialLinks: socialLinksSchema.optional(),
   phone: z.string().trim().max(30).nullable().optional(),
   email: optionalEmailSchema,
   categoryId: z.string().uuid("Invalid category ID").nullable().optional(),
-  socialLinks: socialLinksSchema.optional(),
+  customCategory: z
+    .string()
+    .trim()
+    .max(
+      LIMITS.CUSTOM_CATEGORY_MAX_LENGTH,
+      `Category must be ${LIMITS.CUSTOM_CATEGORY_MAX_LENGTH} characters or fewer`,
+    )
+    .nullable()
+    .optional(),
 });
 
 export const updateBusinessSchema = createBusinessSchema

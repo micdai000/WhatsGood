@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { PRO_SIGNUP_ROUTE } from "@/lib/auth/routes";
 import { Search, UserRound } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { ResultsGrid } from "@/components/search";
+import { BusinessResultsGrid } from "@/components/search";
 import { Spinner } from "@/components/ui/spinner";
 import { Container } from "@/components/layout/container";
 import { PageWrapper } from "@/components/layout/page-wrapper";
@@ -26,7 +26,7 @@ import { businessService } from "@/services/businesses";
 export default function HomePage() {
   const featured = useServiceQuery(
     () =>
-      businessService.discoverBusinesses({
+      businessService.listPublicBusinesses({
         page: 1,
         limit: 6,
         sort: "rating",
@@ -102,8 +102,12 @@ export default function HomePage() {
             <div className="flex justify-center py-12">
               <Spinner className="h-8 w-8" />
             </div>
-          ) : featured.status === "success" && featured.data.items.length > 0 ? (
-            <ResultsGrid businesses={featured.data.items} />
+          ) : featured.status === "error" ? (
+            <div className="meritt-panel text-center text-sm text-muted-foreground">
+              {featured.message}
+            </div>
+          ) : featured.data.items.length > 0 ? (
+            <BusinessResultsGrid businesses={featured.data.items} />
           ) : (
             <div className="meritt-panel text-center text-sm text-muted-foreground">
               No businesses to show yet.{" "}
@@ -118,4 +122,4 @@ export default function HomePage() {
     </PageWrapper>
   );
 }
-
+

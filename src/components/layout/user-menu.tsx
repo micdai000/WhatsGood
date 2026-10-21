@@ -1,6 +1,6 @@
 import { useEffect, useState, useTransition } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Pencil, Settings, User } from "lucide-react";
+import { LayoutDashboard, LogOut, Pencil, Settings } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth.actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -10,55 +10,66 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getAccountDisplayName, getInitials } from "@/lib/auth/display-name";
 import { createClient } from "@/lib/supabase/client";
 
 interface UserMenuProps {
   userId: string;
   email: string;
+  fullName?: string | null;
+  avatarUrl?: string | null;
 }
 
 interface ProfileInfo {
-  displayName: string;
+  displayName: string | null;
   avatarUrl: string | null;
-  username: string | null;
 }
 
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
-export function UserMenu({ userId, email }: UserMenuProps) {
+export function UserMenu({
+  userId,
+  email,
+  fullName,
+  avatarUrl,
+}: UserMenuProps) {
   const navigate = useNavigate();
   const [pending, startTransition] = useTransition();
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
 
   useEffect(() => {
-    // TODO: replace this direct profiles query when legacy identity is retired.
     const supabase = createClient();
 
-    supabase
-      .from("profiles")
-      .select("username, display_name, avatar")
-      .eq("id", userId)
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          setProfile({
-            displayName: data.display_name || email.split("@")[0],
-            avatarUrl: data.avatar || null,
-            username: data.username || null,
-          });
-        }
-      });
-  }, [userId, email]);
+    void Promise.all([
+      supabase
+        .from("profiles")
+        .select("display_name, avatar")
+        .eq("id", userId)
+        .maybeSingle(),
+      supabase
+        .from("business_members")
+        .select("businesses(logo_url)")
+        .eq("user_id", userId),
+    ]).then(([{ data: profileRow }, { data: memberships }]) => {
+      const businessLogo = (memberships ?? [])
+        .map((row) => {
+          const business = Array.isArray(row.businesses)
+            ? row.businesses[0]
+            : row.businesses;
+          return business?.logo_url ?? null;
+        })
+        .find((url): url is string => Boolean(url));
 
-  const displayName = profile?.displayName || email.split("@")[0];
+      setProfile({
+        displayName: profileRow?.display_name || null,
+        avatarUrl: profileRow?.avatar || businessLogo || null,
+      });
+    });
+  }, [userId]);
+
+  const displayName = getAccountDisplayName({
+    fullName: fullName || profile?.displayName,
+    email,
+  });
+  const photoUrl = avatarUrl || profile?.avatarUrl || null;
   const initials = getInitials(displayName) || email[0]?.toUpperCase() || "?";
 
   return (
@@ -68,8 +79,8 @@ export function UserMenu({ userId, email }: UserMenuProps) {
         aria-label="User menu"
       >
         <Avatar size="default">
-          {profile?.avatarUrl ? (
-            <AvatarImage src={profile.avatarUrl} alt={displayName} />
+          {photoUrl ? (
+            <AvatarImage src={photoUrl} alt={displayName} />
           ) : null}
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
@@ -88,10 +99,6 @@ export function UserMenu({ userId, email }: UserMenuProps) {
           Dashboard
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-          <User className="size-4" aria-hidden />
-          Business profile
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/dashboard/profile/edit")}>
           <Pencil className="size-4" aria-hidden />
           Edit Profile
         </DropdownMenuItem>
