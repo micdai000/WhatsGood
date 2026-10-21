@@ -42,6 +42,10 @@ import AdminUsersPage from "@/app/(admin)/admin/users/page";
 import AdminProfilesPage from "@/app/(admin)/admin/profiles/page";
 import AdminReviewsPage from "@/app/(admin)/admin/reviews/page";
 import AdminProfessionsPage from "@/app/(admin)/admin/professions/page";
+import AdminBusinessesPage from "@/app/(admin)/admin/businesses/page";
+import AdminClaimsPage from "@/app/(admin)/admin/claims/page";
+import ClaimPage from "@/app/(claim)/claim/page";
+import ClaimBusinessRoutePage from "@/app/(claim)/claim/[businessId]/page";
 import PublicProfilePage from "@/app/u/[slug]/page";
 import PublicQrPage from "@/app/q/[code]/page";
 import ReviewPage from "@/app/review/[slug]/page";
@@ -137,6 +141,8 @@ export const router = createBrowserRouter([
           { path: "entity/:id", element: <Navigate to="/search" replace /> },
           { path: "profile", element: <Navigate to="/dashboard" replace /> },
           { path: "style-guide", element: <StyleGuidePage /> },
+          { path: "claim", element: <ClaimPage /> },
+          { path: "claim/:businessId", element: <ClaimBusinessRoutePage /> },
         ],
       },
       {
@@ -147,6 +153,8 @@ export const router = createBrowserRouter([
           { path: "admin/profiles", element: <AdminProfilesPage /> },
           { path: "admin/reviews", element: <AdminReviewsPage /> },
           { path: "admin/professions", element: <AdminProfessionsPage /> },
+          { path: "admin/businesses", element: <AdminBusinessesPage /> },
+          { path: "admin/claims", element: <AdminClaimsPage /> },
         ],
       },
       { path: "u/:slug", element: <PublicProfilePage /> },

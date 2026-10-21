@@ -67,6 +67,7 @@ export type { ApiErrorResponse, ApiSuccessResponse } from "./api";
 export type { BusinessCategory } from "./business-category";
 export type {
   Business,
+  BusinessListingSource,
   BusinessStatus,
   CreateBusinessInput,
   DiscoverableBusiness,
@@ -97,11 +98,20 @@ export type {
 export type { ReputationSnapshot, ReputationTier } from "./reputation";
 export { REPUTATION_TIERS } from "./reputation";
 export type {
+  AdminBusinessClaim,
   BusinessClaimRequest,
   BusinessSearchResult,
+  ClaimantRole,
   ClaimRequestStatus,
+  ClaimRequestWithBusiness,
+  ClaimVerificationMethod,
   CompleteBusinessOnboardingInput,
   CompleteBusinessOnboardingResult,
   CreateClaimRequestInput,
+  VerifyClaimCodeResult,
 } from "./business-claim";
-export { CLAIM_REQUEST_STATUSES } from "./business-claim";
+export {
+  CLAIM_REQUEST_STATUSES,
+  CLAIM_VERIFICATION_METHODS,
+  CLAIMANT_ROLES,
+} from "./business-claim";

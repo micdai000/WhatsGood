@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   completeBusinessOnboardingSchema,
   createClaimRequestSchema,
+  verifyClaimCodeSchema,
 } from "@/lib/validators/business-onboarding";
 import { createBusinessSchema } from "@/lib/validators/business";
 import { slugFromBusinessName, uniquifyBusinessSlug } from "@/lib/business/slug";
-import { canCreateClaimRequest } from "@/lib/business/claim";
+import { canCreateClaimRequest, getClaimWebsiteToken } from "@/lib/business/claim";
 import { getQrPath } from "@/lib/qr/destination";
 import { addBusinessMemberSchema } from "@/lib/validators/business-member";
 import { generateSecureCode } from "@/lib/qr/generate-code";
@@ -46,11 +47,59 @@ describe("business onboarding validators", () => {
 });
 
 describe("claim requests", () => {
-  it("requires a business id", () => {
+  const validClaim = {
+    businessId: VALID_UUID,
+    claimantName: "Jane Owner",
+    claimantRole: "owner",
+    contactPhone: "555-0100",
+    verificationMethod: "phone",
+  };
+
+  it("requires a business id and claimant details", () => {
     expect(createClaimRequestSchema.safeParse({}).success).toBe(false);
     expect(
       createClaimRequestSchema.safeParse({ businessId: VALID_UUID }).success,
+    ).toBe(false);
+    expect(createClaimRequestSchema.safeParse(validClaim).success).toBe(true);
+  });
+
+  it("requires a way to reach the claimant", () => {
+    const result = createClaimRequestSchema.safeParse({
+      ...validClaim,
+      contactPhone: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("requires a document link for document verification", () => {
+    expect(
+      createClaimRequestSchema.safeParse({
+        ...validClaim,
+        verificationMethod: "document",
+      }).success,
+    ).toBe(false);
+    expect(
+      createClaimRequestSchema.safeParse({
+        ...validClaim,
+        verificationMethod: "document",
+        evidenceUrl: "https://example.com/license.pdf",
+      }).success,
     ).toBe(true);
+  });
+
+  it("only accepts 6-digit verification codes", () => {
+    expect(
+      verifyClaimCodeSchema.safeParse({ claimId: VALID_UUID, code: "12345" })
+        .success,
+    ).toBe(false);
+    expect(
+      verifyClaimCodeSchema.safeParse({ claimId: VALID_UUID, code: "123456" })
+        .success,
+    ).toBe(true);
+  });
+
+  it("derives a stable website token from the claim id", () => {
+    expect(getClaimWebsiteToken(VALID_UUID)).toBe("meritt-550E8400");
   });
 
   it("does not allow automatic claims of already claimed businesses", () => {

@@ -22,6 +22,7 @@ import {
   businessMembersByBusinessSchema,
   businessSearchQuerySchema,
   businessSlugLookupSchema,
+  claimIdSchema,
   completeBusinessOnboardingSchema,
   createClaimRequestSchema,
   createBusinessLocationSchema,
@@ -31,8 +32,14 @@ import {
   updateBusinessMemberRoleSchema,
   updateBusinessSchema,
   validate,
+  verifyClaimCodeSchema,
 } from "@/lib/validators";
-import { failure, handleServiceError, success } from "@/services/shared";
+import {
+  failure,
+  handleServiceError,
+  mapRpcError,
+  success,
+} from "@/services/shared";
 import type {
   AddBusinessMemberInput,
   Business,
@@ -42,6 +49,7 @@ import type {
   BusinessMember,
   BusinessMemberRole,
   BusinessSearchResult,
+  ClaimRequestWithBusiness,
   CompleteBusinessOnboardingInput,
   CompleteBusinessOnboardingResult,
   CreateBusinessInput,
@@ -53,6 +61,7 @@ import type {
   ServiceResult,
   UpdateBusinessInput,
   UpdateBusinessLocationInput,
+  VerifyClaimCodeResult,
 } from "@/types";
 import { isSuccess } from "@/types";
 import {
@@ -313,7 +322,7 @@ export class BusinessService {
 
       if (error) {
         logger.error(method, error, { id: businessId });
-        return failure(DatabaseError.fromSource(error));
+        return mapRpcError(error);
       }
 
       if (!data) {
@@ -1046,26 +1055,23 @@ export class BusinessService {
       }
 
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("business_claim_requests")
-        .insert({
-          business_id: validated.businessId,
-          user_id: sessionResult.data.user.id,
-          status: "pending",
-        })
-        .select("*")
-        .single();
+      const { data, error } = await supabase.rpc("request_business_claim", {
+        p_business_id: validated.businessId,
+        p_claimant_name: validated.claimantName,
+        p_claimant_role: validated.claimantRole,
+        p_contact_phone: nullableText(validated.contactPhone) ?? null,
+        p_contact_email: nullableText(validated.contactEmail) ?? null,
+        p_verification_method: validated.verificationMethod,
+        p_evidence_url: nullableText(validated.evidenceUrl) ?? null,
+        p_note: nullableText(validated.note) ?? null,
+      });
 
       if (error) {
         logger.error(method, error, { businessId: validated.businessId });
-
-        if (error.code === "23505") {
-          return failure(
-            new ConflictError("You already have a pending claim for this business"),
-          );
-        }
-
-        return failure(DatabaseError.fromSource(error));
+        return mapRpcError(
+          error,
+          "You already have a pending claim for this business",
+        );
       }
 
       return success(mapClaimRequestRow(data as ClaimRequestRow));
@@ -1074,7 +1080,9 @@ export class BusinessService {
     }
   }
 
-  async getMyClaimRequests(): Promise<ServiceResult<BusinessClaimRequest[]>> {
+  async getMyClaimRequests(): Promise<
+    ServiceResult<ClaimRequestWithBusiness[]>
+  > {
     const method = "BusinessService.getMyClaimRequests";
 
     try {
@@ -1089,7 +1097,7 @@ export class BusinessService {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("business_claim_requests")
-        .select("*")
+        .select("*, businesses ( name, slug )")
         .eq("user_id", sessionResult.data.user.id)
         .order("created_at", { ascending: false });
 
@@ -1099,8 +1107,87 @@ export class BusinessService {
       }
 
       return success(
-        (data ?? []).map((row) => mapClaimRequestRow(row as ClaimRequestRow)),
+        (data ?? []).map((row) => {
+          const businessRel = row.businesses as
+            | { name: string; slug: string }
+            | { name: string; slug: string }[]
+            | null;
+          const business = Array.isArray(businessRel)
+            ? businessRel[0]
+            : businessRel;
+
+          return {
+            ...mapClaimRequestRow(row as ClaimRequestRow),
+            businessName: business?.name ?? "Business unavailable",
+            businessSlug: business?.slug ?? "",
+          } satisfies ClaimRequestWithBusiness;
+        }),
       );
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async cancelClaimRequest(
+    claimId: string,
+  ): Promise<ServiceResult<BusinessClaimRequest>> {
+    const method = "BusinessService.cancelClaimRequest";
+
+    try {
+      const validated = validate(claimIdSchema, { claimId });
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("cancel_business_claim", {
+        p_claim_id: validated.claimId,
+      });
+
+      if (error) {
+        logger.error(method, error, { claimId: validated.claimId });
+        return mapRpcError(error);
+      }
+
+      return success(mapClaimRequestRow(data as ClaimRequestRow));
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async verifyClaimCode(
+    claimId: string,
+    code: string,
+  ): Promise<ServiceResult<VerifyClaimCodeResult>> {
+    const method = "BusinessService.verifyClaimCode";
+
+    try {
+      const validated = validate(verifyClaimCodeSchema, { claimId, code });
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("verify_business_claim_code", {
+        p_claim_id: validated.claimId,
+        p_code: validated.code,
+      });
+
+      if (error) {
+        logger.error(method, error, { claimId: validated.claimId });
+        return mapRpcError(error);
+      }
+
+      const payload = data as
+        | { ok: true; claim: ClaimRequestRow }
+        | { ok: false; error: string; attemptsRemaining?: number }
+        | null;
+
+      if (!payload) {
+        return failure(new DatabaseError());
+      }
+
+      if (payload.ok) {
+        return success({ ok: true, claim: mapClaimRequestRow(payload.claim) });
+      }
+
+      return success({
+        ok: false,
+        error: payload.error,
+        attemptsRemaining: payload.attemptsRemaining,
+      });
     } catch (error) {
       return handleServiceError(method, error);
     }

@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BusinessLogoField } from "@/components/business/business-logo-field";
+import {
+  FormField as Field,
+  SELECT_CLASS_NAME,
+} from "@/components/business-onboarding/form-field";
 import { OnboardingLayout } from "@/components/onboarding/onboarding-layout";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusAlert } from "@/components/ui/status-alert";
 import { Spinner } from "@/components/ui/spinner";
@@ -15,9 +18,9 @@ import { US_STATE_CODES } from "@/lib/location/us-states";
 import { completeBusinessOnboardingSchema } from "@/lib/validators";
 import { businessService } from "@/services/businesses";
 import { isFailure } from "@/types";
-import type { BusinessCategory } from "@/types";
+import type { BusinessCategory, BusinessSearchResult } from "@/types";
 
-type Step = "create" | "location" | "success";
+type Step = "choice" | "create" | "duplicates" | "location" | "success";
 
 interface BusinessDraft {
   name: string;
@@ -63,7 +66,9 @@ function withHttps(value: string): string | undefined {
 
 export function BusinessSetupPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>("create");
+  const [step, setStep] = useState<Step>("choice");
+  const [duplicates, setDuplicates] = useState<BusinessSearchResult[]>([]);
+  const [checkingDuplicates, setCheckingDuplicates] = useState(false);
   const [draft, setDraft] = useState<BusinessDraft>(EMPTY_DRAFT);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -132,6 +137,23 @@ export function BusinessSetupPage() {
     return true;
   }
 
+  async function continueFromCreate() {
+    if (!validateCreateStep()) return;
+
+    setCheckingDuplicates(true);
+    const result = await businessService.searchBusinesses(draft.name.trim());
+    setCheckingDuplicates(false);
+
+    const matches = isFailure(result) ? [] : result.data;
+    if (matches.length > 0) {
+      setDuplicates(matches.slice(0, 5));
+      setStep("duplicates");
+      return;
+    }
+
+    setStep("location");
+  }
+
   async function submitOnboarding() {
     setSubmitting(true);
     setError(null);
@@ -177,16 +199,32 @@ export function BusinessSetupPage() {
   return (
     <OnboardingLayout>
       <div className="space-y-8 rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+        {step === "choice" ? (
+          <ChoiceStep
+            onCreate={() => setStep("create")}
+            onClaim={() => navigate("/claim")}
+          />
+        ) : null}
+
         {step === "create" ? (
           <CreateStep
             draft={draft}
             categories={categories}
             loadingCategories={loadingCategories}
             fieldErrors={fieldErrors}
+            checking={checkingDuplicates}
             onChange={updateDraft}
-            onContinue={() => {
-              if (validateCreateStep()) setStep("location");
-            }}
+            onBack={() => setStep("choice")}
+            onContinue={() => void continueFromCreate()}
+          />
+        ) : null}
+
+        {step === "duplicates" ? (
+          <DuplicatesStep
+            businessName={draft.name}
+            matches={duplicates}
+            onBack={() => setStep("create")}
+            onContinue={() => setStep("location")}
           />
         ) : null}
 
@@ -214,19 +252,134 @@ export function BusinessSetupPage() {
   );
 }
 
+function ChoiceStep({
+  onCreate,
+  onClaim,
+}: {
+  onCreate: () => void;
+  onClaim: () => void;
+}) {
+  return (
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-muted-foreground">Get started</p>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Your business deserves a current reputation.
+        </h1>
+        <Paragraph className="text-muted-foreground">
+          Create a Meritt business profile, or claim one that is already listed.
+        </Paragraph>
+      </div>
+
+      <div className="grid gap-4">
+        <button
+          type="button"
+          onClick={onCreate}
+          className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-primary/40 hover:bg-muted/40"
+        >
+          <p className="font-semibold">Create a Business</p>
+          <Muted className="mt-1 text-sm">
+            New, independent, or not on Meritt yet? Create your profile and start
+            building your current reputation today.
+          </Muted>
+        </button>
+        <button
+          type="button"
+          onClick={onClaim}
+          className="rounded-xl border border-border bg-background p-5 text-left transition-colors hover:border-primary/40 hover:bg-muted/40"
+        >
+          <p className="font-semibold">Claim a Business</p>
+          <Muted className="mt-1 text-sm">
+            Already listed on Meritt? Verify that you own it to manage its profile
+            and see customer feedback.
+          </Muted>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DuplicatesStep({
+  businessName,
+  matches,
+  onBack,
+  onContinue,
+}: {
+  businessName: string;
+  matches: BusinessSearchResult[];
+  onBack: () => void;
+  onContinue: () => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Is one of these your business?
+        </h1>
+        <Paragraph className="text-muted-foreground">
+          We found listings similar to &ldquo;{businessName}&rdquo;. If yours is
+          already here, claim it instead of creating a duplicate. Any customer
+          feedback it has collected comes with it.
+        </Paragraph>
+      </div>
+
+      <ul className="divide-y divide-border rounded-xl border border-border">
+        {matches.map((match) => (
+          <li
+            key={match.id}
+            className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <p className="font-medium">{match.name}</p>
+              <Muted className="text-sm">
+                {[match.categoryName, [match.city, match.state].filter(Boolean).join(", ")]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </Muted>
+            </div>
+            {match.isClaimed ? (
+              <Muted className="text-sm">Already claimed</Muted>
+            ) : (
+              <Link
+                to={`/claim/${match.id}`}
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+              >
+                This is mine — claim it
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <div className="flex gap-3">
+        <Button type="button" variant="outline" onClick={onBack}>
+          Back
+        </Button>
+        <Button type="button" className="flex-1" onClick={onContinue}>
+          None of these — continue
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function CreateStep({
   draft,
   categories,
   loadingCategories,
   fieldErrors,
+  checking,
   onChange,
+  onBack,
   onContinue,
 }: {
   draft: BusinessDraft;
   categories: BusinessCategory[];
   loadingCategories: boolean;
   fieldErrors: Record<string, string>;
+  checking: boolean;
   onChange: (patch: Partial<BusinessDraft>) => void;
+  onBack: () => void;
   onContinue: () => void;
 }) {
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -265,7 +418,7 @@ function CreateStep({
               id="business-category"
               value={draft.categoryId}
               onChange={(event) => onChange({ categoryId: event.target.value })}
-              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className={SELECT_CLASS_NAME}
             >
               <option value="">Select a category</option>
               {categories.map((category) => (
@@ -328,9 +481,19 @@ function CreateStep({
         ) : null}
       </div>
 
-      <Button type="button" className="w-full" onClick={onContinue} disabled={uploadingLogo}>
-        {uploadingLogo ? "Uploading logo…" : "Continue"}
-      </Button>
+      <div className="flex gap-3">
+        <Button type="button" variant="outline" onClick={onBack} disabled={checking}>
+          Back
+        </Button>
+        <Button
+          type="button"
+          className="flex-1"
+          onClick={onContinue}
+          disabled={uploadingLogo || checking}
+        >
+          {uploadingLogo ? "Uploading logo…" : checking ? "Checking…" : "Continue"}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -392,7 +555,7 @@ function LocationStep({
               value={draft.state}
               onChange={(event) => onChange({ state: event.target.value })}
               autoComplete="address-level1"
-              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className={SELECT_CLASS_NAME}
             >
               <option value="">State</option>
               {US_STATE_CODES.map((code) => (
@@ -450,7 +613,8 @@ function SuccessStep({
           Your business is ready.
         </h1>
         <Paragraph className="text-muted-foreground">
-          {businessName} now has a live Meritt profile.
+          {businessName} now has a live Meritt profile. Our team reviews new
+          listings and adds a Verified badge once confirmed.
         </Paragraph>
       </div>
 
@@ -476,35 +640,6 @@ function SuccessStep({
           Go to Dashboard
         </Button>
       </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  htmlFor,
-  error,
-  required,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  error?: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={htmlFor}>
-        {label}
-        {required ? <span className="text-destructive"> *</span> : null}
-      </Label>
-      {children}
-      {error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }
