@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Shield,
+  Tags,
   UserCircle,
   Users,
 } from "lucide-react";
@@ -26,6 +27,7 @@ const NAV_ITEMS: Array<{
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/businesses", label: "Businesses", icon: Store },
   { href: "/admin/claims", label: "Claims", icon: BadgeCheck },
+  { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/profiles", label: "Profiles", icon: UserCircle },
   { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },

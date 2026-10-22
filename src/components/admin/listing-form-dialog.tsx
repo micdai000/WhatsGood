@@ -24,7 +24,6 @@ import { LIMITS } from "@/lib/constants";
 import { US_STATE_CODES } from "@/lib/location/us-states";
 import { completeBusinessOnboardingSchema } from "@/lib/validators";
 import { adminBusinessService } from "@/services/admin";
-import { businessService } from "@/services/businesses";
 import { isFailure } from "@/types";
 import type { BusinessCategory } from "@/types";
 
@@ -96,7 +95,7 @@ export function ListingFormDialog({
 
     void (async () => {
       const [categoriesResult, listingResult] = await Promise.all([
-        businessService.getCategories(),
+        adminBusinessService.listCategories(),
         businessId ? adminBusinessService.getListing(businessId) : null,
       ]);
       if (cancelled) return;
@@ -240,7 +239,9 @@ export function ListingFormDialog({
             </Field>
 
             <BusinessCategoryFields
-              categories={categories}
+              categories={categories.filter(
+                (category) => category.isActive || category.id === draft.categoryId,
+              )}
               categoryId={draft.categoryId}
               customCategory={draft.customCategory}
               onCategoryIdChange={(categoryId) => {

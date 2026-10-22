@@ -89,19 +89,10 @@ export function BusinessResultCard({
               <Paragraph className="truncate font-semibold leading-snug">
                 {business.name}
               </Paragraph>
-              {business.categoryName || !business.isClaimed ? (
-                <div className="flex flex-wrap gap-1">
-                  {business.categoryName ? (
-                    <Badge variant="secondary" className="max-w-full truncate text-xs">
-                      {business.categoryName}
-                    </Badge>
-                  ) : null}
-                  {!business.isClaimed ? (
-                    <Badge variant="outline" className="text-xs">
-                      Unclaimed
-                    </Badge>
-                  ) : null}
-                </div>
+              {business.categoryName ? (
+                <Badge variant="secondary" className="max-w-full truncate text-xs">
+                  {business.categoryName}
+                </Badge>
               ) : null}
               {location ? (
                 <Muted className="flex items-center gap-1 text-xs">
