@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Loader2, Plus } from "lucide-react";
+import { BusinessCategoryFields } from "@/components/business/category-fields";
 import { BusinessLogoField } from "@/components/business/business-logo-field";
 import {
   FormField as Field,
@@ -18,6 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { isOtherCategory } from "@/lib/business/categories";
+import { LIMITS } from "@/lib/constants";
 import { US_STATE_CODES } from "@/lib/location/us-states";
 import { completeBusinessOnboardingSchema } from "@/lib/validators";
 import { adminBusinessService } from "@/services/admin";
@@ -28,6 +31,7 @@ import type { BusinessCategory } from "@/types";
 interface ListingDraft {
   name: string;
   categoryId: string;
+  customCategory: string;
   description: string;
   websiteUrl: string;
   phone: string;
@@ -42,6 +46,7 @@ interface ListingDraft {
 const EMPTY_DRAFT: ListingDraft = {
   name: "",
   categoryId: "",
+  customCategory: "",
   description: "",
   websiteUrl: "",
   phone: "",
@@ -109,6 +114,7 @@ export function ListingFormDialog({
           setDraft({
             name: business.name,
             categoryId: business.categoryId ?? "",
+            customCategory: business.customCategory ?? "",
             description: business.description ?? "",
             websiteUrl: business.websiteUrl ?? "",
             phone: business.phone ?? "",
@@ -144,6 +150,7 @@ export function ListingFormDialog({
     const parsed = completeBusinessOnboardingSchema.safeParse({
       name: draft.name,
       categoryId: draft.categoryId,
+      customCategory: optional(draft.customCategory) ?? null,
       description: optional(draft.description),
       websiteUrl: withHttps(draft.websiteUrl),
       phone: optional(draft.phone),
@@ -163,6 +170,16 @@ export function ListingFormDialog({
         next[key] ??= issue.message;
       }
       setFieldErrors(next);
+      return;
+    }
+
+    const selected = categories.find((category) => category.id === draft.categoryId);
+    if (
+      selected &&
+      isOtherCategory(selected) &&
+      draft.customCategory.trim().length < LIMITS.CUSTOM_CATEGORY_MIN_LENGTH
+    ) {
+      setFieldErrors({ customCategory: "Please describe the category" });
       return;
     }
 
@@ -222,21 +239,25 @@ export function ListingFormDialog({
               />
             </Field>
 
-            <Field label="Category" htmlFor="listing-category" error={fieldErrors.categoryId} required>
-              <select
-                id="listing-category"
-                value={draft.categoryId}
-                onChange={(event) => update({ categoryId: event.target.value })}
-                className={SELECT_CLASS_NAME}
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <BusinessCategoryFields
+              categories={categories}
+              categoryId={draft.categoryId}
+              customCategory={draft.customCategory}
+              onCategoryIdChange={(categoryId) => {
+                const selected = categories.find((category) => category.id === categoryId);
+                update({
+                  categoryId,
+                  customCategory:
+                    selected && isOtherCategory(selected) ? draft.customCategory : "",
+                });
+              }}
+              onCustomCategoryChange={(customCategory) => update({ customCategory })}
+              categoryError={fieldErrors.categoryId}
+              customCategoryError={fieldErrors.customCategory}
+              selectId="listing-category"
+              customId="listing-custom-category"
+              required
+            />
 
             <Field label="Description" htmlFor="listing-description" error={fieldErrors.description}>
               <Textarea

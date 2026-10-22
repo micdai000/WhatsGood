@@ -98,6 +98,9 @@ import { mapQrCodeRow, type QrCodeRow } from "@/services/qr/qr.mapper";
 
 const BUSINESS_LOGOS_BUCKET = "entity-images";
 
+/** Owner-claimed businesses plus admin-seeded listings still awaiting their owner. */
+const DISCOVERABLE_BUSINESS_FILTER = "is_claimed.eq.true,listing_source.eq.admin";
+
 const ALLOWED_LOGO_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -1062,7 +1065,7 @@ export class BusinessService {
           { count: "exact" },
         )
         .eq("status", "active")
-        .eq("is_claimed", true);
+        .or(DISCOVERABLE_BUSINESS_FILTER);
 
       if (validated.professionId) {
         query = query.eq("category_id", validated.professionId);
@@ -1228,7 +1231,7 @@ export class BusinessService {
           { count: "exact" },
         )
         .eq("status", "active")
-        .eq("is_claimed", true);
+        .or(DISCOVERABLE_BUSINESS_FILTER);
 
       if (params?.professionId) {
         query = query.eq("category_id", params.professionId);

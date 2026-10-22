@@ -84,6 +84,11 @@ export function PublicBusinessHeader({
                     Verified owner
                   </Badge>
                 ) : null}
+                {!business.isClaimed ? (
+                  <Badge variant="outline" className="font-medium">
+                    Unclaimed
+                  </Badge>
+                ) : null}
                 {categoryName ? (
                   <Badge variant="secondary" className="font-medium">
                     {categoryName}

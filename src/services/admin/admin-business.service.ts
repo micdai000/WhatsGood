@@ -221,6 +221,7 @@ export class AdminBusinessService {
           p_postal_code: nullableText(validated.postalCode),
           p_country: validated.country ?? "US",
           p_qr_code: generateSecureCode(),
+          p_custom_category: nullableText(validated.customCategory),
         });
 
         if (error) {
@@ -290,6 +291,7 @@ export class AdminBusinessService {
         .update({
           name: validated.name,
           category_id: validated.categoryId,
+          custom_category: nullableText(validated.customCategory),
           description: nullableText(validated.description),
           website_url: websiteUrl,
           social_links: socialLinks,
