@@ -1,8 +1,14 @@
 import { createClient } from "@/lib/supabase/client";
 import { requireAdmin } from "@/lib/admin/authorization";
-import { ConflictError, DatabaseError, NotFoundError } from "@/lib/errors";
+import {
+  ConflictError,
+  DatabaseError,
+  NotFoundError,
+  ValidationError,
+} from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { slugFromBusinessName, uniquifyBusinessSlug } from "@/lib/business/slug";
+import { generateSlug } from "@/lib/utils/slug";
 import { generateSecureCode } from "@/lib/qr/generate-code";
 import {
   businessIdSchema,
@@ -19,6 +25,10 @@ import {
   type BusinessLocationRow,
 } from "@/services/businesses/business-location.mapper";
 import {
+  mapBusinessCategoryRow,
+  type BusinessCategoryRow,
+} from "@/services/businesses/business-category.mapper";
+import {
   mapClaimRequestRow,
   type ClaimRequestRow,
 } from "@/services/businesses/business-claim.mapper";
@@ -32,6 +42,7 @@ import {
 import type {
   AdminBusinessClaim,
   Business,
+  BusinessCategory,
   BusinessClaimRequest,
   BusinessLocation,
   BusinessStatus,
@@ -221,6 +232,7 @@ export class AdminBusinessService {
           p_postal_code: nullableText(validated.postalCode),
           p_country: validated.country ?? "US",
           p_qr_code: generateSecureCode(),
+          p_custom_category: nullableText(validated.customCategory),
         });
 
         if (error) {
@@ -290,6 +302,7 @@ export class AdminBusinessService {
         .update({
           name: validated.name,
           category_id: validated.categoryId,
+          custom_category: nullableText(validated.customCategory),
           description: nullableText(validated.description),
           website_url: websiteUrl,
           social_links: socialLinks,
@@ -357,6 +370,141 @@ export class AdminBusinessService {
     status: BusinessStatus,
   ): Promise<ServiceResult<void>> {
     return this.updateFlags(businessId, { status }, `business.status_${status}`);
+  }
+
+  async listCategories(): Promise<ServiceResult<BusinessCategory[]>> {
+    const method = "AdminBusinessService.listCategories";
+
+    try {
+      const adminResult = await requireAdmin();
+      if (!isSuccess(adminResult)) {
+        return failure(adminResult.error);
+      }
+
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("business_categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        logger.error(method, error);
+        return failure(DatabaseError.fromSource(error));
+      }
+
+      return success(
+        (data ?? []).map((row) => mapBusinessCategoryRow(row as BusinessCategoryRow)),
+      );
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async saveCategory(
+    input: { name: string; description?: string | null },
+    categoryId?: string,
+  ): Promise<ServiceResult<void>> {
+    const method = "AdminBusinessService.saveCategory";
+
+    try {
+      const adminResult = await requireAdmin();
+      if (!isSuccess(adminResult)) {
+        return failure(adminResult.error);
+      }
+
+      const name = input.name.trim();
+      const slug = generateSlug(name);
+      if (name.length < 2 || name.length > 60 || !slug) {
+        return failure(new ValidationError("Category name must be 2–60 characters"));
+      }
+
+      const supabase = createClient();
+      const { data: existing, error: existingError } = await supabase
+        .from("business_categories")
+        .select("id, name, slug");
+
+      if (existingError) {
+        return failure(DatabaseError.fromSource(existingError));
+      }
+
+      const duplicate = (existing ?? []).some(
+        (row) =>
+          row.id !== categoryId &&
+          (row.name.trim().toLowerCase() === name.toLowerCase() || row.slug === slug),
+      );
+
+      if (duplicate) {
+        return failure(new ConflictError("A category with this name already exists"));
+      }
+
+      const fields = {
+        name,
+        description: nullableText(input.description),
+      };
+
+      const { error } = categoryId
+        ? await supabase.from("business_categories").update(fields).eq("id", categoryId)
+        : await supabase.from("business_categories").insert({ ...fields, slug });
+
+      if (error) {
+        logger.error(method, error, { categoryId });
+        return mapRpcError(error, "A category with this name already exists");
+      }
+
+      await writeAuditLog({
+        adminId: adminResult.data.userId,
+        action: categoryId ? "business_category.updated" : "business_category.created",
+        entityType: "business_category",
+        entityId: categoryId ?? slug,
+        metadata: { name },
+      });
+
+      return success(undefined);
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
+  }
+
+  async setCategoryActive(
+    categoryId: string,
+    isActive: boolean,
+  ): Promise<ServiceResult<void>> {
+    const method = "AdminBusinessService.setCategoryActive";
+
+    try {
+      const adminResult = await requireAdmin();
+      if (!isSuccess(adminResult)) {
+        return failure(adminResult.error);
+      }
+
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("business_categories")
+        .update({ is_active: isActive })
+        .eq("id", categoryId)
+        .select("id")
+        .maybeSingle();
+
+      if (error) {
+        logger.error(method, error, { categoryId });
+        return mapRpcError(error);
+      }
+      if (!data) {
+        return failure(new NotFoundError("Category"));
+      }
+
+      await writeAuditLog({
+        adminId: adminResult.data.userId,
+        action: isActive ? "business_category.enabled" : "business_category.disabled",
+        entityType: "business_category",
+        entityId: categoryId,
+        metadata: { isActive },
+      });
+
+      return success(undefined);
+    } catch (error) {
+      return handleServiceError(method, error);
+    }
   }
 
   async listClaims(

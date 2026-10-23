@@ -83,8 +83,7 @@ export function PublicBusinessHeader({
                     <BadgeCheck className="size-3.5" aria-hidden />
                     Verified owner
                   </Badge>
-                ) : null}
-                {categoryName ? (
+                ) : null}                {categoryName ? (
                   <Badge variant="secondary" className="font-medium">
                     {categoryName}
                   </Badge>

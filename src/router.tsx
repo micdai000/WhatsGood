@@ -44,6 +44,7 @@ import AdminReviewsPage from "@/app/(admin)/admin/reviews/page";
 import AdminProfessionsPage from "@/app/(admin)/admin/professions/page";
 import AdminBusinessesPage from "@/app/(admin)/admin/businesses/page";
 import AdminClaimsPage from "@/app/(admin)/admin/claims/page";
+import AdminCategoriesPage from "@/app/(admin)/admin/categories/page";
 import ClaimPage from "@/app/(claim)/claim/page";
 import ClaimBusinessRoutePage from "@/app/(claim)/claim/[businessId]/page";
 import PublicProfilePage from "@/app/u/[slug]/page";
@@ -155,6 +156,7 @@ export const router = createBrowserRouter([
           { path: "admin/professions", element: <AdminProfessionsPage /> },
           { path: "admin/businesses", element: <AdminBusinessesPage /> },
           { path: "admin/claims", element: <AdminClaimsPage /> },
+          { path: "admin/categories", element: <AdminCategoriesPage /> },
         ],
       },
       { path: "u/:slug", element: <PublicProfilePage /> },

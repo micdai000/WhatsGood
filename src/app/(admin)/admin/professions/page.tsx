@@ -32,7 +32,8 @@ export default function AdminProfessionsPage() {
         <div>
           <h2 className="text-xl font-semibold">Professions</h2>
           <Muted className="text-sm">
-            Manage profession categories used in onboarding and search.
+            Professions for personal profiles. Business categories are managed
+            under Categories.
           </Muted>
         </div>
         <ProfessionFormDialog />

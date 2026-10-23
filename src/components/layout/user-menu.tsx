@@ -1,6 +1,6 @@
 import { useEffect, useState, useTransition } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Pencil, Settings } from "lucide-react";
+import { LayoutDashboard, LogOut, Pencil, Settings, ShieldCheck } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth.actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -23,6 +23,7 @@ interface UserMenuProps {
 interface ProfileInfo {
   displayName: string | null;
   avatarUrl: string | null;
+  isAdmin: boolean;
 }
 
 export function UserMenu({
@@ -48,7 +49,12 @@ export function UserMenu({
         .from("business_members")
         .select("businesses(logo_url)")
         .eq("user_id", userId),
-    ]).then(([{ data: profileRow }, { data: memberships }]) => {
+      supabase
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", userId)
+        .maybeSingle(),
+    ]).then(([{ data: profileRow }, { data: memberships }, { data: adminRow }]) => {
       const businessLogo = (memberships ?? [])
         .map((row) => {
           const business = Array.isArray(row.businesses)
@@ -61,6 +67,7 @@ export function UserMenu({
       setProfile({
         displayName: profileRow?.display_name || null,
         avatarUrl: profileRow?.avatar || businessLogo || null,
+        isAdmin: Boolean(adminRow),
       });
     });
   }, [userId]);
@@ -106,6 +113,12 @@ export function UserMenu({
           <Settings className="size-4" aria-hidden />
           Settings
         </DropdownMenuItem>
+        {profile?.isAdmin ? (
+          <DropdownMenuItem onClick={() => navigate("/admin/businesses")}>
+            <ShieldCheck className="size-4" aria-hidden />
+            Admin
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={pending}
